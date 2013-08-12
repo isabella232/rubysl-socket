@@ -1,22 +1,21 @@
-# -*- encoding: utf-8 -*-
-require File.expand_path('../lib/rubysl-socket/version', __FILE__)
+# coding: utf-8
+require './lib/rubysl/socket/version'
 
-Gem::Specification.new do |gem|
-  gem.authors       = ["Brian Shirai"]
-  gem.email         = ["brixen@gmail.com"]
-  gem.description   = %q{Ruby Standard Library - socket}
-  gem.summary       = %q{Ruby Standard Library - socket}
-  gem.homepage      = ""
+Gem::Specification.new do |spec|
+  spec.name          = "rubysl-socket"
+  spec.version       = RubySL::Socket::VERSION
+  spec.authors       = ["Brian Shirai"]
+  spec.email         = ["brixen@gmail.com"]
+  spec.description   = %q{Ruby standard library socket.}
+  spec.summary       = %q{Ruby standard library socket.}
+  spec.homepage      = "https://github.com/rubysl/rubysl-socket"
+  spec.license       = "BSD"
 
-  gem.files         = `git ls-files`.split($\)
-  gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
-  gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
-  gem.name          = "rubysl-socket"
-  gem.require_paths = ["lib"]
-  gem.version       = RubySL::Socket::VERSION
+  spec.files         = `git ls-files`.split($/)
+  spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
+  spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
+  spec.require_paths = ["lib"]
 
-  gem.add_runtime_dependency "redcard", "~> 1.0"
-
-  gem.add_development_dependency "rake",  "~> 10.0"
-  gem.add_development_dependency "mspec", "~> 1.5"
+  spec.add_development_dependency "bundler", "~> 1.3"
+  spec.add_development_dependency "rake", "~> 10.0"
 end
