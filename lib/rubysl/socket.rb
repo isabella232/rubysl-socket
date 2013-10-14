@@ -1,5 +1,5 @@
 require "rubysl/socket/version"
-require "rubysl/fcntl"
+require "fcntl"
 
 class SocketError < StandardError
 end
