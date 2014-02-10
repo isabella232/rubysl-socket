@@ -8,7 +8,7 @@ rvm:
   - rbx-2
 matrix:
   exclude:
-    - rvm: 2.0.0
+    - rvm: 2.1.0
       env: RUBYLIB=lib
     - rvm: rbx-2
       env: RUBYLIB=
