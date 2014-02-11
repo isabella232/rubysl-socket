@@ -18,6 +18,10 @@ describe "UDPSocket.send" do
     Thread.pass while @server_thread.status and !@ready
   end
 
+  after :each do
+    @socket.close if @socket and !@socket.closed?
+  end
+
   it "sends data in ad hoc mode" do
     @socket = UDPSocket.open
     @socket.send("ad hoc", 0, SocketSpecs.hostname,SocketSpecs.port)
@@ -53,5 +57,12 @@ describe "UDPSocket.send" do
     @msg[1][0].should == "AF_INET"
     @msg[1][1].should be_kind_of(Fixnum)
     @msg[1][3].should == "127.0.0.1"
+  end
+
+  it "returns the length of the message in bytes and ignores errors sending data when the socket is not connected" do
+    @socket = UDPSocket.open
+    @socket.send("this", 0, "127.0.0.1", SocketSpecs.port + 1).should == 4
+    @socket.send("is", 0, "127.0.0.1", SocketSpecs.port + 1).should == 2
+    @socket.send("nonsense", 0, "127.0.0.1", SocketSpecs.port + 1).should == 8
   end
 end
