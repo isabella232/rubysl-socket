@@ -296,12 +296,34 @@ class Socket < BasicSocket
   # Helper methods re-used between Socket and Addrinfo that don't really belong
   # to just either one of those classes.
   module Helpers
-    def self.socket_family(family)
+    def self.address_family(family)
       case family
       when Symbol, String
         f = family.to_s
         if f[0..2] != 'AF_'
           f = 'AF_' + f
+        end
+
+        if Socket.const_defined?(f)
+          Socket.const_get(f)
+        else
+          raise SocketError, "unknown socket domain: #{family}"
+        end
+      when Integer
+        family
+      when NilClass
+        0
+      else
+        raise SocketError, "unknown socket domain: #{family}"
+      end
+    end
+
+    def self.protocol_family(family)
+      case family
+      when Symbol, String
+        f = family.to_s
+        if f[0..2] != 'PF_'
+          f = 'PF_' + f
         end
 
         if Socket.const_defined?(f)
@@ -715,7 +737,7 @@ class Socket < BasicSocket
     end
 
     def initialize(family, level, optname, data)
-      @family = Helpers.socket_family(family)
+      @family = Helpers.address_family(family)
       @family_name = family
       @level = level_arg(@family, level)
       @level_name = level
@@ -928,7 +950,7 @@ class Socket < BasicSocket
       end
     end
 
-    family    = Helpers.socket_family(family)
+    family    = Helpers.address_family(family)
     socktype  = Helpers.socket_type(socktype)
     addrinfos = Socket::Foreign.getaddrinfo(host, service, family, socktype,
                                             protocol, flags)
@@ -1075,7 +1097,7 @@ class Socket < BasicSocket
       end
     end
 
-    type = get_socket_type(type)
+    type = Helpers.socket_type(type)
 
     FFI::MemoryPointer.new :int, 2 do |mp|
       Socket::Foreign.socketpair(domain, type, protocol, mp)
@@ -1115,8 +1137,8 @@ class Socket < BasicSocket
 
   def initialize(family, socket_type, protocol=0)
     @no_reverse_lookup = self.class.do_not_reverse_lookup
-    family = self.class.get_protocol_family(family)
-    socket_type = self.class.get_socket_type(socket_type)
+    family = Helpers.protocol_family(family)
+    socket_type = Helpers.socket_type(socket_type)
     descriptor  = Socket::Foreign.socket family, socket_type, protocol
 
     Errno.handle 'socket(2)' if descriptor < 0
@@ -1160,46 +1182,6 @@ class Socket < BasicSocket
     end
 
     return status
-  end
-
-  def self.get_protocol_family(family)
-    case family
-    when Fixnum
-      return family
-    when String
-      # do nothing
-    when Symbol
-      family = family.to_s
-    else
-      family = StringValue(family)
-    end
-
-    family = "PF_#{family}" unless family[0, 3] == "PF_"
-    Socket::Constants.const_get family
-  end
-
-  def self.get_socket_type(type)
-    if type.kind_of? String
-      if type.prefix? "SOCK_"
-        begin
-          type = Socket::Constants.const_get(type)
-        rescue NameError
-          raise SocketError, "unknown socket type #{type}"
-        end
-      else
-        raise SocketError, "unknown socket type #{type}"
-      end
-    end
-
-    if type.kind_of? Symbol
-      begin
-        type = Socket::Constants.const_get("SOCK_#{type}")
-      rescue NameError
-        raise SocketError, "unknown socket type #{type}"
-      end
-    end
-
-    type
   end
 end
 
