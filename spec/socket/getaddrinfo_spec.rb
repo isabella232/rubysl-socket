@@ -64,7 +64,7 @@ describe "Socket#getaddrinfo" do
    # address (127.0.0.1 or "::1".
 
    it "accepts empty addresses for IPv4 passive sockets" do
-     res = Socket::getaddrinfo(nil, "http",
+     res = Socket.getaddrinfo(nil, "http",
                                Socket::AF_INET,
                                Socket::SOCK_STREAM,
                                Socket::IPPROTO_TCP,
@@ -77,8 +77,60 @@ describe "Socket#getaddrinfo" do
      end
    end
 
+   it "accepts a Symbol for the socket family" do
+     res = Socket.getaddrinfo(nil, "http",
+                               :AF_INET,
+                               Socket::SOCK_STREAM,
+                               Socket::IPPROTO_TCP,
+                               Socket::AI_PASSIVE)
+
+     res[0].should == ["AF_INET", 80, "0.0.0.0", "0.0.0.0",
+                       Socket::AF_INET,
+                       Socket::SOCK_STREAM,
+                       Socket::IPPROTO_TCP]
+   end
+
+   it "accepts a Symbol for the socket type" do
+     res = Socket.getaddrinfo(nil, "http",
+                               Socket::AF_INET,
+                               :SOCK_STREAM,
+                               Socket::IPPROTO_TCP,
+                               Socket::AI_PASSIVE)
+
+     res[0].should == ["AF_INET", 80, "0.0.0.0", "0.0.0.0",
+                       Socket::AF_INET,
+                       Socket::SOCK_STREAM,
+                       Socket::IPPROTO_TCP]
+   end
+
+   it "accepts a String for the socket family" do
+     res = Socket.getaddrinfo(nil, "http",
+                               'AF_INET',
+                               Socket::SOCK_STREAM,
+                               Socket::IPPROTO_TCP,
+                               Socket::AI_PASSIVE)
+
+     res[0].should == ["AF_INET", 80, "0.0.0.0", "0.0.0.0",
+                       Socket::AF_INET,
+                       Socket::SOCK_STREAM,
+                       Socket::IPPROTO_TCP]
+   end
+
+   it "accepts a String for the socket type" do
+     res = Socket.getaddrinfo(nil, "http",
+                               Socket::AF_INET,
+                               'SOCK_STREAM',
+                               Socket::IPPROTO_TCP,
+                               Socket::AI_PASSIVE)
+
+     res[0].should == ["AF_INET", 80, "0.0.0.0", "0.0.0.0",
+                       Socket::AF_INET,
+                       Socket::SOCK_STREAM,
+                       Socket::IPPROTO_TCP]
+   end
+
    it "accepts empty addresses for IPv4 non-passive sockets" do
-     res = Socket::getaddrinfo(nil, "http",
+     res = Socket.getaddrinfo(nil, "http",
                                Socket::AF_INET,
                                Socket::SOCK_STREAM,
                                Socket::IPPROTO_TCP,
@@ -90,7 +142,7 @@ describe "Socket#getaddrinfo" do
 
 
    it "accepts empty addresses for IPv6 passive sockets" do
-     res = Socket::getaddrinfo(nil, "http",
+     res = Socket.getaddrinfo(nil, "http",
                                Socket::AF_INET6,
                                Socket::SOCK_STREAM,
                                Socket::IPPROTO_TCP,
@@ -104,7 +156,7 @@ describe "Socket#getaddrinfo" do
    end
 
    it "accepts empty addresses for IPv6 non-passive sockets" do
-     res = Socket::getaddrinfo(nil, "http",
+     res = Socket.getaddrinfo(nil, "http",
                                Socket::AF_INET6,
                                Socket::SOCK_STREAM,
                                Socket::IPPROTO_TCP,
