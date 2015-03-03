@@ -312,7 +312,7 @@ class Socket < BasicSocket
       when Integer
         family
       when NilClass
-        0
+        Socket::AF_UNSPEC
       else
         raise SocketError, "unknown socket domain: #{family}"
       end
@@ -334,7 +334,7 @@ class Socket < BasicSocket
       when Integer
         family
       when NilClass
-        0
+        Socket::PF_UNSPEC
       else
         raise SocketError, "unknown socket domain: #{family}"
       end
