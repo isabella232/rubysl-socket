@@ -1,7 +1,6 @@
 class Socket < BasicSocket
   FFI = Rubinius::FFI
 
-  # @todo   Is omitting empty-value constants reasonable? --rue
   module Constants
     all_valid = FFI.config_hash("socket").reject {|name, value| value.empty? }
 
@@ -814,7 +813,6 @@ class Socket < BasicSocket
     err
   end
 
-  # @todo  Should this be closing the descriptor? --rue
   def connect(sockaddr, extra=nil)
     if extra
       sockaddr = Socket.pack_sockaddr_in sockaddr, extra

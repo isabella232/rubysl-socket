@@ -168,11 +168,6 @@ class BasicSocket < IO
     nil
   end
 
-  #
-  # Sets socket nonblocking and reads up to given number of bytes.
-  #
-  # @todo   Should EWOULDBLOCK be passed unchanged? --rue
-  #
   def recv_nonblock(bytes_to_read, flags = 0)
     fcntl Fcntl::F_SETFL, Fcntl::O_NONBLOCK
     socket_recv bytes_to_read, flags, 0

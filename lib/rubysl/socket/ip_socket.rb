@@ -34,8 +34,6 @@ class IPSocket < BasicSocket
     flags = 0 if flags.nil?
     flags |= Socket::MSG_DONTWAIT
 
-    # Wait until we have something to read
-    # @todo  Why? ^^ --rue
     IO.select([self])
     return recvfrom(maxlen, flags)
   end

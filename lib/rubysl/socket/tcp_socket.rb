@@ -16,14 +16,9 @@ class TCPSocket < IPSocket
     [hostname, alternatives.uniq, family] + addresses.uniq
   end
 
-  #
-  # @todo   Is it correct to ignore the to? If not, does
-  #         the socket need to be reconnected? --rue
-  #
   def send(bytes_to_read, flags, to = nil)
     super(bytes_to_read, flags)
   end
-
 
   def initialize(host, port, local_host=nil, local_service=nil)
     @no_reverse_lookup = self.class.do_not_reverse_lookup
