@@ -40,7 +40,7 @@ module SocketSpecs
   end
 
   def self.sockaddr_in(port, host)
-    Socket::SockAddr_In.new(Socket.sockaddr_in(port, host))
+    Socket::Sockaddr_In.new(Socket.sockaddr_in(port, host))
   end
 
   def self.socket_path

@@ -194,7 +194,7 @@ class Socket < BasicSocket
 
   # If we have the details to support unix sockets, do so.
   if Rubinius::FFI.config("sockaddr_un.sun_family.offset") and Socket::Constants.const_defined?(:AF_UNIX)
-    class SockAddr_Un < Rubinius::FFI::Struct
+    class Sockaddr_Un < Rubinius::FFI::Struct
       config("rbx.platform.sockaddr_un", :sun_family, :sun_path)
 
       def initialize(filename = nil)
@@ -233,7 +233,7 @@ class Socket < BasicSocket
         family = addr[:sa_family]
 
         if family == AF_INET or family == AF_INET6
-          size = family == AF_INET6 ? RubySL::Socket::Foreign::SockAddr_In6.size : RubySL::Socket::Foreign::SockAddr_In.size
+          size = family == AF_INET6 ? RubySL::Socket::Foreign::Sockaddr_In6.size : RubySL::Socket::Foreign::Sockaddr_In.size
           host = Rubinius::FFI::MemoryPointer.new(:char, Constants::NI_MAXHOST)
 
           status = RubySL::Socket::Foreign._getnameinfo(addr,
@@ -431,9 +431,9 @@ class Socket < BasicSocket
   end
 
   # Only define these methods if we support unix sockets
-  if self.const_defined?(:SockAddr_Un)
+  if self.const_defined?(:Sockaddr_Un)
     def self.pack_sockaddr_un(file)
-      SockAddr_Un.new(file).to_s
+      Sockaddr_Un.new(file).to_s
     end
 
     def self.unpack_sockaddr_un(addr)
@@ -442,7 +442,7 @@ class Socket < BasicSocket
         raise TypeError, "too long sockaddr_un - #{addr.bytesize} longer than #{Rubinius::FFI.config("sockaddr_un.sizeof")}"
       end
 
-      struct = SockAddr_Un.new
+      struct = Sockaddr_Un.new
       struct.pointer.write_string(addr, addr.bytesize)
 
       struct[:sun_path]

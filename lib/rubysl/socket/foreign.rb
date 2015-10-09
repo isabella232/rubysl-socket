@@ -23,7 +23,7 @@ module RubySL
         config("rbx.platform.sockaddr", :sa_data, :sa_family)
       end
 
-      class SockAddr_In < Rubinius::FFI::Struct
+      class Sockaddr_In < Rubinius::FFI::Struct
         config("rbx.platform.sockaddr_in", :sin_family, :sin_port, :sin_addr, :sin_zero)
 
         def initialize(sockaddrin)
@@ -37,7 +37,7 @@ module RubySL
         end
       end
 
-      class SockAddr_In6 < Rubinius::FFI::Struct
+      class Sockaddr_In6 < Rubinius::FFI::Struct
         config(
           "rbx.platform.sockaddr_in6",
           :sin6_family, :sin6_port, :sin6_flowinfo, :sin6_addr, :sin6_scope_id
@@ -205,7 +205,7 @@ module RubySL
                 raise SocketError, gai_strerror(err)
               end
 
-              sa_family = SockAddr_In.new(sockaddr)[:sin_family]
+              sa_family = Sockaddr_In.new(sockaddr)[:sin_family]
 
               name_info[0] = ::Socket::Constants::AF_TO_FAMILY[sa_family]
               name_info[1] = service.read_string
