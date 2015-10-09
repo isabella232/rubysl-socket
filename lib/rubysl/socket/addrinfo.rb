@@ -41,7 +41,7 @@ class Addrinfo
 
   def initialize(sockaddr, pfamily = nil, socktype = 0, protocol = 0)
     if sockaddr.kind_of?(Array)
-      @afamily    = Socket::Helpers.address_family(sockaddr[0])
+      @afamily    = RubySL::Socket::Helpers.address_family(sockaddr[0])
       @ip_port    = sockaddr[1]
       @ip_address = sockaddr[3]
     else
@@ -57,9 +57,9 @@ class Addrinfo
 
     @socktype = socktype
     @protocol = protocol
-    @afamily  = Socket::Helpers.address_family(@afamily)
-    @pfamily  = Socket::Helpers.protocol_family(pfamily)
-    @socktype = Socket::Helpers.socket_type(@socktype)
+    @afamily  = RubySL::Socket::Helpers.address_family(@afamily)
+    @pfamily  = RubySL::Socket::Helpers.protocol_family(pfamily)
+    @socktype = RubySL::Socket::Helpers.socket_type(@socktype)
 
     # When using AF_INET6 the protocol family can only be PF_INET6
     if @afamily == Socket::AF_INET6

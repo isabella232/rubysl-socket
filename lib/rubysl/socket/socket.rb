@@ -26,77 +26,6 @@ class Socket < BasicSocket
     PF_TO_FAMILY = Hash[*pfamilies.flatten]
   end
 
-  # Helper methods re-used between Socket and Addrinfo that don't really belong
-  # to just either one of those classes.
-  module Helpers
-    def self.address_family(family)
-      case family
-      when Symbol, String
-        f = family.to_s
-        if f[0..2] != 'AF_'
-          f = 'AF_' + f
-        end
-
-        if Socket.const_defined?(f)
-          Socket.const_get(f)
-        else
-          raise SocketError, "unknown socket domain: #{family}"
-        end
-      when Integer
-        family
-      when NilClass
-        Socket::AF_UNSPEC
-      else
-        raise SocketError, "unknown socket domain: #{family}"
-      end
-    end
-
-    def self.protocol_family(family)
-      case family
-      when Symbol, String
-        f = family.to_s
-        if f[0..2] != 'PF_'
-          f = 'PF_' + f
-        end
-
-        if Socket.const_defined?(f)
-          Socket.const_get(f)
-        else
-          raise SocketError, "unknown socket domain: #{family}"
-        end
-      when Integer
-        family
-      when NilClass
-        Socket::PF_UNSPEC
-      else
-        raise SocketError, "unknown socket domain: #{family}"
-      end
-    end
-
-    def self.socket_type(type)
-      case type
-      when Symbol, String
-        t = type.to_s
-
-        if t[0..4] != 'SOCK_'
-          t = "SOCK_#{t}"
-        end
-
-        if Socket.const_defined?(t)
-          Socket.const_get(t)
-        else
-          raise SocketError, "unknown socket type: #{type}"
-        end
-      when Integer
-        type
-      when NilClass
-        0
-      else
-        raise SocketError, "unknown socket type: #{type}"
-      end
-    end
-  end # Helpers
-
   module Foreign
     extend FFI::Library
 
@@ -470,7 +399,7 @@ class Socket < BasicSocket
     end
 
     def initialize(family, level, optname, data)
-      @family = Helpers.address_family(family)
+      @family = RubySL::Socket::Helpers.address_family(family)
       @family_name = family
       @level = level_arg(@family, level)
       @level_name = level
@@ -683,8 +612,8 @@ class Socket < BasicSocket
       end
     end
 
-    family    = Helpers.address_family(family)
-    socktype  = Helpers.socket_type(socktype)
+    family    = RubySL::Socket::Helpers.address_family(family)
+    socktype  = RubySL::Socket::Helpers.socket_type(socktype)
     addrinfos = Socket::Foreign.getaddrinfo(host, service, family, socktype,
                                             protocol, flags)
 
@@ -830,7 +759,7 @@ class Socket < BasicSocket
       end
     end
 
-    type = Helpers.socket_type(type)
+    type = RubySL::Socket::Helpers.socket_type(type)
 
     FFI::MemoryPointer.new :int, 2 do |mp|
       Socket::Foreign.socketpair(domain, type, protocol, mp)
@@ -870,8 +799,8 @@ class Socket < BasicSocket
 
   def initialize(family, socket_type, protocol=0)
     @no_reverse_lookup = self.class.do_not_reverse_lookup
-    family = Helpers.protocol_family(family)
-    socket_type = Helpers.socket_type(socket_type)
+    family = RubySL::Socket::Helpers.protocol_family(family)
+    socket_type = RubySL::Socket::Helpers.socket_type(socket_type)
     descriptor  = Socket::Foreign.socket family, socket_type, protocol
 
     Errno.handle 'socket(2)' if descriptor < 0
