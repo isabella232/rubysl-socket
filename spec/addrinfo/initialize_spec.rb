@@ -162,141 +162,205 @@ describe 'Addrinfo#initialize' do
   end
 
   describe 'using an Array with extra arguments' do
-    describe 'using AF_INET with an explicit protocol family' do
+    describe 'using AF_INET6 and an explicit protocol family' do
       before do
-        @sockaddr = ['AF_INET', 80, 'hostname', '127.0.0.1']
+        @sockaddr = ['AF_INET6', 80, 'hostname', '127.0.0.1']
       end
 
-      it 'raises SocketError when setting the protocol family to PF_APPLETALK' do
-        block = proc { Addrinfo.new(@sockaddr, Socket::PF_APPLETALK) }
+      it 'overwrites the protocol family with AF_INET' do
+        addr = Addrinfo.new(@sockaddr, Socket::AF_INET)
 
-        block.should raise_error(SocketError)
+        addr.afamily.should == Socket::AF_INET
       end
 
-      it 'overwrites the protocol family when using PF_AX25' do
-        block = proc { Addrinfo.new(@sockaddr, Socket::PF_AX25) }
-
-        block.should raise_error(SocketError)
-      end
-
-      it 'keeps the protocol family as-is when using PF_INET' do
+      it 'overwrites the protocol family with PF_INET' do
         addr = Addrinfo.new(@sockaddr, Socket::PF_INET)
 
-        addr.pfamily.should == Socket::PF_INET
+        addr.afamily.should == Socket::AF_INET
       end
 
-      it 'raises SocketError when setting the protocol family to PF_INET6' do
-        block = proc { Addrinfo.new(@sockaddr, Socket::PF_INET6) }
+      # Everything except AF_INET(6)/PF_INET(6) should raise an error.
+      Socket.constants.grep(/(^AF_|^PF_)(?!INET)/).each do |constant|
+        it "raises SocketError when using #{constant}" do
+          block = proc { Addrinfo.new(@sockaddr, Socket.const_get(constant)) }
 
-        block.should raise_error(SocketError)
-      end
-
-      it 'raises SocketError when setting the protocol family to PF_IPX' do
-        block = proc { Addrinfo.new(@sockaddr, Socket::PF_IPX) }
-
-        block.should raise_error(SocketError)
-      end
-
-      it 'raises SocketError when setting the protocol family to PF_KEY' do
-        block = proc { Addrinfo.new(@sockaddr, Socket::PF_KEY) }
-
-        block.should raise_error(SocketError)
-      end
-
-      it 'raises SocketError when setting the protocol family to PF_MAX' do
-        block = proc { Addrinfo.new(@sockaddr, Socket::PF_MAX) }
-
-        block.should raise_error(SocketError)
-      end
-
-      it 'raises SocketError when setting the protocol family to PF_ROUTE' do
-        block = proc { Addrinfo.new(@sockaddr, Socket::PF_ROUTE) }
-
-        block.should raise_error(SocketError)
-      end
-
-      it 'raises SocketError when setting the protocol family to PF_UNIX' do
-        block = proc { Addrinfo.new(@sockaddr, Socket::PF_UNIX) }
-
-        block.should raise_error(SocketError)
-      end
-
-      it 'raises SocketError when setting the protocol family to PF_ISDN' do
-        block = proc { Addrinfo.new(@sockaddr, Socket::PF_ISDN) }
-
-        block.should raise_error(SocketError)
-      end
-
-      it 'raises SocketError when setting the protocol family to PF_LOCAL' do
-        block = proc { Addrinfo.new(@sockaddr, Socket::PF_LOCAL) }
-
-        block.should raise_error(SocketError)
-      end
-
-      it 'raises SocketError when setting the protocol family to PF_PACKET' do
-        block = proc { Addrinfo.new(@sockaddr, Socket::PF_PACKET) }
-
-        block.should raise_error(SocketError)
-      end
-
-      it 'raises SocketError when setting the protocol family to PF_SNA' do
-        block = proc { Addrinfo.new(@sockaddr, Socket::PF_SNA) }
-
-        block.should raise_error(SocketError)
-      end
-
-      it 'overwrites the protocol family with PF_INET when using PF_UNSPEC' do
-        addr = Addrinfo.new(@sockaddr, Socket::PF_UNSPEC)
-
-        addr.pfamily.should == Socket::PF_INET
+          block.should raise_error(SocketError)
+        end
       end
     end
 
-    describe 'using AF_INET with an explicit socket type' do
+    describe 'using AF_INET and an explicit socket type' do
       before do
         @sockaddr = ['AF_INET', 80, 'hostname', '127.0.0.1']
       end
 
-      it 'overwrites the socket type when using SOCK_DGRAM' do
-        addr = Addrinfo.new(@sockaddr, nil, Socket::SOCK_DGRAM)
+      [:SOCK_STREAM, :SOCK_DGRAM, :SOCK_RAW, :SOCK_SEQPACKET].each do |type|
+        it "overwrites the socket type with #{type}" do
+          value = Socket.const_get(type)
+          addr  = Addrinfo.new(@sockaddr, nil, value)
 
-        addr.socktype.should == Socket::SOCK_DGRAM
+          addr.socktype.should == value
+        end
       end
 
-      it 'raises SocketError when using SOCK_PACKET' do
-        block = proc { Addrinfo.new(@sockaddr, nil, Socket::SOCK_PACKET) }
+      [:SOCK_RDM, :SOCK_PACKET].each do |type|
+        it "raises SocketError when using #{type}" do
+          value = Socket.const_get(type)
+          block = proc { Addrinfo.new(@sockaddr, nil, value) }
 
-        block.should raise_error(SocketError)
-      end
-
-      it 'overwrites the socket type hwne using SOCK_RAW' do
-        addr = Addrinfo.new(@sockaddr, nil, Socket::SOCK_RAW)
-
-        addr.socktype.should == Socket::SOCK_RAW
-      end
-
-      it 'raises SocketError when using SOCK_RDM' do
-        block = proc { Addrinfo.new(@sockaddr, nil, Socket::SOCK_RDM) }
-
-        block.should raise_error(SocketError)
+          block.should raise_error(SocketError)
+        end
       end
     end
 
-    describe 'using AF_INET with an explicit protocol' do
+    describe 'using AF_INET and an explicit protocol' do
       before do
         @sockaddr = ['AF_INET', 80, 'hostname', '127.0.0.1']
       end
 
-      it 'overwrites the protocol when using IPPROTO_IP' do
-        addr = Addrinfo.new(@sockaddr, nil, nil, Socket::IPPROTO_IP)
+      describe 'without an explicit socket type' do
+        valid = [:IPPROTO_IP, :IPPROTO_UDP, :IPPROTO_HOPOPTS]
 
-        addr.protocol.should == Socket::IPPROTO_IP
+        valid.each do |type|
+          it "overwrites the protocol when using #{type}" do
+            value = Socket.const_get(type)
+            addr  = Addrinfo.new(@sockaddr, nil, nil, value)
+
+            addr.protocol.should == value
+          end
+        end
+
+        (Socket.constants.grep(/^IPPROTO/) - valid).each do |type|
+          it "raises SocketError when using #{type}" do
+            value = Socket.const_get(type)
+            block = proc { Addrinfo.new(@sockaddr, nil, nil, value) }
+
+            block.should raise_error(SocketError)
+          end
+        end
       end
 
-      it 'raises SocketError when using IPPROTO_ICMP' do
-        block = proc { Addrinfo.new(@sockaddr, nil, nil, Socket::IPPROTO_ICMP) }
+      describe 'with the socket type set to SOCK_DGRAM' do
+        before do
+          @socktype = Socket::SOCK_DGRAM
+        end
 
-        block.should raise_error(SocketError)
+        valid = [:IPPROTO_IP, :IPPROTO_UDP, :IPPROTO_HOPOPTS]
+
+        valid.each do |type|
+          it "overwrites the protocol when using #{type}" do
+            value = Socket.const_get(type)
+            addr  = Addrinfo.new(@sockaddr, nil, @socktype, value)
+
+            addr.protocol.should == value
+          end
+        end
+
+        (Socket.constants.grep(/^IPPROTO/) - valid).each do |type|
+          it "raises SocketError when using #{type}" do
+            value = Socket.const_get(type)
+            block = proc { Addrinfo.new(@sockaddr, nil, @socktype, value) }
+
+            block.should raise_error(SocketError)
+          end
+        end
+      end
+
+      describe 'with the socket type set to SOCK_PACKET' do
+        before do
+          @socktype = Socket::SOCK_PACKET
+        end
+
+        Socket.constants.grep(/^IPPROTO/).each do |type|
+          it "raises SocketError when using #{type}" do
+            value = Socket.const_get(type)
+            block = proc { Addrinfo.new(@sockaddr, nil, @socktype, value) }
+
+            block.should raise_error(SocketError)
+          end
+        end
+      end
+
+      describe 'with the socket type set to SOCK_RAW' do
+        before do
+          @socktype = Socket::SOCK_RAW
+        end
+
+        Socket.constants.grep(/^IPPROTO/).each do |type|
+          it "overwrites the protocol when using #{type}" do
+            value = Socket.const_get(type)
+            addr  = Addrinfo.new(@sockaddr, nil, @socktype, value)
+
+            addr.protocol.should == value
+          end
+        end
+      end
+
+      describe 'with the socket type set to SOCK_RDM' do
+        before do
+          @socktype = Socket::SOCK_RDM
+        end
+
+        Socket.constants.grep(/^IPPROTO/).each do |type|
+          it "raises SocketError when using #{type}" do
+            value = Socket.const_get(type)
+            block = proc { Addrinfo.new(@sockaddr, nil, @socktype, value) }
+
+            block.should raise_error(SocketError)
+          end
+        end
+      end
+
+      describe 'with the socket type set to SOCK_SEQPACKET' do
+        before do
+          @socktype = Socket::SOCK_SEQPACKET
+        end
+
+        valid = [:IPPROTO_IP, :IPPROTO_HOPOPTS]
+
+        valid.each do |type|
+          it "overwrites the protocol when using #{type}" do
+            value = Socket.const_get(type)
+            addr  = Addrinfo.new(@sockaddr, nil, @socktype, value)
+
+            addr.protocol.should == value
+          end
+        end
+
+        (Socket.constants.grep(/^IPPROTO/) - valid).each do |type|
+          it "raises SocketError when using #{type}" do
+            value = Socket.const_get(type)
+            block = proc { Addrinfo.new(@sockaddr, nil, @socktype, value) }
+
+            block.should raise_error(SocketError)
+          end
+        end
+      end
+
+      describe 'with the socket type set to SOCK_STREAM' do
+        before do
+          @socktype = Socket::SOCK_STREAM
+        end
+
+        valid = [:IPPROTO_IP, :IPPROTO_TCP, :IPPROTO_HOPOPTS]
+
+        valid.each do |type|
+          it "overwrites the protocol when using #{type}" do
+            value = Socket.const_get(type)
+            addr  = Addrinfo.new(@sockaddr, nil, @socktype, value)
+
+            addr.protocol.should == value
+          end
+        end
+
+        (Socket.constants.grep(/^IPPROTO/) - valid).each do |type|
+          it "raises SocketError when using #{type}" do
+            value = Socket.const_get(type)
+            block = proc { Addrinfo.new(@sockaddr, nil, @socktype, value) }
+
+            block.should raise_error(SocketError)
+          end
+        end
       end
     end
   end
