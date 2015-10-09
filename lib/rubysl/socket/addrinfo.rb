@@ -55,15 +55,76 @@ class Addrinfo
       end
     end
 
-    @socktype = socktype
-    @protocol = protocol
-    @afamily  = RubySL::Socket::Helpers.address_family(@afamily)
     @pfamily  = RubySL::Socket::Helpers.protocol_family(pfamily)
-    @socktype = RubySL::Socket::Helpers.socket_type(@socktype)
+    @socktype = RubySL::Socket::Helpers.socket_type(socktype || 0)
+    @protocol = protocol || 0
+
+    # Per MRI behaviour setting the protocol family should also set the address
+    # family, but only if the address and protocol families are compatible.
+    if @pfamily && @pfamily != 0
+      if @afamily == Socket::AF_INET6 and
+      @pfamily != Socket::PF_INET and
+      @pfamily != Socket::PF_INET6
+        raise SocketError, 'Unsupported protocol family'
+      end
+
+      @afamily = @pfamily
+    end
 
     # When using AF_INET6 the protocol family can only be PF_INET6
     if @afamily == Socket::AF_INET6
       @pfamily = Socket::PF_INET6
+    end
+
+    # MRI uses getaddrinfo() for this, but there's no need to do a system call
+    # to check if the given address is in a valid format.
+    #
+    # MRI only checks this if "sockaddr" is an Array.
+    if sockaddr.kind_of?(Array)
+      if @afamily == Socket::AF_INET6 and @ip_address !~ Resolv::IPv6::Regex
+        raise SocketError, "Invalid IPv6 address: #{@ip_address.inspect}"
+      end
+    end
+
+    # Based on MRI's (re-)implementation of getaddrinfo()
+    if @afamily != Socket::AF_UNIX and
+    @afamily != Socket::PF_UNSPEC and
+    @afamily != Socket::PF_INET and
+    @afamily != Socket::PF_INET6
+      raise SocketError, 'Unsupported address family'
+    end
+
+    # Per MRI this validation should only happen when "sockaddr" is an Array.
+    if sockaddr.is_a?(Array)
+      case @socktype
+      when 0, nil
+        case @protocol
+        when 0, nil
+          # nothing to do
+        when Socket::IPPROTO_UDP
+          @socktype = Socket::SOCK_DGRAM
+        else
+          raise SocketError, 'Unsupported protocol'
+        end
+      when Socket::SOCK_RAW
+        # nothing to do
+      when Socket::SOCK_DGRAM
+        if @protocol != Socket::IPPROTO_UDP and @protocol != 0
+          raise SocketError, 'Socket protocol must be IPPROTO_UDP or left unset'
+        end
+      when Socket::SOCK_STREAM
+        if @protocol != Socket::IPPROTO_TCP and @protocol != 0
+          raise SocketError, 'Socket protocol must be IPPROTO_TCP or left unset'
+        end
+      # Based on MRI behaviour, though MRI itself doesn't seem to explicitly
+      # handle this case (possibly handled by getaddrinfo()).
+      when Socket::SOCK_SEQPACKET
+        if @protocol != 0
+          raise SocketError, 'SOCK_SEQPACKET can not be used with an explicit protocol'
+        end
+      else
+        raise SocketError, 'Unsupported socket type'
+      end
     end
   end
 

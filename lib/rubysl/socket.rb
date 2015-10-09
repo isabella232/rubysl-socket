@@ -1,4 +1,5 @@
 require "fcntl"
+require "resolv"
 
 require "rubysl/socket/version"
 require "rubysl/socket/helpers"
