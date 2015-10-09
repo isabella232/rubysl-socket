@@ -41,11 +41,9 @@ class Addrinfo
 
   def initialize(sockaddr, pfamily = nil, socktype = 0, protocol = 0)
     if sockaddr.kind_of?(Array)
-      @afamily    = Socket.const_get(sockaddr[0])
+      @afamily    = Socket::Helpers.address_family(sockaddr[0])
       @ip_port    = sockaddr[1]
       @ip_address = sockaddr[3]
-      @socktype   = 0
-      @protocol   = 0
     else
       if sockaddr.bytesize == Rubinius::FFI.config('sockaddr_un.sizeof')
         @unix_path = Socket.unpack_sockaddr_un(sockaddr)
@@ -55,14 +53,18 @@ class Addrinfo
 
         @afamily = Socket::AF_INET
       end
-
-      @socktype = socktype
-      @protocol = protocol
     end
 
+    @socktype = socktype
+    @protocol = protocol
     @afamily  = Socket::Helpers.address_family(@afamily)
     @pfamily  = Socket::Helpers.protocol_family(pfamily)
     @socktype = Socket::Helpers.socket_type(@socktype)
+
+    # When using AF_INET6 the protocol family can only be PF_INET6
+    if @afamily == Socket::AF_INET6
+      @pfamily = Socket::PF_INET6
+    end
   end
 
   # Everything below is copied from the MRI codebase.
