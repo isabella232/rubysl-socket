@@ -1,5 +1,5 @@
 class TCPServer < TCPSocket
-  include Socket::ListenAndAccept
+  include RubySL::Socket::ListenAndAccept
 
   def initialize(host, port = nil)
     @no_reverse_lookup = self.class.do_not_reverse_lookup
