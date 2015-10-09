@@ -1,6 +1,4 @@
 class BasicSocket < IO
-  FFI = Rubinius::FFI
-
   class << self
     def from_descriptor(fixnum)
       sock = allocate()
@@ -73,14 +71,14 @@ class BasicSocket < IO
 
     case optval
     when Fixnum then
-      FFI::MemoryPointer.new :socklen_t do |val|
+      Rubinius::FFI::MemoryPointer.new :socklen_t do |val|
         val.write_int optval
         error = Socket::Foreign.setsockopt(descriptor, level,
                                            optname, val,
                                            val.total)
       end
     when String then
-      FFI::MemoryPointer.new optval.bytesize do |val|
+      Rubinius::FFI::MemoryPointer.new optval.bytesize do |val|
         val.write_string optval, optval.bytesize
         error = Socket::Foreign.setsockopt(descriptor, level,
                                            optname, val,
@@ -117,7 +115,7 @@ class BasicSocket < IO
     bytes = message.bytesize
     bytes_sent = 0
 
-    FFI::MemoryPointer.new :char, bytes + 1 do |buffer|
+    Rubinius::FFI::MemoryPointer.new :char, bytes + 1 do |buffer|
       buffer.write_string message, bytes
       bytes_sent = Socket::Foreign.send(descriptor, buffer, bytes, flags)
       Errno.handle 'send(2)' if bytes_sent < 0

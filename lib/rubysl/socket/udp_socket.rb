@@ -1,6 +1,4 @@
 class UDPSocket < IPSocket
-  FFI = Rubinius::FFI
-
   def initialize(socktype = Socket::AF_INET)
     @no_reverse_lookup = self.class.do_not_reverse_lookup
     @socktype = socktype
@@ -58,7 +56,7 @@ class UDPSocket < IPSocket
     bytes = message.bytesize
     bytes_sent = 0
 
-    FFI::MemoryPointer.new :char, bytes + 1 do |buffer|
+    Rubinius::FFI::MemoryPointer.new :char, bytes + 1 do |buffer|
       buffer.write_string message, bytes
       bytes_sent = Socket::Foreign.send(descriptor, buffer, bytes, flags)
       Errno.handle 'send(2)' if bytes_sent < 0

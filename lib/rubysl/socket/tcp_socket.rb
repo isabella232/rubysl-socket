@@ -1,6 +1,4 @@
 class TCPSocket < IPSocket
-  FFI = Rubinius::FFI
-
   def self.gethostbyname(hostname)
     addrinfos = Socket.getaddrinfo(hostname, nil)
 
@@ -68,7 +66,7 @@ class TCPSocket < IPSocket
       next if sock < 0
 
       if server
-        FFI::MemoryPointer.new :socklen_t do |val|
+        Rubinius::FFI::MemoryPointer.new :socklen_t do |val|
           val.write_int 1
           level = Socket::Constants::SOL_SOCKET
           optname = Socket::Constants::SO_REUSEADDR

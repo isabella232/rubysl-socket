@@ -1,8 +1,6 @@
 class Socket < BasicSocket
-  FFI = Rubinius::FFI
-
   module Constants
-    all_valid = FFI.config_hash("socket").reject {|name, value| value.empty? }
+    all_valid = Rubinius::FFI.config_hash("socket").reject {|name, value| value.empty? }
 
     all_valid.each {|name, value| const_set name, Integer(value) }
 
@@ -26,25 +24,25 @@ class Socket < BasicSocket
   end
 
   module Foreign
-    extend FFI::Library
+    extend Rubinius::FFI::Library
 
-    class Addrinfo < FFI::Struct
+    class Addrinfo < Rubinius::FFI::Struct
       config("rbx.platform.addrinfo", :ai_flags, :ai_family, :ai_socktype,
              :ai_protocol, :ai_addrlen, :ai_addr, :ai_canonname, :ai_next)
     end
 
-    class Linger < FFI::Struct
+    class Linger < Rubinius::FFI::Struct
       config("rbx.platform.linger", :l_onoff, :l_linger)
     end
 
-    class Ifaddrs < FFI::Struct
+    class Ifaddrs < Rubinius::FFI::Struct
       config(
         "rbx.platform.ifaddrs",
         :ifa_next, :ifa_name, :ifa_flags, :ifa_addr, :ifa_netmask
       )
     end
 
-    class Sockaddr < FFI::Struct
+    class Sockaddr < Rubinius::FFI::Struct
       config("rbx.platform.sockaddr", :sa_data, :sa_family)
     end
 
@@ -88,7 +86,7 @@ class Socket < BasicSocket
     attach_function :freeifaddrs, [:pointer], :void
 
     def self.bind(descriptor, sockaddr)
-      FFI::MemoryPointer.new :char, sockaddr.bytesize do |sockaddr_p|
+      Rubinius::FFI::MemoryPointer.new :char, sockaddr.bytesize do |sockaddr_p|
         sockaddr_p.write_string sockaddr, sockaddr.bytesize
 
         _bind descriptor, sockaddr_p, sockaddr.bytesize
@@ -97,7 +95,7 @@ class Socket < BasicSocket
 
     def self.connect(descriptor, sockaddr)
       err = 0
-      FFI::MemoryPointer.new :char, sockaddr.bytesize do |sockaddr_p|
+      Rubinius::FFI::MemoryPointer.new :char, sockaddr.bytesize do |sockaddr_p|
         sockaddr_p.write_string sockaddr, sockaddr.bytesize
 
         err = _connect descriptor, sockaddr_p, sockaddr.bytesize
@@ -107,8 +105,8 @@ class Socket < BasicSocket
     end
 
     def self.getsockopt(descriptor, level, optname)
-      FFI::MemoryPointer.new 256 do |val| # HACK magic number
-        FFI::MemoryPointer.new :socklen_t do |length|
+      Rubinius::FFI::MemoryPointer.new 256 do |val| # HACK magic number
+        Rubinius::FFI::MemoryPointer.new :socklen_t do |length|
           length.write_int 256 # HACK magic number
 
           err = _getsockopt descriptor, level, optname, val, length
@@ -133,7 +131,7 @@ class Socket < BasicSocket
         host = '255.255.255.255'
       end
 
-      res_p = FFI::MemoryPointer.new :pointer
+      res_p = Rubinius::FFI::MemoryPointer.new :pointer
 
       err = _getaddrinfo host, service, hints.pointer, res_p
 
@@ -188,9 +186,9 @@ class Socket < BasicSocket
       name_info = []
       value = nil
 
-      FFI::MemoryPointer.new :char, sockaddr.bytesize do |sockaddr_p|
-        FFI::MemoryPointer.new :char, Socket::Constants::NI_MAXHOST do |node|
-          FFI::MemoryPointer.new :char, Socket::Constants::NI_MAXSERV do |service|
+      Rubinius::FFI::MemoryPointer.new :char, sockaddr.bytesize do |sockaddr_p|
+        Rubinius::FFI::MemoryPointer.new :char, Socket::Constants::NI_MAXHOST do |node|
+          Rubinius::FFI::MemoryPointer.new :char, Socket::Constants::NI_MAXSERV do |service|
             sockaddr_p.write_string sockaddr, sockaddr.bytesize
 
             if reverse_lookup then
@@ -223,8 +221,8 @@ class Socket < BasicSocket
     end
 
     def self.getpeername(descriptor)
-      FFI::MemoryPointer.new :char, 128 do |sockaddr_storage_p|
-        FFI::MemoryPointer.new :socklen_t do |len_p|
+      Rubinius::FFI::MemoryPointer.new :char, 128 do |sockaddr_storage_p|
+        Rubinius::FFI::MemoryPointer.new :socklen_t do |len_p|
           len_p.write_int 128
 
           err = _getpeername descriptor, sockaddr_storage_p, len_p
@@ -237,8 +235,8 @@ class Socket < BasicSocket
     end
 
     def self.getsockname(descriptor)
-      FFI::MemoryPointer.new :char, 128 do |sockaddr_storage_p|
-        FFI::MemoryPointer.new :socklen_t do |len_p|
+      Rubinius::FFI::MemoryPointer.new :char, 128 do |sockaddr_storage_p|
+        Rubinius::FFI::MemoryPointer.new :socklen_t do |len_p|
           len_p.write_int 128
 
           err = _getsockname descriptor, sockaddr_storage_p, len_p
@@ -260,7 +258,7 @@ class Socket < BasicSocket
         host = "0.0.0.0"
       end
 
-      res_p = FFI::MemoryPointer.new :pointer
+      res_p = Rubinius::FFI::MemoryPointer.new :pointer
 
       err = _getaddrinfo host, port.to_s, hints.pointer, res_p
 
@@ -328,8 +326,8 @@ class Socket < BasicSocket
       fd = nil
       sockaddr = nil
 
-      FFI::MemoryPointer.new 1024 do |sockaddr_p| # HACK from MRI
-        FFI::MemoryPointer.new :int do |size_p|
+      Rubinius::FFI::MemoryPointer.new 1024 do |sockaddr_p| # HACK from MRI
+        Rubinius::FFI::MemoryPointer.new :int do |size_p|
           fd = Socket::Foreign.accept descriptor, sockaddr_p, size_p
         end
       end
@@ -346,11 +344,11 @@ class Socket < BasicSocket
 
   include Socket::ListenAndAccept
 
-  class SockAddr_In < FFI::Struct
+  class SockAddr_In < Rubinius::FFI::Struct
     config("rbx.platform.sockaddr_in", :sin_family, :sin_port, :sin_addr, :sin_zero)
 
     def initialize(sockaddrin)
-      @p = FFI::MemoryPointer.new sockaddrin.bytesize
+      @p = Rubinius::FFI::MemoryPointer.new sockaddrin.bytesize
       @p.write_string(sockaddrin, sockaddrin.bytesize)
       super(@p)
     end
@@ -361,7 +359,7 @@ class Socket < BasicSocket
 
   end
 
-  class SockAddr_In6 < FFI::Struct
+  class SockAddr_In6 < Rubinius::FFI::Struct
     config(
       "rbx.platform.sockaddr_in6",
       :sin6_family, :sin6_port, :sin6_flowinfo, :sin6_addr, :sin6_scope_id
@@ -416,9 +414,9 @@ class Socket < BasicSocket
     end
 
     def bool
-      unless @data.length == Rubinius::FFI.type_size(:int)
+      unless @data.length == Rubinius::Rubinius::FFI.type_size(:int)
         raise TypeError, "size differ. expected as sizeof(int)=" +
-          "#{Rubinius::FFI.type_size(:int)} but #{@data.length}"
+          "#{Rubinius::Rubinius::FFI.type_size(:int)} but #{@data.length}"
       end
 
       i = @data.unpack('i').first
@@ -426,9 +424,9 @@ class Socket < BasicSocket
     end
 
     def int
-      unless @data.length == Rubinius::FFI.type_size(:int)
+      unless @data.length == Rubinius::Rubinius::FFI.type_size(:int)
         raise TypeError, "size differ. expected as sizeof(int)=" +
-          "#{Rubinius::FFI.type_size(:int)} but #{@data.length}"
+          "#{Rubinius::Rubinius::FFI.type_size(:int)} but #{@data.length}"
       end
       @data.unpack('i').first
     end
@@ -437,9 +435,9 @@ class Socket < BasicSocket
       if @level != Socket::SOL_SOCKET || @optname != Socket::SO_LINGER
         raise TypeError, "linger socket option expected"
       end
-      if @data.bytesize != FFI.config("linger.sizeof")
+      if @data.bytesize != Rubinius::FFI.config("linger.sizeof")
         raise TypeError, "size differ. expected as sizeof(struct linger)=" +
-          "#{FFI.config("linger.sizeof")} but #{@data.length}"
+          "#{Rubinius::FFI.config("linger.sizeof")} but #{@data.length}"
       end
 
       linger = Socket::Foreign::Linger.new
@@ -536,17 +534,17 @@ class Socket < BasicSocket
   end
 
   # If we have the details to support unix sockets, do so.
-  if FFI.config("sockaddr_un.sun_family.offset") and Socket::Constants.const_defined?(:AF_UNIX)
-    class SockAddr_Un < FFI::Struct
+  if Rubinius::FFI.config("sockaddr_un.sun_family.offset") and Socket::Constants.const_defined?(:AF_UNIX)
+    class SockAddr_Un < Rubinius::FFI::Struct
       config("rbx.platform.sockaddr_un", :sun_family, :sun_path)
 
       def initialize(filename = nil)
-        maxfnsize = self.size - (FFI.config("sockaddr_un.sun_family.size") + 1)
+        maxfnsize = self.size - (Rubinius::FFI.config("sockaddr_un.sun_family.size") + 1)
 
         if filename and filename.length > maxfnsize
           raise ArgumentError, "too long unix socket path (max: #{maxfnsize}bytes)"
         end
-        @p = FFI::MemoryPointer.new self.size
+        @p = Rubinius::FFI::MemoryPointer.new self.size
         if filename
           @p.write_string( [Socket::AF_UNIX].pack("s") + filename )
         end
@@ -577,7 +575,7 @@ class Socket < BasicSocket
 
         if family == AF_INET or family == AF_INET6
           size = family == AF_INET6 ? SockAddr_In6.size : SockAddr_In.size
-          host = FFI::MemoryPointer.new(:char, Constants::NI_MAXHOST)
+          host = Rubinius::FFI::MemoryPointer.new(:char, Constants::NI_MAXHOST)
 
           status = Foreign._getnameinfo(addr,
                                 size,
@@ -661,7 +659,7 @@ class Socket < BasicSocket
   end
 
   def self.gethostname
-    FFI::MemoryPointer.new :char, 1024 do |mp|  #magic number 1024 comes from MRI
+    Rubinius::FFI::MemoryPointer.new :char, 1024 do |mp|  #magic number 1024 comes from MRI
       Socket::Foreign.gethostname(mp, 1024) # same here
       return mp.read_string
     end
@@ -681,13 +679,13 @@ class Socket < BasicSocket
         sockaddr = Socket.sockaddr_in(1, a[3])
         if family == AF_INET
           # IPv4 address
-          offset = FFI.config("sockaddr_in.sin_addr.offset")
-          size = FFI.config("sockaddr_in.sin_addr.size")
+          offset = Rubinius::FFI.config("sockaddr_in.sin_addr.offset")
+          size = Rubinius::FFI.config("sockaddr_in.sin_addr.size")
           addresses << sockaddr.byteslice(offset, size)
         elsif family == AF_INET6
           # Ipv6 address
-          offset = FFI.config("sockaddr_in6.sin6_addr.offset")
-          size = FFI.config("sockaddr_in6.sin6_addr.size")
+          offset = Rubinius::FFI.config("sockaddr_in6.sin6_addr.offset")
+          size = Rubinius::FFI.config("sockaddr_in6.sin6_addr.size")
           addresses << sockaddr.byteslice(offset, size)
         else
           addresses << a[3]
@@ -699,11 +697,11 @@ class Socket < BasicSocket
   end
 
 
-  class Servent < FFI::Struct
+  class Servent < Rubinius::FFI::Struct
     config("rbx.platform.servent", :s_name, :s_aliases, :s_port, :s_proto)
 
     def initialize(data)
-      @p = FFI::MemoryPointer.new data.bytesize
+      @p = Rubinius::FFI::MemoryPointer.new data.bytesize
       @p.write_string(data, data.bytesize)
       super(@p)
     end
@@ -715,8 +713,8 @@ class Socket < BasicSocket
   end
 
   def self.getservbyname(service, proto='tcp')
-    FFI::MemoryPointer.new :char, service.length + 1 do |svc|
-      FFI::MemoryPointer.new :char, proto.length + 1 do |prot|
+    Rubinius::FFI::MemoryPointer.new :char, service.length + 1 do |svc|
+      Rubinius::FFI::MemoryPointer.new :char, proto.length + 1 do |prot|
         svc.write_string(service + "\0")
         prot.write_string(proto + "\0")
         fn = Socket::Foreign.getservbyname(svc, prot)
@@ -760,7 +758,7 @@ class Socket < BasicSocket
 
     type = RubySL::Socket::Helpers.socket_type(type)
 
-    FFI::MemoryPointer.new :int, 2 do |mp|
+    Rubinius::FFI::MemoryPointer.new :int, 2 do |mp|
       Socket::Foreign.socketpair(domain, type, protocol, mp)
       fd0, fd1 = mp.read_array_of_int(2)
 
@@ -781,8 +779,8 @@ class Socket < BasicSocket
 
     def self.unpack_sockaddr_un(addr)
 
-      if addr.bytesize > FFI.config("sockaddr_un.sizeof")
-        raise TypeError, "too long sockaddr_un - #{addr.bytesize} longer than #{FFI.config("sockaddr_un.sizeof")}"
+      if addr.bytesize > Rubinius::FFI.config("sockaddr_un.sizeof")
+        raise TypeError, "too long sockaddr_un - #{addr.bytesize} longer than #{Rubinius::FFI.config("sockaddr_un.sizeof")}"
       end
 
       struct = SockAddr_Un.new
