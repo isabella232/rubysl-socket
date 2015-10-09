@@ -16,7 +16,7 @@ class UNIXSocket < BasicSocket
 
   def path
     unless @path
-      sockaddr = Socket::Foreign.getsockname descriptor
+      sockaddr = RubySL::Socket::Foreign.getsockname descriptor
       _, @path = sockaddr.unpack('SZ*')
     end
 
@@ -31,7 +31,7 @@ class UNIXSocket < BasicSocket
   def unix_setup(server = false)
     status = nil
     phase = 'socket(2)'
-    sock = Socket::Foreign
+    sock = RubySL::Socket::Foreign
       .socket(Socket::Constants::AF_UNIX, Socket::Constants::SOCK_STREAM, 0)
 
     Errno.handle phase if sock < 0
@@ -42,10 +42,10 @@ class UNIXSocket < BasicSocket
 
     if server then
       phase = 'bind(2)'
-      status = Socket::Foreign.bind descriptor, sockaddr
+      status = RubySL::Socket::Foreign.bind descriptor, sockaddr
     else
       phase = 'connect(2)'
-      status = Socket::Foreign.connect descriptor, sockaddr
+      status = RubySL::Socket::Foreign.connect descriptor, sockaddr
     end
 
     if status < 0 then
@@ -55,7 +55,7 @@ class UNIXSocket < BasicSocket
 
     if server then
       phase = 'listen(2)'
-      status = Socket::Foreign.listen descriptor, 5
+      status = RubySL::Socket::Foreign.listen descriptor, 5
       if status < 0
         close
         Errno.handle phase
@@ -67,13 +67,13 @@ class UNIXSocket < BasicSocket
   private :unix_setup
 
   def addr
-    sockaddr = Socket::Foreign.getsockname descriptor
+    sockaddr = RubySL::Socket::Foreign.getsockname descriptor
     _, sock_path = sockaddr.unpack('SZ*')
     ["AF_UNIX", sock_path]
   end
 
   def peeraddr
-    sockaddr = Socket::Foreign.getpeername descriptor
+    sockaddr = RubySL::Socket::Foreign.getpeername descriptor
     _, sock_path = sockaddr.unpack('SZ*')
     ["AF_UNIX", sock_path]
   end

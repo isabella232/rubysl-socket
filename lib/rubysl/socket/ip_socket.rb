@@ -1,14 +1,14 @@
 class IPSocket < BasicSocket
   def self.getaddress(host)
-    Socket::Foreign.getaddress host
+    RubySL::Socket::Foreign.getaddress host
   end
 
   def addr(reverse_lookup=nil)
-    sockaddr = Socket::Foreign.getsockname descriptor
+    sockaddr = RubySL::Socket::Foreign.getsockname descriptor
 
     reverse_lookup = !do_not_reverse_lookup if reverse_lookup.nil?
 
-    family, port, host, ip = Socket::Foreign.getnameinfo(
+    family, port, host, ip = RubySL::Socket::Foreign.getnameinfo(
       sockaddr,
       Socket::Constants::NI_NUMERICHOST | Socket::Constants::NI_NUMERICSERV,
       reverse_lookup
@@ -18,11 +18,11 @@ class IPSocket < BasicSocket
   end
 
   def peeraddr(reverse_lookup=nil)
-    sockaddr = Socket::Foreign.getpeername descriptor
+    sockaddr = RubySL::Socket::Foreign.getpeername descriptor
 
     reverse_lookup = !do_not_reverse_lookup if reverse_lookup.nil?
 
-    family, port, host, ip = Socket::Foreign.getnameinfo(
+    family, port, host, ip = RubySL::Socket::Foreign.getnameinfo(
       sockaddr,
       Socket::Constants::NI_NUMERICHOST | Socket::Constants::NI_NUMERICSERV,
       reverse_lookup

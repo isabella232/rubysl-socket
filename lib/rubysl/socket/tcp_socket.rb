@@ -40,7 +40,7 @@ class TCPSocket < IPSocket
     end
 
     flags = server ? Socket::AI_PASSIVE : 0
-    @remote_addrinfo = Socket::Foreign.getaddrinfo(remote_host,
+    @remote_addrinfo = RubySL::Socket::Foreign.getaddrinfo(remote_host,
                                                    remote_service,
                                                    Socket::AF_UNSPEC,
                                                    Socket::SOCK_STREAM, 0,
@@ -49,7 +49,7 @@ class TCPSocket < IPSocket
     if server == false and (local_host or local_service)
       local_host    = local_host.to_s    if local_host
       local_service = local_service.to_s if local_service
-      @local_addrinfo = Socket::Foreign.getaddrinfo(local_host,
+      @local_addrinfo = RubySL::Socket::Foreign.getaddrinfo(local_host,
                                                     local_service,
                                                     Socket::AF_UNSPEC,
                                                     Socket::SOCK_STREAM, 0, 0)
@@ -60,7 +60,7 @@ class TCPSocket < IPSocket
     @remote_addrinfo.each do |addrinfo|
       flags, family, socket_type, protocol, sockaddr, canonname = addrinfo
 
-      sock = Socket::Foreign.socket family, socket_type, protocol
+      sock = RubySL::Socket::Foreign.socket family, socket_type, protocol
       syscall = 'socket(2)'
 
       next if sock < 0
@@ -70,14 +70,14 @@ class TCPSocket < IPSocket
           val.write_int 1
           level = Socket::Constants::SOL_SOCKET
           optname = Socket::Constants::SO_REUSEADDR
-          error = Socket::Foreign.setsockopt(sock, level,
+          error = RubySL::Socket::Foreign.setsockopt(sock, level,
                                              optname, val,
                                              val.total)
           # Don't check error because if this fails, we just continue
           # anyway.
         end
 
-        status = Socket::Foreign.bind sock, sockaddr
+        status = RubySL::Socket::Foreign.bind sock, sockaddr
         syscall = 'bind(2)'
       else
         if @local_addrinfo
@@ -88,7 +88,7 @@ class TCPSocket < IPSocket
           end
 
           if li
-            status = Socket::Foreign.bind sock, li[4]
+            status = RubySL::Socket::Foreign.bind sock, li[4]
             syscall = 'bind(2)'
           else
             status = 1
@@ -98,13 +98,13 @@ class TCPSocket < IPSocket
         end
 
         if status >= 0
-          status = Socket::Foreign.connect sock, sockaddr
+          status = RubySL::Socket::Foreign.connect sock, sockaddr
           syscall = 'connect(2)'
         end
       end
 
       if status < 0
-        Socket::Foreign.close sock
+        RubySL::Socket::Foreign.close sock
       else
         break
       end
@@ -115,9 +115,9 @@ class TCPSocket < IPSocket
     end
 
     if server
-      err = Socket::Foreign.listen sock, 5
+      err = RubySL::Socket::Foreign.listen sock, 5
       unless err == 0
-        Socket::Foreign.close sock
+        RubySL::Socket::Foreign.close sock
         Errno.handle syscall
       end
     end

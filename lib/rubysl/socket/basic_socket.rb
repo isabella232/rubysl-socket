@@ -32,11 +32,11 @@ class BasicSocket < IO
   end
 
   def getsockopt(level, optname)
-    data = Socket::Foreign.getsockopt(descriptor, level, optname)
+    data = RubySL::Socket::Foreign.getsockopt(descriptor, level, optname)
 
-    sockaddr = Socket::Foreign.getsockname(descriptor)
+    sockaddr = RubySL::Socket::Foreign.getsockname(descriptor)
 
-    family, _ = Socket::Foreign.getnameinfo(
+    family, _ = RubySL::Socket::Foreign.getnameinfo(
       sockaddr,
       Socket::Constants::NI_NUMERICHOST | Socket::Constants::NI_NUMERICSERV
     )
@@ -68,8 +68,8 @@ class BasicSocket < IO
 
     error = 0
 
-    sockname = Socket::Foreign.getsockname descriptor
-    family = Socket::Foreign.getnameinfo(sockname).first
+    sockname = RubySL::Socket::Foreign.getsockname descriptor
+    family = RubySL::Socket::Foreign.getnameinfo(sockname).first
 
     level = level_arg(family, level)
     optname = optname_arg(level, optname)
@@ -78,14 +78,14 @@ class BasicSocket < IO
     when Fixnum then
       Rubinius::FFI::MemoryPointer.new :socklen_t do |val|
         val.write_int optval
-        error = Socket::Foreign.setsockopt(descriptor, level,
+        error = RubySL::Socket::Foreign.setsockopt(descriptor, level,
                                            optname, val,
                                            val.total)
       end
     when String then
       Rubinius::FFI::MemoryPointer.new optval.bytesize do |val|
         val.write_string optval, optval.bytesize
-        error = Socket::Foreign.setsockopt(descriptor, level,
+        error = RubySL::Socket::Foreign.setsockopt(descriptor, level,
                                            optname, val,
                                            optval.size)
       end
@@ -99,7 +99,7 @@ class BasicSocket < IO
   end
 
   def getsockname()
-    return Socket::Foreign.getsockname(descriptor)
+    return RubySL::Socket::Foreign.getsockname(descriptor)
   end
 
   #
@@ -108,7 +108,7 @@ class BasicSocket < IO
   # @see  Socket.getpeername
   #
   def getpeername()
-    Socket::Foreign.getpeername @descriptor
+    RubySL::Socket::Foreign.getpeername @descriptor
   end
 
   #
@@ -122,7 +122,7 @@ class BasicSocket < IO
 
     Rubinius::FFI::MemoryPointer.new :char, bytes + 1 do |buffer|
       buffer.write_string message, bytes
-      bytes_sent = Socket::Foreign.send(descriptor, buffer, bytes, flags)
+      bytes_sent = RubySL::Socket::Foreign.send(descriptor, buffer, bytes, flags)
       Errno.handle 'send(2)' if bytes_sent < 0
     end
 
@@ -148,7 +148,7 @@ class BasicSocket < IO
     end
 
     # MRI doesn't check if shutdown worked, so we don't.
-    Socket::Foreign.shutdown @descriptor, 0
+    RubySL::Socket::Foreign.shutdown @descriptor, 0
 
     @mode = WRONLY
 
@@ -163,7 +163,7 @@ class BasicSocket < IO
       return close
     end
 
-    Socket::Foreign.shutdown @descriptor, 1
+    RubySL::Socket::Foreign.shutdown @descriptor, 1
 
     # Mark it as read only
     @mode = RDONLY
@@ -179,7 +179,7 @@ class BasicSocket < IO
   end
 
   def shutdown(how = 2)
-    err = Socket::Foreign.shutdown @descriptor, how
+    err = RubySL::Socket::Foreign.shutdown @descriptor, how
     Errno.handle "shutdown" unless err == 0
   end
 
