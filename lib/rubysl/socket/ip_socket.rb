@@ -8,7 +8,12 @@ class IPSocket < BasicSocket
 
     reverse_lookup = !do_not_reverse_lookup if reverse_lookup.nil?
 
-    family, port, host, ip = Socket::Foreign.getnameinfo sockaddr, Socket::Constants::NI_NUMERICHOST | Socket::Constants::NI_NUMERICSERV, reverse_lookup
+    family, port, host, ip = Socket::Foreign.getnameinfo(
+      sockaddr,
+      Socket::Constants::NI_NUMERICHOST | Socket::Constants::NI_NUMERICSERV,
+      reverse_lookup
+    )
+
     [family, port.to_i, host, ip]
   end
 
@@ -17,7 +22,12 @@ class IPSocket < BasicSocket
 
     reverse_lookup = !do_not_reverse_lookup if reverse_lookup.nil?
 
-    family, port, host, ip = Socket::Foreign.getnameinfo sockaddr, Socket::Constants::NI_NUMERICHOST | Socket::Constants::NI_NUMERICSERV, reverse_lookup
+    family, port, host, ip = Socket::Foreign.getnameinfo(
+      sockaddr,
+      Socket::Constants::NI_NUMERICHOST | Socket::Constants::NI_NUMERICSERV,
+      reverse_lookup
+    )
+
     [family, port.to_i, host, ip]
   end
 

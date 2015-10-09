@@ -31,7 +31,8 @@ class UNIXSocket < BasicSocket
   def unix_setup(server = false)
     status = nil
     phase = 'socket(2)'
-    sock = Socket::Foreign.socket Socket::Constants::AF_UNIX, Socket::Constants::SOCK_STREAM, 0
+    sock = Socket::Foreign
+      .socket(Socket::Constants::AF_UNIX, Socket::Constants::SOCK_STREAM, 0)
 
     Errno.handle phase if sock < 0
 

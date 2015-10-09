@@ -233,7 +233,13 @@ class Socket < BasicSocket
         family = addr[:sa_family]
 
         if family == AF_INET or family == AF_INET6
-          size = family == AF_INET6 ? RubySL::Socket::Foreign::Sockaddr_In6.size : RubySL::Socket::Foreign::Sockaddr_In.size
+
+          if AF_INET6
+            size = family == RubySL::Socket::Foreign::Sockaddr_In6.size
+          else
+            size = family = RubySL::Socket::Foreign::Sockaddr_In.size
+          end
+
           host = Rubinius::FFI::MemoryPointer.new(:char, Constants::NI_MAXHOST)
 
           status = RubySL::Socket::Foreign._getnameinfo(addr,
@@ -270,14 +276,15 @@ class Socket < BasicSocket
 
     family    = RubySL::Socket::Helpers.address_family(family)
     socktype  = RubySL::Socket::Helpers.socket_type(socktype)
-    addrinfos = RubySL::Socket::Foreign.getaddrinfo(host, service, family, socktype,
-                                            protocol, flags)
+    addrinfos = RubySL::Socket::Foreign
+      .getaddrinfo(host, service, family, socktype, protocol, flags)
 
     addrinfos.map do |ai|
       addrinfo = []
       addrinfo << Socket::Constants::AF_TO_FAMILY[ai[1]]
 
-      sockaddr = RubySL::Socket::Foreign.unpack_sockaddr_in ai[4], !BasicSocket.do_not_reverse_lookup
+      sockaddr = RubySL::Socket::Foreign
+        .unpack_sockaddr_in(ai[4], !BasicSocket.do_not_reverse_lookup)
 
       addrinfo << sockaddr.pop # port
       addrinfo.concat sockaddr # hosts
@@ -310,10 +317,13 @@ class Socket < BasicSocket
       elsif family == "AF_INET6"
         family = Socket::AF_INET6
       end
-      sockaddr = RubySL::Socket::Foreign.pack_sockaddr_in(host, port, family, Socket::SOCK_DGRAM, 0)
+
+      sockaddr = RubySL::Socket::Foreign
+        .pack_sockaddr_in(host, port, family, Socket::SOCK_DGRAM, 0)
     end
 
-    family, port, host, ip = RubySL::Socket::Foreign.getnameinfo(sockaddr, flags)
+    family, port, host, _ = RubySL::Socket::Foreign.getnameinfo(sockaddr, flags)
+
     [host, port]
   end
 
@@ -387,11 +397,13 @@ class Socket < BasicSocket
   end
 
   def self.pack_sockaddr_in(port, host, type = Socket::SOCK_DGRAM, flags = 0)
-    RubySL::Socket::Foreign.pack_sockaddr_in host, port, Socket::AF_UNSPEC, type, flags
+    RubySL::Socket::Foreign
+      .pack_sockaddr_in(host, port, Socket::AF_UNSPEC, type, flags)
   end
 
   def self.unpack_sockaddr_in(sockaddr)
-    host, address, port = RubySL::Socket::Foreign.unpack_sockaddr_in sockaddr, false
+    _, address, port = RubySL::Socket::Foreign
+      .unpack_sockaddr_in(sockaddr, false)
 
     return [port, address]
   rescue SocketError => e

@@ -281,10 +281,18 @@ module RubySL
       end
 
       def self.unpack_sockaddr_in(sockaddr, reverse_lookup)
-        family, port, host, ip = getnameinfo sockaddr, ::Socket::Constants::NI_NUMERICHOST | ::Socket::Constants::NI_NUMERICSERV, reverse_lookup
+        family, port, host, ip = getnameinfo(
+          sockaddr,
+          ::Socket::Constants::NI_NUMERICHOST | ::Socket::Constants::NI_NUMERICSERV,
+          reverse_lookup
+        )
+
         # On some systems this doesn't fail for families other than AF_INET(6)
         # so we raise manually here.
-        raise ArgumentError, 'not an AF_INET/AF_INET6 sockaddr' unless family =~ /AF_INET/
+        unless family =~ /AF_INET/
+          raise ArgumentError, 'not an AF_INET/AF_INET6 sockaddr'
+        end
+
         return host, ip, port.to_i
       end
     end

@@ -35,7 +35,12 @@ class BasicSocket < IO
     data = Socket::Foreign.getsockopt(descriptor, level, optname)
 
     sockaddr = Socket::Foreign.getsockname(descriptor)
-    family, = Socket::Foreign.getnameinfo sockaddr, Socket::Constants::NI_NUMERICHOST | Socket::Constants::NI_NUMERICSERV
+
+    family, _ = Socket::Foreign.getnameinfo(
+      sockaddr,
+      Socket::Constants::NI_NUMERICHOST | Socket::Constants::NI_NUMERICSERV
+    )
+
     Socket::Option.new(family, level, optname, data)
   end
 
