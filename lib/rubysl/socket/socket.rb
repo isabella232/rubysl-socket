@@ -1,28 +1,4 @@
 class Socket < BasicSocket
-  module Constants
-    all_valid = Rubinius::FFI.config_hash("socket").reject {|name, value| value.empty? }
-
-    all_valid.each {|name, value| const_set name, Integer(value) }
-
-    # MRI compat. socket is a pretty screwed up API. All the constants in Constants
-    # must also be directly accessible on Socket itself. This means it's not enough
-    # to include Constants into Socket, because Socket#const_defined? must be able
-    # to see constants like AF_INET6 directly on Socket, but #const_defined? doesn't
-    # check inherited constants. O_o
-    #
-    all_valid.each {|name, value| Socket.const_set name, Integer(value) }
-
-
-    afamilies = all_valid.to_a.select { |name,| name =~ /^AF_/ }
-    afamilies.map! {|name, value| [value.to_i, name] }
-
-    pfamilies = all_valid.to_a.select { |name,| name =~ /^PF_/ }
-    pfamilies.map! {|name, value| [value.to_i, name] }
-
-    AF_TO_FAMILY = Hash[*afamilies.flatten]
-    PF_TO_FAMILY = Hash[*pfamilies.flatten]
-  end
-
   include RubySL::Socket::ListenAndAccept
 
   class Option
@@ -189,30 +165,6 @@ class Socket < BasicSocket
       #if Socket::Constants.const_defined?("#{prefix}_#{suffix}")
         Socket::Constants.const_get("#{prefix}_#{suffix}")
       #end
-    end
-  end
-
-  # If we have the details to support unix sockets, do so.
-  if Rubinius::FFI.config("sockaddr_un.sun_family.offset") and Socket::Constants.const_defined?(:AF_UNIX)
-    class Sockaddr_Un < Rubinius::FFI::Struct
-      config("rbx.platform.sockaddr_un", :sun_family, :sun_path)
-
-      def initialize(filename = nil)
-        maxfnsize = self.size - (Rubinius::FFI.config("sockaddr_un.sun_family.size") + 1)
-
-        if filename and filename.length > maxfnsize
-          raise ArgumentError, "too long unix socket path (max: #{maxfnsize}bytes)"
-        end
-        @p = Rubinius::FFI::MemoryPointer.new self.size
-        if filename
-          @p.write_string( [Socket::AF_UNIX].pack("s") + filename )
-        end
-        super @p
-      end
-
-      def to_s
-        @p.read_string self.size
-      end
     end
   end
 
@@ -443,9 +395,9 @@ class Socket < BasicSocket
   end
 
   # Only define these methods if we support unix sockets
-  if self.const_defined?(:Sockaddr_Un)
+  if RubySL::Socket::Foreign.const_defined?(:Sockaddr_Un)
     def self.pack_sockaddr_un(file)
-      Sockaddr_Un.new(file).to_s
+      RubySL::Socket::Foreign::Sockaddr_Un.new(file).to_s
     end
 
     def self.unpack_sockaddr_un(addr)
@@ -454,7 +406,7 @@ class Socket < BasicSocket
         raise TypeError, "too long sockaddr_un - #{addr.bytesize} longer than #{Rubinius::FFI.config("sockaddr_un.sizeof")}"
       end
 
-      struct = Sockaddr_Un.new
+      struct = RubySL::Socket::Foreign::Sockaddr_Un.new
       struct.pointer.write_string(addr, addr.bytesize)
 
       struct[:sun_path]
