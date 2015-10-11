@@ -127,4 +127,8 @@ class Addrinfo
       end
     end
   end
+
+  def unix?
+    @afamily == Socket::AF_UNIX
+  end
 end
