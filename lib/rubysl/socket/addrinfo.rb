@@ -65,7 +65,7 @@ class Addrinfo
       if @afamily == Socket::AF_INET6 and
       @pfamily != Socket::PF_INET and
       @pfamily != Socket::PF_INET6
-        raise SocketError, 'Unsupported protocol family'
+        raise SocketError, 'The given protocol and address families are incompatible'
       end
 
       @afamily = @pfamily
@@ -91,20 +91,18 @@ class Addrinfo
     @afamily != Socket::PF_UNSPEC and
     @afamily != Socket::PF_INET and
     @afamily != Socket::PF_INET6
-      raise SocketError, 'Unsupported address family'
+      raise(
+        SocketError,
+        'Address family must be AF_UNIX, AF_INET, AF_INET6, PF_INET or PF_INET6'
+      )
     end
 
     # Per MRI this validation should only happen when "sockaddr" is an Array.
     if sockaddr.is_a?(Array)
       case @socktype
       when 0, nil
-        case @protocol
-        when 0, nil
-          # nothing to do
-        when Socket::IPPROTO_UDP
-          @socktype = Socket::SOCK_DGRAM
-        else
-          raise SocketError, 'Unsupported protocol'
+        if @protocol != 0 and @protocol != nil and @protocol != Socket::IPPROTO_UDP
+          raise SocketError, 'Socket protocol must be IPPROTO_UDP or left unset'
         end
       when Socket::SOCK_RAW
         # nothing to do
