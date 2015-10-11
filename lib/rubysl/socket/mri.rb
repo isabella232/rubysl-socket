@@ -58,7 +58,7 @@
 #      WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
 #      PURPOSE.
 
-class Socket < BasicSocket
+class Addrinfo
   # creates an Addrinfo object from the arguments.
   #
   # The arguments are interpreted as similar to self.
