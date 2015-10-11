@@ -30,7 +30,7 @@ describe 'Addrinfo#initialize' do
       addr.pfamily.should == Socket::PF_UNSPEC
     end
 
-    it 'returns an Addrinfo with PF_INET6 as the protocol family' do
+    it 'returns an Addrinfo with PF_INET6  family' do
       addr = Addrinfo.new(@sockaddr, Socket::PF_INET6)
 
       addr.pfamily.should == Socket::PF_INET6
@@ -49,13 +49,13 @@ describe 'Addrinfo#initialize' do
     end
 
     describe 'with Symbols' do
-      it 'returns an Addrinfo with :PF_INET as the protocol family' do
+      it 'returns an Addrinfo with :PF_INET  family' do
         addr = Addrinfo.new(@sockaddr, :PF_INET)
 
         addr.pfamily.should == Socket::PF_INET
       end
 
-      it 'returns an Addrinfo with :INET as the protocol family' do
+      it 'returns an Addrinfo with :INET  family' do
         addr = Addrinfo.new(@sockaddr, :INET)
 
         addr.pfamily.should == Socket::PF_INET
@@ -75,13 +75,13 @@ describe 'Addrinfo#initialize' do
     end
 
     describe 'with Strings' do
-      it 'returns an Addrinfo with "PF_INET" as the protocol family' do
+      it 'returns an Addrinfo with "PF_INET"  family' do
         addr = Addrinfo.new(@sockaddr, 'PF_INET')
 
         addr.pfamily.should == Socket::PF_INET
       end
 
-      it 'returns an Addrinfo with "INET" as the protocol family' do
+      it 'returns an Addrinfo with "INET"  family' do
         addr = Addrinfo.new(@sockaddr, 'INET')
 
         addr.pfamily.should == Socket::PF_INET
@@ -120,7 +120,7 @@ describe 'Addrinfo#initialize' do
   end
 
   describe 'using an Array as a single argument' do
-    describe 'using a valid address' do
+    describe 'with a valid IP address' do
       # Uses AF_INET6 since AF_INET is the default, making it harder to test if
       # our Addrinfo actually sets the family correctly.
       before do
@@ -152,7 +152,7 @@ describe 'Addrinfo#initialize' do
       end
     end
 
-    describe 'using an invalid address' do
+    describe 'with an invalid IP address' do
       it 'raises SocketError' do
         block = proc { Addrinfo.new(['AF_INET6', 80, 'hostname', '127.0.0.1']) }
 
@@ -162,7 +162,7 @@ describe 'Addrinfo#initialize' do
   end
 
   describe 'using an Array with extra arguments' do
-    describe 'using AF_INET6 and an explicit protocol family' do
+    describe 'with the AF_INET6 address family and an explicit protocol family' do
       before do
         @sockaddr = ['AF_INET6', 80, 'hostname', '127.0.0.1']
       end
@@ -189,7 +189,7 @@ describe 'Addrinfo#initialize' do
       end
     end
 
-    describe 'using AF_INET and an explicit socket type' do
+    describe 'with the AF_INET address family and an explicit socket type' do
       before do
         @sockaddr = ['AF_INET', 80, 'hostname', '127.0.0.1']
       end
@@ -213,16 +213,16 @@ describe 'Addrinfo#initialize' do
       end
     end
 
-    describe 'using AF_INET and an explicit protocol' do
+    describe 'with the AF_INET address family and an explicit socket protocol' do
       before do
         @sockaddr = ['AF_INET', 80, 'hostname', '127.0.0.1']
       end
 
-      describe 'without an explicit socket type' do
+      describe 'and no socket type is given' do
         valid = [:IPPROTO_IP, :IPPROTO_UDP, :IPPROTO_HOPOPTS]
 
         valid.each do |type|
-          it "overwrites the protocol when using #{type}" do
+          it "overwrites the protocol when using #{type} " do
             value = Socket.const_get(type)
             addr  = Addrinfo.new(@sockaddr, nil, nil, value)
 
@@ -231,7 +231,7 @@ describe 'Addrinfo#initialize' do
         end
 
         (Socket.constants.grep(/^IPPROTO/) - valid).each do |type|
-          it "raises SocketError when using #{type}" do
+          it "raises SocketError when using #{type} " do
             value = Socket.const_get(type)
             block = proc { Addrinfo.new(@sockaddr, nil, nil, value) }
 
@@ -240,7 +240,7 @@ describe 'Addrinfo#initialize' do
         end
       end
 
-      describe 'with the socket type set to SOCK_DGRAM' do
+      describe 'and the socket type is set to SOCK_DGRAM' do
         before do
           @socktype = Socket::SOCK_DGRAM
         end
@@ -248,7 +248,7 @@ describe 'Addrinfo#initialize' do
         valid = [:IPPROTO_IP, :IPPROTO_UDP, :IPPROTO_HOPOPTS]
 
         valid.each do |type|
-          it "overwrites the protocol when using #{type}" do
+          it "overwrites the protocol when using #{type} " do
             value = Socket.const_get(type)
             addr  = Addrinfo.new(@sockaddr, nil, @socktype, value)
 
@@ -257,7 +257,7 @@ describe 'Addrinfo#initialize' do
         end
 
         (Socket.constants.grep(/^IPPROTO/) - valid).each do |type|
-          it "raises SocketError when using #{type}" do
+          it "raises SocketError when using #{type} " do
             value = Socket.const_get(type)
             block = proc { Addrinfo.new(@sockaddr, nil, @socktype, value) }
 
@@ -266,13 +266,13 @@ describe 'Addrinfo#initialize' do
         end
       end
 
-      describe 'with the socket type set to SOCK_PACKET' do
+      describe 'and the socket type is set to SOCK_PACKET' do
         before do
           @socktype = Socket::SOCK_PACKET
         end
 
         Socket.constants.grep(/^IPPROTO/).each do |type|
-          it "raises SocketError when using #{type}" do
+          it "raises SocketError when using #{type} " do
             value = Socket.const_get(type)
             block = proc { Addrinfo.new(@sockaddr, nil, @socktype, value) }
 
@@ -281,13 +281,13 @@ describe 'Addrinfo#initialize' do
         end
       end
 
-      describe 'with the socket type set to SOCK_RAW' do
+      describe 'and the socket type is set to SOCK_RAW' do
         before do
           @socktype = Socket::SOCK_RAW
         end
 
         Socket.constants.grep(/^IPPROTO/).each do |type|
-          it "overwrites the protocol when using #{type}" do
+          it "overwrites the protocol when using #{type} " do
             value = Socket.const_get(type)
             addr  = Addrinfo.new(@sockaddr, nil, @socktype, value)
 
@@ -296,13 +296,13 @@ describe 'Addrinfo#initialize' do
         end
       end
 
-      describe 'with the socket type set to SOCK_RDM' do
+      describe 'and the socket type is set to SOCK_RDM' do
         before do
           @socktype = Socket::SOCK_RDM
         end
 
         Socket.constants.grep(/^IPPROTO/).each do |type|
-          it "raises SocketError when using #{type}" do
+          it "raises SocketError when using #{type} " do
             value = Socket.const_get(type)
             block = proc { Addrinfo.new(@sockaddr, nil, @socktype, value) }
 
@@ -311,7 +311,7 @@ describe 'Addrinfo#initialize' do
         end
       end
 
-      describe 'with the socket type set to SOCK_SEQPACKET' do
+      describe 'and the socket type is set to SOCK_SEQPACKET' do
         before do
           @socktype = Socket::SOCK_SEQPACKET
         end
@@ -319,7 +319,7 @@ describe 'Addrinfo#initialize' do
         valid = [:IPPROTO_IP, :IPPROTO_HOPOPTS]
 
         valid.each do |type|
-          it "overwrites the protocol when using #{type}" do
+          it "overwrites the protocol when using #{type} " do
             value = Socket.const_get(type)
             addr  = Addrinfo.new(@sockaddr, nil, @socktype, value)
 
@@ -328,7 +328,7 @@ describe 'Addrinfo#initialize' do
         end
 
         (Socket.constants.grep(/^IPPROTO/) - valid).each do |type|
-          it "raises SocketError when using #{type}" do
+          it "raises SocketError when using #{type} " do
             value = Socket.const_get(type)
             block = proc { Addrinfo.new(@sockaddr, nil, @socktype, value) }
 
@@ -337,7 +337,7 @@ describe 'Addrinfo#initialize' do
         end
       end
 
-      describe 'with the socket type set to SOCK_STREAM' do
+      describe 'and the socket type is set to SOCK_STREAM' do
         before do
           @socktype = Socket::SOCK_STREAM
         end
@@ -345,7 +345,7 @@ describe 'Addrinfo#initialize' do
         valid = [:IPPROTO_IP, :IPPROTO_TCP, :IPPROTO_HOPOPTS]
 
         valid.each do |type|
-          it "overwrites the protocol when using #{type}" do
+          it "overwrites the protocol when using #{type} " do
             value = Socket.const_get(type)
             addr  = Addrinfo.new(@sockaddr, nil, @socktype, value)
 
@@ -354,7 +354,7 @@ describe 'Addrinfo#initialize' do
         end
 
         (Socket.constants.grep(/^IPPROTO/) - valid).each do |type|
-          it "raises SocketError when using #{type}" do
+          it "raises SocketError when using #{type} " do
             value = Socket.const_get(type)
             block = proc { Addrinfo.new(@sockaddr, nil, @socktype, value) }
 
