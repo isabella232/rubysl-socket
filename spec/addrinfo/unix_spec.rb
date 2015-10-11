@@ -31,7 +31,3 @@ describe 'Addrinfo.unix' do
     Addrinfo.unix('socket').protocol.should == 0
   end
 end
-
-describe "Addrinfo#unix?" do
-  it "needs to be reviewed for spec completeness"
-end
