@@ -183,6 +183,15 @@ class BasicSocket < IO
     Errno.handle "shutdown" unless err == 0
   end
 
+  # MRI defines this method in BasicSocket and stuffs all logic in it. Since
+  # inheriting classes behave differently we overwrite this method in said
+  # classes. The method here exists so that code such as the following still
+  # works: BasicSocket.method_defined?(:local_address).
+  def local_address
+    raise NotImplementedError,
+      'This method must be implemented by classes inheriting from BasicSocket'
+  end
+
   private
 
   def level_arg(family, level)

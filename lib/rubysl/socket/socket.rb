@@ -419,9 +419,10 @@ class Socket < BasicSocket
 
   def initialize(family, socket_type, protocol=0)
     @no_reverse_lookup = self.class.do_not_reverse_lookup
-    family = RubySL::Socket::Helpers.protocol_family(family)
-    socket_type = RubySL::Socket::Helpers.socket_type(socket_type)
-    descriptor  = RubySL::Socket::Foreign.socket family, socket_type, protocol
+    @family = RubySL::Socket::Helpers.protocol_family(family)
+    @socket_type = RubySL::Socket::Helpers.socket_type(socket_type)
+
+    descriptor = RubySL::Socket::Foreign.socket(@family, @socket_type, protocol)
 
     Errno.handle 'socket(2)' if descriptor < 0
 
@@ -463,5 +464,9 @@ class Socket < BasicSocket
     end
 
     return status
+  end
+
+  def local_address
+    Addrinfo.new([@family, 0, nil, '0.0.0.0'], @family, @socket_type, 0)
   end
 end
