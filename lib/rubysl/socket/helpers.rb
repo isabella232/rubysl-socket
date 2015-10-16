@@ -3,11 +3,16 @@ module RubySL
     # Helper methods re-used between Socket and Addrinfo that don't really
     # belong to just either one of those classes.
     module Helpers
+      def self.family_prefix?(family)
+        family.start_with?('AF_') || family.start_with?('PF_')
+      end
+
       def self.address_family(family)
         case family
         when Symbol, String
           f = family.to_s
-          if f[0..2] != 'AF_'
+
+          unless family_prefix?(f)
             f = 'AF_' + f
           end
 
@@ -33,7 +38,8 @@ module RubySL
         case family
         when Symbol, String
           f = family.to_s
-          if f[0..2] != 'PF_'
+
+          unless family_prefix?(f)
             f = 'PF_' + f
           end
 
