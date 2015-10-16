@@ -81,3 +81,44 @@ describe "Socket#bind on SOCK_STREAM socket" do
     end
   end
 end
+
+describe 'Socket#bind using an Addrinfo' do
+  before do
+    @addr = Addrinfo.tcp('127.0.0.1', 9999)
+    @sock = Socket.new(@addr.afamily, @addr.socktype)
+  end
+
+  after do
+    @sock.close
+  end
+
+  it 'binds to an Addrinfo' do
+    @sock.bind(@addr)
+
+    @sock.local_address.should be_an_instance_of(Addrinfo)
+  end
+
+  it 'uses a new Addrinfo for the local address' do
+    @sock.bind(@addr)
+
+    @sock.local_address.should_not == @addr
+  end
+
+  describe 'the Addrinfo used as the local address' do
+    before do
+      @sock.bind(@addr)
+    end
+
+    it 'has the same address family' do
+      @sock.local_address.afamily.should == @addr.afamily
+    end
+
+    it 'has the same protocol family' do
+      @sock.local_address.pfamily.should == @addr.pfamily
+    end
+
+    it 'has the same socket type' do
+      @sock.local_address.socktype.should == @addr.socktype
+    end
+  end
+end
