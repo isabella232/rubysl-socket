@@ -14,10 +14,6 @@ class TCPSocket < IPSocket
     [hostname, alternatives.uniq, family] + addresses.uniq
   end
 
-  def send(bytes_to_read, flags, to = nil)
-    super(bytes_to_read, flags)
-  end
-
   def initialize(host, port, local_host=nil, local_service=nil)
     @no_reverse_lookup = self.class.do_not_reverse_lookup
     @host = host
@@ -25,6 +21,18 @@ class TCPSocket < IPSocket
 
     tcp_setup @host, @port, local_host, local_service
   end
+
+  def send(bytes_to_read, flags, to = nil)
+    super(bytes_to_read, flags)
+  end
+
+  def from_descriptor(descriptor)
+    IO.setup self, descriptor, nil, true
+
+    self
+  end
+
+  private
 
   def tcp_setup(remote_host, remote_service, local_host = nil,
                 local_service = nil, server = false)
@@ -128,12 +136,5 @@ class TCPSocket < IPSocket
     # and it's fd has been closed underneith it, we close someone elses
     # fd!
     IO.setup self, sock, nil, true
-  end
-  private :tcp_setup
-
-  def from_descriptor(descriptor)
-    IO.setup self, descriptor, nil, true
-
-    self
   end
 end
