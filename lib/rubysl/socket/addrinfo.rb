@@ -53,6 +53,7 @@ class Addrinfo
         @ip_port, @ip_address = Socket.unpack_sockaddr_in(sockaddr)
 
         @afamily = Socket::AF_INET
+        @pfamily = Socket::PF_INET
       end
     end
 
