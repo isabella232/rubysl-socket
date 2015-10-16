@@ -49,9 +49,9 @@ class Socket < BasicSocket
     end
 
     def bool
-      unless @data.length == Rubinius::Rubinius::FFI.type_size(:int)
+      unless @data.length == Rubinius::FFI.type_size(:int)
         raise TypeError, "size differ. expected as sizeof(int)=" +
-          "#{Rubinius::Rubinius::FFI.type_size(:int)} but #{@data.length}"
+          "#{Rubinius::FFI.type_size(:int)} but #{@data.length}"
       end
 
       i = @data.unpack('i').first
@@ -59,9 +59,9 @@ class Socket < BasicSocket
     end
 
     def int
-      unless @data.length == Rubinius::Rubinius::FFI.type_size(:int)
+      unless @data.length == Rubinius::FFI.type_size(:int)
         raise TypeError, "size differ. expected as sizeof(int)=" +
-          "#{Rubinius::Rubinius::FFI.type_size(:int)} but #{@data.length}"
+          "#{Rubinius::FFI.type_size(:int)} but #{@data.length}"
       end
       @data.unpack('i').first
     end
