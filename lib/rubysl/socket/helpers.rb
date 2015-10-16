@@ -21,7 +21,11 @@ module RubySL
         when NilClass
           ::Socket::AF_UNSPEC
         else
-          raise SocketError, "unknown socket domain: #{family}"
+          if family.respond_to?(:to_str)
+            address_family(Rubinius::Type.coerce_to(family, String, :to_str))
+          else
+            raise SocketError, "unknown socket domain: #{family}"
+          end
         end
       end
 
@@ -43,7 +47,11 @@ module RubySL
         when NilClass
           ::Socket::PF_UNSPEC
         else
-          raise SocketError, "unknown socket domain: #{family}"
+          if family.respond_to?(:to_str)
+            protocol_family(Rubinius::Type.coerce_to(family, String, :to_str))
+          else
+            raise SocketError, "unknown socket domain: #{family}"
+          end
         end
       end
 
@@ -66,7 +74,11 @@ module RubySL
         when NilClass
           0
         else
-          raise SocketError, "unknown socket type: #{type}"
+          if type.respond_to?(:to_str)
+            socket_type(Rubinius::Type.coerce_to(type, String, :to_str))
+          else
+            raise SocketError, "unknown socket type: #{type}"
+          end
         end
       end
     end
