@@ -18,4 +18,3 @@ require "rubysl/socket/udp_socket"
 require "rubysl/socket/tcp_socket"
 require "rubysl/socket/tcp_server"
 require "rubysl/socket/addrinfo"
-

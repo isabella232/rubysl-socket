@@ -30,7 +30,7 @@ module RubySL
       def accept_nonblock
         return if closed?
 
-        fcntl(Fcntl::F_SETFL, Fcntl::O_NONBLOCK)
+        fcntl(::Fcntl::F_SETFL, ::Fcntl::O_NONBLOCK)
 
         fd = nil
         sockaddr = nil
