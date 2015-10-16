@@ -1,6 +1,6 @@
 require File.expand_path('../../fixtures/classes', __FILE__)
 
-describe "Socket::BasicSocket#getpeername" do
+describe "BasicSocket#getpeername" do
 
   before :each do
     @server = TCPServer.new("127.0.0.1", SocketSpecs.port)

@@ -1,6 +1,6 @@
 require File.expand_path('../../fixtures/classes', __FILE__)
 
-describe "Socket::BasicSocket#getsockname" do
+describe "BasicSocket#getsockname" do
   after :each do
     @socket.closed?.should be_false
     @socket.close

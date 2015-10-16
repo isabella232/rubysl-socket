@@ -1,6 +1,6 @@
 require 'socket'
 
-describe "Socket::BasicSocket#ioctl" do
+describe "BasicSocket#ioctl" do
   platform_is :os => :linux do
     it "passes data from and to a String correctly" do
       s = Socket.new Socket::AF_INET, Socket::SOCK_DGRAM, 0

@@ -1,6 +1,6 @@
 require File.expand_path('../../fixtures/classes', __FILE__)
 
-describe "Socket::BasicSocket#close_read" do
+describe "BasicSocket#close_read" do
   before :each do
     @server = TCPServer.new(SocketSpecs.port)
   end
