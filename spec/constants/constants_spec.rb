@@ -1,5 +1,4 @@
 require File.expand_path('../../fixtures/classes', __FILE__)
-include Socket::Constants
 
 describe "Socket::Constants" do
   it "defines socket types" do
