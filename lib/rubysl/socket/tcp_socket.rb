@@ -39,6 +39,13 @@ class TCPSocket < IPSocket
     Addrinfo.new(sockaddr, nil, Socket::SOCK_STREAM)
   end
 
+  def remote_address
+    address  = peeraddr
+    sockaddr = Socket.pack_sockaddr_in(address[1], @host || address[3])
+
+    Addrinfo.new(sockaddr, nil, Socket::SOCK_STREAM)
+  end
+
   private
 
   def tcp_setup(remote_host, remote_service, local_host = nil,
