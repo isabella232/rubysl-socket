@@ -1,6 +1,14 @@
 class UNIXSocket < BasicSocket
   include IO::TransferIO
 
+  class << self
+    def socketpair(type=Socket::SOCK_STREAM, protocol=0)
+      Socket.socketpair(Socket::PF_UNIX, type, protocol, self)
+    end
+
+    alias_method :pair, :socketpair
+  end
+
   # Coding to the lowest standard here.
   def recvfrom(bytes_read, flags = 0)
     # FIXME 2 is hardcoded knowledge from io.cpp
@@ -27,6 +35,36 @@ class UNIXSocket < BasicSocket
     super
     @path = nil
   end
+
+  def addr
+    sockaddr = RubySL::Socket::Foreign.getsockname descriptor
+    _, sock_path = sockaddr.unpack('SZ*')
+    ["AF_UNIX", sock_path]
+  end
+
+  def peeraddr
+    sockaddr = RubySL::Socket::Foreign.getpeername descriptor
+    _, sock_path = sockaddr.unpack('SZ*')
+    ["AF_UNIX", sock_path]
+  end
+
+  def recv_io(klass=IO, mode=nil)
+    begin
+      fd = recv_fd
+    rescue PrimitiveFailure
+      raise SocketError, "file descriptor was not passed"
+    end
+
+    return fd unless klass
+
+    if klass < BasicSocket
+      klass.for_fd(fd)
+    else
+      klass.for_fd(fd, mode)
+    end
+  end
+
+  private
 
   def unix_setup(server = false)
     status = nil
@@ -63,42 +101,5 @@ class UNIXSocket < BasicSocket
     end
 
     return sock
-  end
-  private :unix_setup
-
-  def addr
-    sockaddr = RubySL::Socket::Foreign.getsockname descriptor
-    _, sock_path = sockaddr.unpack('SZ*')
-    ["AF_UNIX", sock_path]
-  end
-
-  def peeraddr
-    sockaddr = RubySL::Socket::Foreign.getpeername descriptor
-    _, sock_path = sockaddr.unpack('SZ*')
-    ["AF_UNIX", sock_path]
-  end
-
-  def recv_io(klass=IO, mode=nil)
-    begin
-      fd = recv_fd
-    rescue PrimitiveFailure
-      raise SocketError, "file descriptor was not passed"
-    end
-
-    return fd unless klass
-
-    if klass < BasicSocket
-      klass.for_fd(fd)
-    else
-      klass.for_fd(fd, mode)
-    end
-  end
-
-  class << self
-    def socketpair(type=Socket::SOCK_STREAM, protocol=0)
-      Socket.socketpair(Socket::PF_UNIX, type, protocol, self)
-    end
-
-    alias_method :pair, :socketpair
   end
 end
