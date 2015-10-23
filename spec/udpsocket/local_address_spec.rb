@@ -38,7 +38,7 @@ describe 'UDPSocket#local_address' do
         @sock.local_address.pfamily.should == Socket::PF_INET
       end
 
-      it 'uses SOCK_STREAM as the socket type' do
+      it 'uses SOCK_DGRAM as the socket type' do
         @sock.local_address.socktype.should == Socket::SOCK_DGRAM
       end
 
