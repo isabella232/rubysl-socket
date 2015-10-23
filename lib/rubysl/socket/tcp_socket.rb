@@ -33,7 +33,8 @@ class TCPSocket < IPSocket
   end
 
   def local_address
-    sockaddr = Socket.pack_sockaddr_in(addr[1], @host)
+    address  = addr
+    sockaddr = Socket.pack_sockaddr_in(address[1], @host || address[3])
 
     Addrinfo.new(sockaddr, nil, Socket::SOCK_STREAM)
   end
