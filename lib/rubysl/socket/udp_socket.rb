@@ -68,4 +68,11 @@ class UDPSocket < IPSocket
   def inspect
     "#<#{self.class}:0x#{object_id.to_s(16)} #{@host}:#{@port}>"
   end
+
+  def local_address
+    address  = addr
+    sockaddr = Socket.pack_sockaddr_in(address[1], @host || address[3])
+
+    Addrinfo.new(sockaddr, nil, Socket::SOCK_DGRAM)
+  end
 end
