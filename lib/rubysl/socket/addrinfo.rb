@@ -133,6 +133,10 @@ class Addrinfo
     @afamily == Socket::AF_UNIX
   end
 
+  def ipv4?
+    @afamily == Socket::AF_INET
+  end
+
   def ipv6?
     @afamily == Socket::AF_INET6
   end
