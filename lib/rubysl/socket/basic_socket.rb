@@ -192,6 +192,11 @@ class BasicSocket < IO
       'This method must be implemented by classes inheriting from BasicSocket'
   end
 
+  def remote_address
+    raise NotImplementedError,
+      'This method must be implemented by classes inheriting from BasicSocket'
+  end
+
   private
 
   def level_arg(family, level)
