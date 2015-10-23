@@ -475,4 +475,11 @@ class Socket < BasicSocket
 
     Addrinfo.new(sockaddr, @family, @socket_type, 0)
   end
+
+  def recvfrom(bytes_to_read, flags = 0)
+    bytes = socket_recv(bytes_to_read, flags, 0)
+    addr  = Addrinfo.new(['AF_UNSPEC'], Socket::PF_UNSPEC, Socket::SOCK_STREAM)
+
+    return bytes, addr
+  end
 end

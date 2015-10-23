@@ -129,13 +129,6 @@ class BasicSocket < IO
     bytes_sent
   end
 
-  def recvfrom(bytes_to_read, flags = 0)
-    bytes = socket_recv(bytes_to_read, flags, 0)
-    addr  = Addrinfo.new(['AF_UNSPEC'], Socket::PF_UNSPEC, Socket::SOCK_STREAM)
-
-    return bytes, addr
-  end
-
   def recv(bytes_to_read, flags = 0)
     # FIXME 0 is knowledge from io.cpp
     return socket_recv(bytes_to_read, flags, 0)
