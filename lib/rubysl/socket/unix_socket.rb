@@ -64,6 +64,10 @@ class UNIXSocket < BasicSocket
     end
   end
 
+  def local_address
+    Addrinfo.new(Socket.pack_sockaddr_un(''), nil, Socket::SOCK_STREAM)
+  end
+
   private
 
   def unix_setup(server = false)
