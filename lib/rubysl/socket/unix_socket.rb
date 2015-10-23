@@ -68,6 +68,12 @@ class UNIXSocket < BasicSocket
     Addrinfo.new(Socket.pack_sockaddr_un(''), nil, Socket::SOCK_STREAM)
   end
 
+  def remote_address
+    address = peeraddr
+
+    Addrinfo.new(Socket.pack_sockaddr_un(address[1]), nil, Socket::SOCK_STREAM)
+  end
+
   private
 
   def unix_setup(server = false)
