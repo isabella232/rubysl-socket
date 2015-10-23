@@ -1,6 +1,5 @@
 class Addrinfo
-  attr_reader :ip_port, :afamily, :pfamily, :socktype, :protocol,
-    :unix_path
+  attr_reader :afamily, :pfamily, :socktype, :protocol, :unix_path
 
   def self.getaddrinfo(nodename, service, family = nil, socktype = nil,
                        protocol = nil, flags = nil)
@@ -147,5 +146,13 @@ class Addrinfo
     end
 
     @ip_address
+  end
+
+  def ip_port
+    if !ipv4? and !ipv6?
+      raise SocketError, 'An IPv4/IPv6 address is required'
+    end
+
+    @ip_port
   end
 end
