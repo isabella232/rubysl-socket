@@ -2,7 +2,7 @@ require 'socket'
 
 describe 'Addrinfo#afamily' do
   it 'returns AF_INET as the default address family' do
-    sockaddr = Socket.pack_sockaddr_in(80, 'localhost')
+    sockaddr = Socket.pack_sockaddr_in(80, '127.0.0.1')
 
     Addrinfo.new(sockaddr).afamily.should == Socket::AF_INET
   end

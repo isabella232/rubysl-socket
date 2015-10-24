@@ -9,25 +9,25 @@ describe 'Addrinfo.getaddrinfo' do
   end
 
   it 'sets the IP address of the Addrinfo instances' do
-    array = Addrinfo.getaddrinfo('localhost', 80)
+    array = Addrinfo.getaddrinfo('127.0.0.1', 80)
 
     array[0].ip_address.should == '127.0.0.1'
   end
 
   it 'sets the port of the Addrinfo instances' do
-    array = Addrinfo.getaddrinfo('localhost', 80)
+    array = Addrinfo.getaddrinfo('127.0.0.1', 80)
 
     array[0].ip_port.should == 80
   end
 
   it 'sets the default address family of the Addrinfo instances' do
-    array = Addrinfo.getaddrinfo('localhost', 80)
+    array = Addrinfo.getaddrinfo('127.0.0.1', 80)
 
     array[0].afamily.should == Socket::AF_INET
   end
 
   it 'sets the default protocol family of the Addrinfo instances' do
-    array = Addrinfo.getaddrinfo('localhost', 80)
+    array = Addrinfo.getaddrinfo('127.0.0.1', 80)
 
     array[0].pfamily.should == Socket::PF_INET
   end
