@@ -1,21 +1,78 @@
+require 'socket'
 require File.expand_path('../../fixtures/classes', __FILE__)
 
-require 'socket'
-
-describe "Socket#accept_nonblock" do
-  before :each do
-    @hostname = "127.0.0.1"
-    @addr = Socket.sockaddr_in(0, @hostname)
-    @socket = Socket.new(Socket::AF_INET, Socket::SOCK_STREAM, 0)
-    @socket.bind(@addr)
-    @socket.listen(1)
+describe 'Socket#accept_nonblock' do
+  before do
+    @server   = Socket.new(:INET, :STREAM, 0)
+    @sockaddr = Socket.sockaddr_in(0, '127.0.0.1')
   end
 
-  after :each do
-    @socket.close
+  after do
+    @server.close
   end
 
-  it 'raises IO::EAGAINWaitReadable if the connection is not accepted yet' do
-    lambda { @socket.accept_nonblock }.should raise_error(IO::EAGAINWaitReadable)
+  describe 'using an unbound socket' do
+    it 'raises Errno::EINVAL' do
+      proc { @server.accept_nonblock }.should raise_error(Errno::EINVAL)
+    end
+  end
+
+  describe "using a bound socket that's not listening" do
+    before do
+      @server.bind(@sockaddr)
+    end
+
+    it 'raises Errno::EINVAL' do
+      proc { @server.accept_nonblock }.should raise_error(Errno::EINVAL)
+    end
+  end
+
+  describe "using a bound socket that's listening" do
+    before do
+      @server.bind(@sockaddr)
+      @server.listen(1)
+
+      @client = Socket.new(:INET, :STREAM, 0)
+      addr    = Socket.sockaddr_in(@server.local_address.ip_port, '127.0.0.1')
+
+      @client.connect(addr)
+    end
+
+    it 'returns an Array containing a Socket and an Addrinfo' do
+      socket, addrinfo = @server.accept_nonblock
+
+      socket.should be_an_instance_of(Socket)
+      addrinfo.should be_an_instance_of(Addrinfo)
+    end
+
+    describe 'the returned Addrinfo' do
+      before do
+        _, @addr = @server.accept_nonblock
+      end
+
+      it 'uses AF_INET as the address family' do
+        @addr.afamily.should == Socket::AF_INET
+      end
+
+      it 'uses PF_INET as the protocol family' do
+        @addr.pfamily.should == Socket::PF_INET
+      end
+
+      it 'uses SOCK_STREAM as the socket type' do
+        @addr.socktype.should == Socket::SOCK_STREAM
+      end
+
+      it 'uses 0 as the protocol' do
+        @addr.protocol.should == 0
+      end
+
+      it 'uses the same IP address as the client Socket' do
+        @addr.ip_address.should == @client.local_address.ip_address
+      end
+
+      it 'uses the same port as the client Socket' do
+        @addr.ip_port.should == @client.local_address.ip_port
+      end
+    end
   end
 end
