@@ -467,7 +467,9 @@ class Socket < BasicSocket
   end
 
   def local_address
-    Addrinfo.new([@family, 0, nil, '0.0.0.0'], @family, @socket_type, 0)
+    sockaddr = RubySL::Socket::Foreign.getsockname(descriptor)
+
+    Addrinfo.new(sockaddr, @family, @socket_type, 0)
   end
 
   def remote_address
