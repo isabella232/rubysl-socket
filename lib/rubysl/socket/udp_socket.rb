@@ -1,8 +1,8 @@
 class UDPSocket < IPSocket
-  def initialize(socktype = Socket::AF_INET)
+  def initialize(family = Socket::AF_INET)
     @no_reverse_lookup = self.class.do_not_reverse_lookup
-    @socktype = socktype
-    status = RubySL::Socket::Foreign.socket @socktype,
+    @family = family
+    status = RubySL::Socket::Foreign.socket @family,
                                     Socket::SOCK_DGRAM,
                                     Socket::IPPROTO_UDP
     Errno.handle 'socket(2)' if status < 0
@@ -16,7 +16,7 @@ class UDPSocket < IPSocket
 
     addrinfos = RubySL::Socket::Foreign.getaddrinfo(@host,
                                            @port,
-                                           @socktype,
+                                           @family,
                                            Socket::SOCK_DGRAM, 0,
                                            Socket::AI_PASSIVE)
 
@@ -38,7 +38,7 @@ class UDPSocket < IPSocket
   end
 
   def connect(host, port)
-    sockaddr = RubySL::Socket::Foreign.pack_sockaddr_in host, port, @socktype, Socket::SOCK_DGRAM, 0
+    sockaddr = RubySL::Socket::Foreign.pack_sockaddr_in host, port, @family, Socket::SOCK_DGRAM, 0
 
     syscall = 'connect(2)'
     status = RubySL::Socket::Foreign.connect descriptor, sockaddr
