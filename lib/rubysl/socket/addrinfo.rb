@@ -47,12 +47,10 @@ class Addrinfo
       if sockaddr.bytesize == Rubinius::FFI.config('sockaddr_un.sizeof')
         @unix_path = Socket.unpack_sockaddr_un(sockaddr)
         @afamily   = Socket::AF_UNIX
-        @pfamily   = Socket::PF_UNIX
       else
         @ip_port, @ip_address = Socket.unpack_sockaddr_in(sockaddr)
 
         @afamily = Socket::AF_INET
-        @pfamily = Socket::PF_INET
       end
     end
 
