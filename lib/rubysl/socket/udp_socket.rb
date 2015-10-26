@@ -73,13 +73,13 @@ class UDPSocket < IPSocket
     address  = addr
     sockaddr = Socket.pack_sockaddr_in(address[1], @host || address[3])
 
-    Addrinfo.new(sockaddr, nil, Socket::SOCK_DGRAM)
+    Addrinfo.new(sockaddr, address[0], :DGRAM)
   end
 
   def remote_address
     address  = peeraddr
     sockaddr = Socket.pack_sockaddr_in(address[1], @host || address[3])
 
-    Addrinfo.new(sockaddr, nil, Socket::SOCK_DGRAM)
+    Addrinfo.new(sockaddr, address[0], :DGRAM)
   end
 end

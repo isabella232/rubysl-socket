@@ -65,13 +65,13 @@ class UNIXSocket < BasicSocket
   end
 
   def local_address
-    Addrinfo.new(Socket.pack_sockaddr_un(''), nil, Socket::SOCK_STREAM)
+    Addrinfo.new(Socket.pack_sockaddr_un(''), :UNIX, :STREAM)
   end
 
   def remote_address
     address = peeraddr
 
-    Addrinfo.new(Socket.pack_sockaddr_un(address[1]), nil, Socket::SOCK_STREAM)
+    Addrinfo.new(Socket.pack_sockaddr_un(address[1]), :UNIX, :STREAM)
   end
 
   private
