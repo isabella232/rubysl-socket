@@ -1,6 +1,14 @@
 require 'socket'
 
 module SocketSpecs
+  # Waits for the given thread to finish, raising an error if the operation
+  # times out.
+  def self.join_thread!(thread, timeout = 5)
+    unless thread.join(timeout)
+      raise "Thread did not finish within #{timeout} seconds"
+    end
+  end
+
   # helper to get the hostname associated to 127.0.0.1
   def self.hostname
     # Calculate each time, without caching, since the result might
