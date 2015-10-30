@@ -266,12 +266,16 @@ module RubySL
         return host, ip, port.to_i
       end
 
-      def self.getpeereid(descriptor)
-        if Socket.bsd_support?
+      if Socket.bsd_support?
+        def self.getpeereid(descriptor)
           BSD.getpeereid(descriptor)
-        elsif Rubinius.linux?
+        end
+      elsif Rubinius.linux?
+        def self.getpeereid(descriptor)
           Linux.getpeereid(descriptor)
-        else
+        end
+      else
+        def self.getpeereid(*)
           raise NotImplementedError, 'getpeereid() is not supported'
         end
       end
