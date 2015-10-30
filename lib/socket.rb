@@ -1,1 +1,20 @@
-require "rubysl/socket"
+require 'fcntl'
+require 'resolv'
+
+require 'rubysl/socket/version'
+require 'rubysl/socket/helpers'
+
+require 'socket/socket_error'
+require 'socket/basic_socket'
+require 'rubysl/socket/listen_and_accept'
+require 'socket/constants'
+require 'rubysl/socket/foreign'
+require 'socket/socket'
+require 'socket/mri'
+require 'socket/unix_socket'
+require 'socket/unix_server'
+require 'socket/ip_socket'
+require 'socket/udp_socket'
+require 'socket/tcp_socket'
+require 'socket/tcp_server'
+require 'socket/addrinfo'
