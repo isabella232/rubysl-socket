@@ -71,8 +71,8 @@ class BasicSocket < IO
     sockname = RubySL::Socket::Foreign.getsockname descriptor
     family = RubySL::Socket::Foreign.getnameinfo(sockname).first
 
-    level = level_arg(family, level)
-    optname = optname_arg(level, optname)
+    level = RubySL::Socket::SocketOptions.socket_level(family, level)
+    optname = RubySL::Socket::SocketOptions.socket_option(level, optname)
 
     case optval
     when Fixnum then
@@ -190,76 +190,5 @@ class BasicSocket < IO
   def remote_address
     raise NotImplementedError,
       'This method must be implemented by classes inheriting from BasicSocket'
-  end
-
-  private
-
-  def level_arg(family, level)
-    case level
-    when Symbol, String
-      if Socket::Constants.const_defined?(level)
-        Socket::Constants.const_get(level)
-      else
-        if is_ip_family?(family)
-          ip_level_to_int(level)
-        else
-          unknown_level_to_int(level)
-        end
-      end
-    else
-      level
-    end
-  end
-
-  def optname_arg(level, optname)
-    case optname
-    when Symbol, String
-      if Socket::Constants.const_defined?(optname)
-        Socket::Constants.const_get(optname)
-      else
-        case(level)
-        when Socket::Constants::SOL_SOCKET
-          constant("SO", optname)
-        when Socket::Constants::IPPROTO_IP
-          constant("IP", optname)
-        when Socket::Constants::IPPROTO_TCP
-          constant("TCP", optname)
-        when Socket::Constants::IPPROTO_UDP
-          constant("UDP", optname)
-        else
-          if Socket::Constants.const_defined?(Socket::Constants::IPPROTO_IPV6) &&
-            level == Socket::Constants::IPPROTO_IPV6
-            constant("IPV6", optname)
-          else
-            optname
-          end
-        end
-      end
-    else
-      optname
-    end
-  end
-
-  def is_ip_family?(family)
-    family == "AF_INET" || family == "AF_INET6"
-  end
-
-  def ip_level_to_int(level)
-    prefixes = ["IPPROTO", "SOL"]
-    prefixes.each do |prefix|
-      if Socket::Constants.const_defined?("#{prefix}_#{level}")
-        return Socket::Constants.const_get("#{prefix}_#{level}")
-      end
-    end
-  end
-
-  def unknown_level_to_int(level)
-    constant("SOL", level)
-  end
-
-  def constant(prefix, suffix)
-    if Socket::Constants.const_defined?("#{prefix}_#{suffix}")
-      Socket::Constants.const_get("#{prefix}_#{suffix}")
-    end
   end
 end

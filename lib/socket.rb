@@ -3,6 +3,7 @@ require 'resolv'
 
 require 'rubysl/socket/version'
 require 'rubysl/socket/helpers'
+require 'rubysl/socket/socket_options'
 
 require 'socket/socket_error'
 require 'socket/basic_socket'
