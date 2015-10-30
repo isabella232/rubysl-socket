@@ -9,18 +9,19 @@ class BasicSocket < IO
     alias :for_fd :from_descriptor
   end
 
-  def from_descriptor(fixnum)
-    IO.setup self, fixnum, nil, true
-    return self
-  end
-
   def self.do_not_reverse_lookup=(setting)
     @no_reverse_lookup = setting
   end
 
   def self.do_not_reverse_lookup
-    @no_reverse_lookup = true unless defined? @no_reverse_lookup
+    @no_reverse_lookup = true unless defined?(@no_reverse_lookup)
     @no_reverse_lookup
+  end
+
+  def from_descriptor(fixnum)
+    IO.setup(self, fixnum, nil, true)
+
+    self
   end
 
   def do_not_reverse_lookup=(setting)
