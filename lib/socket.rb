@@ -24,6 +24,7 @@ require 'rubysl/socket/foreign/sockaddr_un'
 
 require 'rubysl/socket/foreign'
 require 'socket/socket'
+require 'socket/option'
 require 'socket/mri'
 require 'socket/unix_socket'
 require 'socket/unix_server'
