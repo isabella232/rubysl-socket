@@ -1,27 +1,23 @@
-require File.expand_path('../../fixtures/classes', __FILE__)
+require 'socket'
 
-describe "BasicSocket#getsockname" do
-  after :each do
-    @socket.closed?.should be_false
-    @socket.close
+describe 'BasicSocket#getsockname' do
+  before do
+    @server = Socket.new(:INET, :STREAM)
   end
 
-  it "returns the sockaddr associacted with the socket" do
-    @socket = TCPServer.new("127.0.0.1", SocketSpecs.port)
-    sockaddr = Socket.unpack_sockaddr_in(@socket.getsockname)
-    sockaddr.should == [SocketSpecs.port, "127.0.0.1"]
- end
-
-  it "works on sockets listening in ipaddr_any" do
-    @socket = TCPServer.new(SocketSpecs.port)
-    sockaddr = Socket.unpack_sockaddr_in(@socket.getsockname)
-    ["::", "0.0.0.0", "::ffff:0.0.0.0"].include?(sockaddr[1]).should be_true
-    sockaddr[0].should == SocketSpecs.port
+  after do
+    @server.close
   end
 
-  it "returns empty sockaddr for unbinded sockets" do
-    @socket = Socket.new(Socket::AF_INET, Socket::SOCK_STREAM, 0)
-    sockaddr = Socket.unpack_sockaddr_in(@socket.getsockname)
-    sockaddr.should == [0, "0.0.0.0"]
+  it 'returns a socket address as a String' do
+    @server.bind(Socket.sockaddr_in(0, '127.0.0.1'))
+
+    addr = Socket.sockaddr_in(@server.local_address.ip_port, '127.0.0.1')
+
+    @server.getsockname.should == addr
+  end
+
+  it 'returns a default socket address for a disconnected socket' do
+    @server.getsockname.should == Socket.sockaddr_in(0, '0.0.0.0')
   end
 end
