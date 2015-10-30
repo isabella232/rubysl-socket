@@ -21,5 +21,21 @@ class Socket < BasicSocket
 
     AF_TO_FAMILY = Hash[*afamilies.flatten]
     PF_TO_FAMILY = Hash[*pfamilies.flatten]
+
+    # MRI defines these constants manually, thus our FFI generators don't pick
+    # them up.
+    EAI_ADDRFAMILY = 1
+    EAI_NODATA = 7
+    IPPORT_USERRESERVED = 5000
+
+    # This constant is hidden behind a #ifdef __GNU on Linux, meaning it won't
+    # be available when using clang.
+    unless const_defined?(:SCM_CREDENTIALS)
+      SCM_CREDENTIALS = 2
+    end
+  end
+
+  [:EAI_ADDRFAMILY, :EAI_NODATA, :IPPORT_USERRESERVED, :SCM_CREDENTIALS].each do |const|
+    const_set(const, Constants.const_get(const))
   end
 end
