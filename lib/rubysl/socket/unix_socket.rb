@@ -65,7 +65,9 @@ class UNIXSocket < BasicSocket
   end
 
   def local_address
-    Addrinfo.new(Socket.pack_sockaddr_un(''), :UNIX, :STREAM)
+    address = addr
+
+    Addrinfo.new(Socket.pack_sockaddr_un(address[1]), :UNIX, :STREAM)
   end
 
   def remote_address
