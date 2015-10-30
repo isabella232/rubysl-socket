@@ -87,6 +87,20 @@ module RubySL
           end
         end
       end
+
+      def self.address_info(method, socket, reverse_lookup = nil)
+        sockaddr = Foreign.__send__(method, socket.descriptor)
+
+        reverse_lookup = !socket.do_not_reverse_lookup if reverse_lookup.nil?
+
+        options = ::Socket::Constants::NI_NUMERICHOST |
+          ::Socket::Constants::NI_NUMERICSERV
+
+        family, port, host, ip = Foreign
+          .getnameinfo(sockaddr, options, reverse_lookup)
+
+        [family, port.to_i, host, ip]
+      end
     end
   end
 end
