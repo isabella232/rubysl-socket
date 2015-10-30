@@ -2,7 +2,7 @@
 
 module RubySL
   module Socket
-    module Linux
+    module Foreign
       def self.getpeereid(descriptor)
         data = Foreign
           .getsockopt(descriptor, ::Socket::SOL_SOCKET, ::Socket::SO_PEERCRED)

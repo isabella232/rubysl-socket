@@ -2,9 +2,7 @@
 
 module RubySL
   module Socket
-    module BSD
-      extend Rubinius::FFI::Library
-
+    module Foreign
       attach_function :_getpeereid,
         :getpeereid, [:int, :pointer, :pointer], :int
 
