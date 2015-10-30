@@ -1,4 +1,6 @@
 class IPSocket < BasicSocket
+  undef_method :getpeereid
+
   def self.getaddress(host)
     RubySL::Socket::Foreign.getaddress(host)
   end

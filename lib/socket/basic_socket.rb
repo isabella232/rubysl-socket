@@ -192,4 +192,8 @@ class BasicSocket < IO
     raise NotImplementedError,
       'This method must be implemented by classes inheriting from BasicSocket'
   end
+
+  def getpeereid
+    RubySL::Socket::Foreign.getpeereid(descriptor)
+  end
 end
