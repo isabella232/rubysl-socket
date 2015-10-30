@@ -27,11 +27,11 @@ module RubySL
             case level
             when ::Socket::SOL_SOCKET
               constant("SO", optname)
-            when ::Socket::IPPROTO_IP
+            when ::Socket::SOL_IP
               constant("IP", optname)
-            when ::Socket::IPPROTO_TCP
+            when ::Socket::SOL_TCP
               constant("TCP", optname)
-            when ::Socket::IPPROTO_UDP
+            when ::Socket::SOL_UDP
               constant("UDP", optname)
             else
               if ::Socket.const_defined?(:IPPROTO_IPV6) &&
