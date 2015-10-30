@@ -100,7 +100,7 @@ describe 'Socket#connect_address' do
       @client.close
       @server.close
 
-      rm_r @path
+      rm_r(@path)
     end
 
     it 'raises SocketError' do
@@ -117,7 +117,7 @@ describe 'Socket#connect_address' do
     after do
       @sock.close
 
-      rm_r @path
+      rm_r(@path)
     end
 
     it 'returns an Addrinfo' do
