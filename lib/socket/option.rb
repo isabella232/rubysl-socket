@@ -31,9 +31,9 @@ class Socket < BasicSocket
     def initialize(family, level, optname, data)
       @family = RubySL::Socket::Helpers.address_family(family)
       @family_name = family
-      @level = level_arg(@family, level)
+      @level = RubySL::Socket::SocketOptions.socket_level(level, @family)
       @level_name = level
-      @optname = optname_arg(@level, optname)
+      @optname = RubySL::Socket::SocketOptions.socket_option(@level, optname)
       @opt_name = optname
       @data = data
     end
@@ -87,82 +87,5 @@ class Socket < BasicSocket
     end
 
     alias :to_s :data
-
-    private
-
-    def level_arg(family, level)
-      case level
-      when Symbol, String
-        if Socket::Constants.const_defined?(level)
-          Socket::Constants.const_get(level)
-        else
-          if is_ip_family?(family)
-            ip_level_to_int(level)
-          else
-            unknown_level_to_int(level)
-          end
-        end
-      when Integer
-        level
-      else
-        raise SocketError, "unknown protocol level: #{level}"
-      end
-    rescue NameError
-      raise SocketError, "unknown protocol level: #{level}"
-    end
-
-    def optname_arg(level, optname)
-      case optname
-      when Symbol, String
-        if Socket::Constants.const_defined?(optname)
-          Socket::Constants.const_get(optname)
-        else
-          case(level)
-          when Socket::Constants::SOL_SOCKET
-            constant("SO", optname)
-          when Socket::Constants::IPPROTO_IP
-            constant("IP", optname)
-          when Socket::Constants::IPPROTO_TCP
-            constant("TCP", optname)
-          when Socket::Constants::IPPROTO_UDP
-            constant("UDP", optname)
-          else
-            if Socket::Constants.const_defined?(Socket::Constants::IPPROTO_IPV6) &&
-                level == Socket::Constants::IPPROTO_IPV6
-              constant("IPV6", optname)
-            else
-              optname
-            end
-          end
-        end
-      else
-        optname
-      end
-    rescue NameError
-      raise SocketError, "unknown socket level option name: #{optname}"
-    end
-
-    def is_ip_family?(family)
-      [Socket::AF_INET, Socket::AF_INET6].include? family
-    end
-
-    def ip_level_to_int(level)
-      prefixes = ["IPPROTO", "SOL"]
-      prefixes.each do |prefix|
-        if Socket::Constants.const_defined?("#{prefix}_#{level}")
-          return Socket::Constants.const_get("#{prefix}_#{level}")
-        end
-      end
-    end
-
-    def unknown_level_to_int(level)
-      constant("SOL", level)
-    end
-
-    def constant(prefix, suffix)
-      #if Socket::Constants.const_defined?("#{prefix}_#{suffix}")
-        Socket::Constants.const_get("#{prefix}_#{suffix}")
-      #end
-    end
   end
 end
