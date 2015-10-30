@@ -1,24 +1,28 @@
-require File.expand_path('../../fixtures/classes', __FILE__)
+require 'socket'
 
-describe "BasicSocket#getpeername" do
+describe 'BasicSocket#getpeername' do
+  before do
+    @server = Socket.new(:INET, :STREAM)
+    @client = Socket.new(:INET, :STREAM)
 
-  before :each do
-    @server = TCPServer.new("127.0.0.1", SocketSpecs.port)
-    @client = TCPSocket.new("127.0.0.1", SocketSpecs.port)
+    @server.bind(Socket.sockaddr_in(0, '127.0.0.1'))
+    @server.listen(1)
+
+    @sockaddr = Socket.sockaddr_in(@server.local_address.ip_port, '127.0.0.1')
+
+    @client.connect(@sockaddr)
   end
 
-  after :each do
-    @server.close unless @server.closed?
-    @client.close unless @client.closed?
+  after do
+    @client.close
+    @server.close
   end
 
-  it "returns the sockaddr of the other end of the connection" do
-    server_sockaddr = Socket.pack_sockaddr_in(SocketSpecs.port, "127.0.0.1")
-    @client.getpeername.should == server_sockaddr
+  it 'returns a socket address as a String' do
+    @client.getpeername.should == @sockaddr
   end
 
-  # Catch general exceptions to prevent NotImplementedError
-  it "raises an error if socket's not connected" do
-    lambda { @server.getpeername }.should raise_error(Exception)
+  it 'raises Errno::ENOTCONN for a disconnected socket' do
+    proc { @server.getpeername }.should raise_error(Errno::ENOTCONN)
   end
 end

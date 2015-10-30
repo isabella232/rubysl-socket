@@ -99,22 +99,14 @@ class BasicSocket < IO
     return 0
   end
 
-  def getsockname()
-    return RubySL::Socket::Foreign.getsockname(descriptor)
+  def getsockname
+    RubySL::Socket::Foreign.getsockname(descriptor)
   end
 
-  #
-  # Obtain peername information for this socket.
-  #
-  # @see  Socket.getpeername
-  #
-  def getpeername()
-    RubySL::Socket::Foreign.getpeername @descriptor
+  def getpeername
+    RubySL::Socket::Foreign.getpeername(descriptor)
   end
 
-  #
-  #
-  #
   def send(message, flags, to = nil)
     connect to if to
 
