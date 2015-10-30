@@ -1,13 +1,13 @@
 module RubySL
   module Socket
     module SocketOptions
-      def self.socket_level(family, level)
+      def self.socket_level(level, family = nil)
         case level
         when Symbol, String
           if ::Socket.const_defined?(level)
             ::Socket.const_get(level)
           else
-            if is_ip_family?(family)
+            if family and is_ip_family?(family)
               ip_level_to_int(level)
             else
               constant("SOL", level)
@@ -24,7 +24,7 @@ module RubySL
           if ::Socket.const_defined?(optname)
             ::Socket.const_get(optname)
           else
-            case(level)
+            case level
             when ::Socket::SOL_SOCKET
               constant("SO", optname)
             when ::Socket::IPPROTO_IP
@@ -34,11 +34,12 @@ module RubySL
             when ::Socket::IPPROTO_UDP
               constant("UDP", optname)
             else
-              if ::Socket.const_defined?(::Socket::IPPROTO_IPV6) &&
+              if ::Socket.const_defined?(:IPPROTO_IPV6) &&
                 level == ::Socket::IPPROTO_IPV6
                 constant("IPV6", optname)
               else
-                optname
+                raise SocketError,
+                  "Unsupported socket level option name: #{optname}"
               end
             end
           end
@@ -70,6 +71,8 @@ module RubySL
 
         if ::Socket.const_defined?(const)
           ::Socket.const_get(const)
+        else
+          raise SocketError, "Undefined socket constant: #{const}"
         end
       end
     end
