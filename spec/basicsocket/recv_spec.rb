@@ -1,76 +1,58 @@
-# -*- encoding: US-ASCII -*-
+require 'socket'
 require File.expand_path('../../fixtures/classes', __FILE__)
 
-describe "BasicSocket#recv" do
-
-  before :each do
-    @server = TCPServer.new('127.0.0.1', SocketSpecs.port)
+describe 'BasicSocket#recv' do
+  before do
+    @server = Socket.new(:INET, :DGRAM)
+    @client = Socket.new(:INET, :DGRAM)
   end
 
-  after :each do
-    @server.closed?.should be_false
+  after do
+    @client.close
     @server.close
-    ScratchPad.clear
   end
 
-  it "receives a specified number of bytes of a message from another socket"  do
-    t = Thread.new do
-      client = @server.accept
-      ScratchPad.record client.recv(10)
-      client.recv(1) # this recv is important
-      client.close
+  describe 'using an unbound socket' do
+    it 'blocks the caller' do
+      SocketSpecs.blocking? { @server.recv(4) }.should == true
     end
-    Thread.pass while t.status and t.status != "sleep"
-    t.status.should_not be_nil
-
-    socket = TCPSocket.new('127.0.0.1', SocketSpecs.port)
-    socket.send('hello', 0)
-    socket.close
-
-    t.join
-    ScratchPad.recorded.should == 'hello'
   end
 
-  it "accepts flags to specify unusual receiving behaviour" do
-    t = Thread.new do
-      client = @server.accept
-
-      # in-band data (TCP), doesn't receive the flag.
-      ScratchPad.record client.recv(10)
-
-      # this recv is important (TODO: explain)
-      client.recv(10)
-      client.close
+  describe 'using a bound socket' do
+    before do
+      @server.bind(Socket.sockaddr_in(0, '127.0.0.1'))
     end
-    Thread.pass while t.status and t.status != "sleep"
-    t.status.should_not be_nil
 
-    socket = TCPSocket.new('127.0.0.1', SocketSpecs.port)
-    socket.send('helloU', Socket::MSG_OOB)
-    socket.shutdown(1)
-    t.join
-    socket.close
-    ScratchPad.recorded.should == 'hello'
-  end
-
-  it "gets lines delimited with a custom separator"  do
-    t = Thread.new do
-      client = @server.accept
-      ScratchPad.record client.gets("\377")
-
-      # this call is important (TODO: explain)
-      client.gets(nil)
-      client.close
+    describe 'without any data available' do
+      it 'blocks the caller' do
+        SocketSpecs.blocking? { @server.recv(4) }.should == true
+      end
     end
-    Thread.pass while t.status and t.status != "sleep"
-    t.status.should_not be_nil
 
-    socket = TCPSocket.new('127.0.0.1', SocketSpecs.port)
-    socket.write("firstline\377secondline\377")
-    socket.close
+    describe 'with data available' do
+      before do
+        @client.connect(@server.getsockname)
+      end
 
-    t.join
-    ScratchPad.recorded.should == "firstline\377"
+      it 'reads the given amount of bytes' do
+        @client.write('hello')
+
+        @server.recv(2).should == 'he'
+      end
+
+      it 'reads the given amount of bytes when it exceeds the data size' do
+        @client.write('he')
+
+        @server.recv(6).should == 'he'
+      end
+
+      it 'blocks the caller when called twice without new data being available' do
+        @client.write('hello')
+
+        @server.recv(2).should == 'he'
+
+        SocketSpecs.blocking? { @server.recv(4) }.should == true
+      end
+    end
   end
-
 end

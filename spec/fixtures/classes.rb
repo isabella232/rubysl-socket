@@ -9,6 +9,25 @@ module SocketSpecs
     end
   end
 
+  # Returns true if the given block would block the calling thread.
+  #
+  # This method assumes the block can reach its final state (e.g. a blocking
+  # call) within `timeout` seconds.
+  def self.blocking?(timeout = 0.1)
+    blocking = true
+
+    thread = Thread.new do
+      yield
+
+      blocking = false
+    end
+
+    thread.join(timeout)
+    thread.kill
+
+    blocking
+  end
+
   # helper to get the hostname associated to 127.0.0.1
   def self.hostname
     # Calculate each time, without caching, since the result might
