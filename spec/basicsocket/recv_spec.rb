@@ -53,6 +53,13 @@ describe 'BasicSocket#recv' do
 
         SocketSpecs.blocking? { @server.recv(4) }.should == true
       end
+
+      it 'takes a peek at the data when using the MSG_PEEK flag' do
+        @client.write('hello')
+
+        @server.recv(2, Socket::MSG_PEEK).should == 'he'
+        @server.recv(2).should == 'he'
+      end
     end
   end
 end
