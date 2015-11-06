@@ -19,6 +19,7 @@ require 'rubysl/socket/foreign/sockaddr_in'
 require 'rubysl/socket/foreign/sockaddr_in6'
 require 'rubysl/socket/foreign/sockaddr_un'
 
+require 'rubysl/socket/ancillary_data'
 require 'rubysl/socket/foreign'
 require 'rubysl/socket/bsd' if RubySL::Socket.bsd_support?
 require 'rubysl/socket/linux' if Rubinius.linux?
