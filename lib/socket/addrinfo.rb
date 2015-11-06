@@ -15,7 +15,11 @@ class Addrinfo
   end
 
   def self.ip(ip)
-    new(Socket.pack_sockaddr_in(nil, ip))
+    if ip =~ Resolv::IPv6::Regex
+      new(['AF_INET6', 0, nil, ip], :INET6)
+    else
+      new(['AF_INET', 0, nil, ip], :INET)
+    end
   end
 
   def self.tcp(ip, port)
