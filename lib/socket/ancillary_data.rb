@@ -8,5 +8,12 @@ class Socket < BasicSocket
       @level  = RubySL::Socket::AncillaryData.level(level)
       @type   = RubySL::Socket::AncillaryData.type(@family, @level, type)
     end
+
+    def cmsg_is?(level, type)
+      level = RubySL::Socket::AncillaryData.level(level)
+      type  = RubySL::Socket::AncillaryData.type(@family, level, type)
+
+      @level == level && @type == type
+    end
   end
 end
