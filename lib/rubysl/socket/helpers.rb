@@ -3,8 +3,40 @@ module RubySL
     # Helper methods re-used between Socket and Addrinfo that don't really
     # belong to just either one of those classes.
     module Helpers
+      def self.coerce_to_string(object)
+        if object.is_a?(String) or object.is_a?(Symbol)
+          object.to_s
+        elsif object.respond_to?(:to_str)
+          Rubinius::Type.coerce_to(object, String, :to_str)
+        else
+          raise TypeError, "no implicit conversion of #{object.inspect} into Integer"
+        end
+      end
+
       def self.family_prefix?(family)
         family.start_with?('AF_') || family.start_with?('PF_')
+      end
+
+      def self.prefix_with(name, prefix)
+        unless name.start_with?(prefix)
+          name = "#{prefix}#{name}"
+        end
+
+        name
+      end
+
+      def self.prefixed_socket_constant(name, prefix, &block)
+        prefixed = prefix_with(name, prefix)
+
+        socket_constant(prefixed, &block)
+      end
+
+      def self.socket_constant(name)
+        if ::Socket.const_defined?(name)
+          ::Socket.const_get(name)
+        else
+          raise SocketError, yield
+        end
       end
 
       def self.address_family(family)

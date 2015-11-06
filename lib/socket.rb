@@ -25,6 +25,7 @@ require 'rubysl/socket/linux' if Rubinius.linux?
 
 require 'socket/socket'
 require 'socket/option'
+require 'socket/ancillary_data'
 require 'socket/mri'
 require 'socket/unix_socket'
 require 'socket/unix_server'
