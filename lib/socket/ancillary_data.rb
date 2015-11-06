@@ -26,6 +26,15 @@ class Socket < BasicSocket
       instance
     end
 
+    def self.ip_pktinfo(addr, ifindex, spec_dst = nil)
+      spec_dst ||= addr
+
+      data = RubySL::Socket::AncillaryData
+        .pack_ip_pktinfo(addr, ifindex, spec_dst)
+
+      new(:INET, :IP, :PKTINFO, data)
+    end
+
     def initialize(family, level, type, data)
       @family = RubySL::Socket::Helpers.address_family(family)
       @data   = RubySL::Socket::Helpers.coerce_to_string(data)
@@ -56,6 +65,10 @@ class Socket < BasicSocket
       end
 
       @_unix_rights
+    end
+
+    def ip_pktinfo
+      RubySL::Socket::AncillaryData.unpack_ip_pktinfo(@data)
     end
   end
 end

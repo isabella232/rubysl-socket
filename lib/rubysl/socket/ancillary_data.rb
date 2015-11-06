@@ -51,6 +51,26 @@ module RubySL
           end
         end
       end
+
+      def self.octets_from_ip4_addrinfo(addr)
+        addr.ip_address.split('.').map(&:to_i)
+      end
+
+      def self.pack_ip_pktinfo(addr, ifindex, spec_dst)
+        dst_octets  = octets_from_ip4_addrinfo(spec_dst)
+        addr_octets = octets_from_ip4_addrinfo(addr)
+
+        [ifindex, *dst_octets, *addr_octets].pack('Ic*')
+      end
+
+      def self.unpack_ip_pktinfo(data)
+        unpacked = data.unpack('Ic*')
+        ifindex  = unpacked[0]
+        spec_dst = Addrinfo.ip(unpacked[1..4].join('.'))
+        addr     = Addrinfo.ip(unpacked[5..9].join('.'))
+
+        [addr, ifindex, spec_dst]
+      end
     end
   end
 end
