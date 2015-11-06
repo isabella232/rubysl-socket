@@ -6,15 +6,15 @@ describe 'Socket::AncillaryData.unix_rights' do
       @data = Socket::AncillaryData.unix_rights(STDOUT, STDERR)
     end
 
-    it 'sets the family' do
+    it 'sets the family to AF_UNIX' do
       @data.family.should == Socket::AF_UNIX
     end
 
-    it 'sets the level' do
+    it 'sets the level to SOL_SOCKET' do
       @data.level.should == Socket::SOL_SOCKET
     end
 
-    it 'sets the type' do
+    it 'sets the type to SCM_RIGHTS' do
       @data.type.should == Socket::SCM_RIGHTS
     end
 

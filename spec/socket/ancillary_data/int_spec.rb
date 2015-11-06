@@ -9,15 +9,15 @@ describe 'Socket::AncillaryData.int' do
     @data.should be_an_instance_of(Socket::AncillaryData)
   end
 
-  it 'sets the family' do
+  it 'sets the family to AF_INET' do
     @data.family.should == Socket::AF_INET
   end
 
-  it 'sets the level' do
+  it 'sets the level SOL_SOCKET' do
     @data.level.should == Socket::SOL_SOCKET
   end
 
-  it 'sets the type' do
+  it 'sets the type SCM_RIGHTS' do
     @data.type.should == Socket::SCM_RIGHTS
   end
 
