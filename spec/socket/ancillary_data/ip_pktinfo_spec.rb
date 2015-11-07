@@ -21,10 +21,6 @@ describe 'Socket::AncillaryData.ip_pktinfo' do
     it 'sets the type to IP_PKTINFO' do
       @data.type.should == Socket::IP_PKTINFO
     end
-
-    it 'sets the data to a String containing the address details' do
-      @data.data.should == [4, 127, 0, 0, 1, 127, 0, 0, 1].pack('Ic*')
-    end
   end
 
   describe 'with a source address, index, and destination address' do
@@ -48,10 +44,6 @@ describe 'Socket::AncillaryData.ip_pktinfo' do
 
     it 'sets the type to IP_PKTINFO' do
       @data.type.should == Socket::IP_PKTINFO
-    end
-
-    it 'sets the data to a String containing the address details' do
-      @data.data.should == [4, 127, 0, 0, 5, 127, 0, 0, 1].pack('Ic*')
     end
   end
 end

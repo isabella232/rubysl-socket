@@ -1,6 +1,6 @@
 class Socket < BasicSocket
   class AncillaryData
-    attr_reader :family, :level, :type, :data
+    attr_reader :family, :level, :type
 
     def self.int(family, level, type, integer)
       new(family, level, type, [integer].pack('I'))
@@ -29,10 +29,25 @@ class Socket < BasicSocket
     def self.ip_pktinfo(addr, ifindex, spec_dst = nil)
       spec_dst ||= addr
 
-      data = RubySL::Socket::AncillaryData
-        .pack_ip_pktinfo(addr, ifindex, spec_dst)
+      instance = new(:INET, :IP, :PKTINFO, '')
+      pkt_info = [
+        Addrinfo.ip(addr.ip_address),
+        ifindex,
+        Addrinfo.ip(spec_dst.ip_address)
+      ]
 
-      new(:INET, :IP, :PKTINFO, data)
+      instance.instance_variable_set(:@_ip_pktinfo, pkt_info)
+
+      instance
+    end
+
+    def self.ipv6_pktinfo(addr, ifindex)
+      instance = new(:INET6, :IPV6, :PKTINFO, '')
+      pkt_info = [Addrinfo.ip(addr.ip_address), ifindex]
+
+      instance.instance_variable_set(:@_ipv6_pktinfo, pkt_info)
+
+      instance
     end
 
     def initialize(family, level, type, data)
@@ -67,8 +82,26 @@ class Socket < BasicSocket
       @_unix_rights
     end
 
+    def data
+      if @_ip_pktinfo or @_ipv6_pktinfo
+        raise NotImplementedError,
+          'AncillaryData#data is not supported as its output depends on ' \
+          'MRI specific internals, use #ip_pktinfo or #ipv6_pktinfo instead'
+      else
+        @data
+      end
+    end
+
     def ip_pktinfo
-      RubySL::Socket::AncillaryData.unpack_ip_pktinfo(@data)
+      addr, ifindex, spec = @_ip_pktinfo
+
+      [addr.dup, ifindex, spec.dup]
+    end
+
+    def ipv6_pktinfo
+      addr, ifindex = @_ipv6_pktinfo
+
+      [addr.dup, ifindex]
     end
   end
 end
