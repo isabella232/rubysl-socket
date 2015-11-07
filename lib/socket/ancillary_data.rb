@@ -106,5 +106,9 @@ class Socket < BasicSocket
     def ipv6_pktinfo_addr
       ipv6_pktinfo[0]
     end
+
+    def ipv6_pktinfo_ifindex
+      ipv6_pktinfo[1]
+    end
   end
 end
