@@ -175,7 +175,7 @@ module RubySL
 
               raise SocketError, gai_strerror(err) unless err == 0
 
-              sa_family = Sockaddr_In.new(sockaddr)[:sin_family]
+              sa_family = Sockaddr_In.with_sockaddr(sockaddr)[:sin_family]
 
               name_info[0] = ::Socket::Constants::AF_TO_FAMILY[sa_family]
               name_info[1] = service.read_string

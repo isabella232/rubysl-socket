@@ -5,16 +5,15 @@ module RubySL
         config("rbx.platform.sockaddr_in",
                :sin_family, :sin_port, :sin_addr, :sin_zero)
 
-        def initialize(sockaddrin)
-          @p = Rubinius::FFI::MemoryPointer.new sockaddrin.bytesize
+        def self.with_sockaddr(addr)
+          pointer = Rubinius::FFI::MemoryPointer.new(addr.bytesize)
+          pointer.write_string(addr, addr.bytesize)
 
-          @p.write_string(sockaddrin, sockaddrin.bytesize)
-
-          super(@p)
+          new(pointer)
         end
 
         def to_s
-          @p.read_string(@p.total)
+          pointer.read_string(pointer.total)
         end
       end
     end
