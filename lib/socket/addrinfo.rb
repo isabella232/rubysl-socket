@@ -54,7 +54,11 @@ class Addrinfo
       else
         @ip_port, @ip_address = Socket.unpack_sockaddr_in(sockaddr)
 
-        @afamily = Socket::AF_INET
+        if sockaddr.bytesize == 28
+          @afamily = Socket::AF_INET6
+        else
+          @afamily = Socket::AF_INET
+        end
       end
     end
 

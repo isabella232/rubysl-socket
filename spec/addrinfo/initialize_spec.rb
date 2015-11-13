@@ -24,13 +24,19 @@ describe 'Addrinfo#initialize' do
       addr.afamily.should == Socket::AF_INET
     end
 
+    it 'returns an Addrinfo with AF_INET6 as the address family' do
+      addr = Addrinfo.new(Socket.sockaddr_in(80, '::1'))
+
+      addr.afamily.should == Socket::AF_INET6
+    end
+
     it 'returns an Addrinfo with PF_UNSPEC as the default protocol family' do
       addr = Addrinfo.new(@sockaddr)
 
       addr.pfamily.should == Socket::PF_UNSPEC
     end
 
-    it 'returns an Addrinfo with PF_INET6  family' do
+    it 'returns an Addrinfo with PF_INET6 family' do
       addr = Addrinfo.new(@sockaddr, Socket::PF_INET6)
 
       addr.pfamily.should == Socket::PF_INET6
