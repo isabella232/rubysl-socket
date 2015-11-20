@@ -125,8 +125,80 @@ class BasicSocket < IO
   end
 
   def recv(bytes_to_read, flags = 0)
-    # FIXME 0 is knowledge from io.cpp
     return socket_recv(bytes_to_read, flags, 0)
+  end
+
+  # TODO: use scm_rights
+  # TODO: ancillary data support
+  def recvmsg(max_msg_len = nil, flags = 0, max_ctl_len = nil, scm_rights: false)
+    socket_type = getsockopt(:SOCKET, :TYPE).int
+
+    if socket_type == Socket::SOCK_STREAM
+      grow_msg = false
+      grow_ctl = false
+    else
+      grow_msg = max_msg_len.nil?
+      grow_ctl = max_ctl_len.nil?
+    end
+
+    if grow_msg or grow_ctl
+      flags |= Socket::MSG_PEEK
+    end
+
+    msg_len = max_msg_len || 4096
+    ctl_len = max_ctl_len || 4096
+
+    loop do
+      msg_buffer = RubySL::Socket::Foreign.char_pointer(msg_len)
+      ctl_buffer = RubySL::Socket::Foreign.char_pointer(ctl_len)
+
+      address = RubySL::Socket::Foreign::Sockaddr_In.new
+      io_vec  = RubySL::Socket::Foreign::Iovec.with_buffer(msg_buffer)
+
+      header = RubySL::Socket::Foreign::Msghdr
+        .with_buffers(ctl_buffer, address, io_vec)
+
+      begin
+        need_more = false
+
+        retval = RubySL::Socket::Foreign
+          .recvmsg(descriptor, header.pointer, flags)
+
+        if grow_msg and header.message_truncated?
+          need_more = true
+          msg_len *= 2
+        end
+
+        if grow_ctl and header.control_truncated?
+          need_more = true
+          ctl_len *= 2
+        end
+
+        next if need_more
+
+        msg = msg_buffer.read_string
+
+        if address.null?
+          addr = nil
+        else
+          addr = Addrinfo.new(address.to_s, nil, socket_type)
+        end
+
+        rflags = header.flags
+
+        controls = nil
+
+        return msg, addr, rflags, controls
+      ensure
+        msg_buffer.free
+        ctl_buffer.free
+        address.free
+        io_vec.free
+        header.free
+      end
+    end
+
+    nil
   end
 
   def close_read

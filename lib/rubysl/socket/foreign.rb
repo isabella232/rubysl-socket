@@ -13,6 +13,7 @@ module RubySL
       attach_function :socket, [:int, :int, :int], :int
       attach_function :send, [:int, :pointer, :size_t, :int], :ssize_t
       attach_function :recv, [:int, :pointer, :size_t, :int], :ssize_t
+      attach_function :_recvmsg, :recvmsg, [:int, :pointer, :int], :ssize_t
 
       attach_function :recvfrom,
         [:int, :pointer, :size_t, :int, :pointer, :pointer], :int
@@ -269,6 +270,18 @@ module RubySL
       def self.getpeereid(*)
         raise NotImplementedError,
           'getpeereid() is not supported on this platform'
+      end
+
+      def self.recvmsg(*args)
+        retval = _recvmsg(*args)
+
+        Errno.handle('recvmsg(2)') if retval < 0
+
+        retval
+      end
+
+      def self.char_pointer(length)
+        Rubinius::FFI::MemoryPointer.new(:char, length)
       end
     end
   end
