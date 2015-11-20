@@ -128,70 +128,47 @@ class BasicSocket < IO
     return socket_recv(bytes_to_read, flags, 0)
   end
 
-  # TODO: use scm_rights
-  # TODO: ancillary data support
-  def recvmsg(max_msg_len = nil, flags = 0, max_ctl_len = nil, scm_rights: false)
+  def recvmsg(max_msg_len = nil, flags = 0, *_)
     socket_type = getsockopt(:SOCKET, :TYPE).int
 
     if socket_type == Socket::SOCK_STREAM
       grow_msg = false
-      grow_ctl = false
     else
       grow_msg = max_msg_len.nil?
-      grow_ctl = max_ctl_len.nil?
     end
 
-    if grow_msg or grow_ctl
-      flags |= Socket::MSG_PEEK
-    end
+    flags |= Socket::MSG_PEEK if grow_msg
 
     msg_len = max_msg_len || 4096
-    ctl_len = max_ctl_len || 4096
 
     loop do
       msg_buffer = RubySL::Socket::Foreign.char_pointer(msg_len)
-      ctl_buffer = RubySL::Socket::Foreign.char_pointer(ctl_len)
-
-      address = RubySL::Socket::Foreign::Sockaddr_In.new
-      io_vec  = RubySL::Socket::Foreign::Iovec.with_buffer(msg_buffer)
-
-      header = RubySL::Socket::Foreign::Msghdr
-        .with_buffers(ctl_buffer, address, io_vec)
+      address    = RubySL::Socket::Foreign::Sockaddr_In.new
+      io_vec     = RubySL::Socket::Foreign::Iovec.with_buffer(msg_buffer)
+      header     = RubySL::Socket::Foreign::Msghdr.with_buffers(address, io_vec)
 
       begin
         need_more = false
 
-        retval = RubySL::Socket::Foreign
-          .recvmsg(descriptor, header.pointer, flags)
+        RubySL::Socket::Foreign.recvmsg(descriptor, header.pointer, flags)
 
         if grow_msg and header.message_truncated?
           need_more = true
           msg_len *= 2
         end
 
-        if grow_ctl and header.control_truncated?
-          need_more = true
-          ctl_len *= 2
-        end
-
         next if need_more
 
-        msg = msg_buffer.read_string
-
-        if address.null?
-          addr = nil
+        # When a socket is actually connected the address structure is not used.
+        if header.address_size > 0
+          addr = Addrinfo.new(address.to_s, socket_type)
         else
-          addr = Addrinfo.new(address.to_s, nil, socket_type)
+          addr = Addrinfo.new([Socket::AF_UNSPEC])
         end
 
-        rflags = header.flags
-
-        controls = nil
-
-        return msg, addr, rflags, controls
+        return msg_buffer.read_string, addr, header.flags
       ensure
         msg_buffer.free
-        ctl_buffer.free
         address.free
         io_vec.free
         header.free
