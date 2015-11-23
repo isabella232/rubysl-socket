@@ -161,4 +161,12 @@ class Addrinfo
 
     @ip_port
   end
+
+  def to_sockaddr
+    if unix?
+      Socket.sockaddr_un(@unix_path)
+    else
+      Socket.sockaddr_in(@ip_port.to_i, @ip_address.to_s)
+    end
+  end
 end
