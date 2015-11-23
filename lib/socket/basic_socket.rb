@@ -178,6 +178,10 @@ class BasicSocket < IO
     nil
   end
 
+  def recvmsg_nonblock(max_msg_len = nil, flags = 0, *_)
+    recvmsg(max_msg_len, flags | Socket::MSG_DONTWAIT)
+  end
+
   def close_read
     ensure_open
 
