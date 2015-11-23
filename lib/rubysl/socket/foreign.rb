@@ -12,6 +12,10 @@ module RubySL
       attach_function :listen, [:int, :int], :int
       attach_function :socket, [:int, :int, :int], :int
       attach_function :send, [:int, :pointer, :size_t, :int], :ssize_t
+
+      attach_function :sendto,
+        [:int, :pointer, :size_t, :int, :pointer, :socklen_t], :ssize_t
+
       attach_function :recv, [:int, :pointer, :size_t, :int], :ssize_t
       attach_function :recvmsg, :recvmsg, [:int, :pointer, :int], :ssize_t
       attach_function :sendmsg, :sendmsg, [:int, :pointer, :int], :ssize_t
@@ -273,8 +277,8 @@ module RubySL
           'getpeereid() is not supported on this platform'
       end
 
-      def self.char_pointer(length)
-        Rubinius::FFI::MemoryPointer.new(:char, length)
+      def self.char_pointer(length, &block)
+        Rubinius::FFI::MemoryPointer.new(:char, length, &block)
       end
     end
   end

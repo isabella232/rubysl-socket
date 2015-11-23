@@ -109,17 +109,33 @@ class BasicSocket < IO
     RubySL::Socket::Foreign.getpeername(descriptor)
   end
 
-  def send(message, flags, to = nil)
-    connect to if to
-
-    bytes = message.bytesize
+  def send(message, flags, dest_sockaddr = nil)
+    bytes      = message.bytesize
     bytes_sent = 0
 
-    Rubinius::FFI::MemoryPointer.new :char, bytes + 1 do |buffer|
-      buffer.write_string message, bytes
-      bytes_sent = RubySL::Socket::Foreign.send(descriptor, buffer, bytes, flags)
-      Errno.handle 'send(2)' if bytes_sent < 0
+    if dest_sockaddr.is_a?(Addrinfo)
+      dest_sockaddr = dest_sockaddr.to_sockaddr
     end
+
+    RubySL::Socket::Foreign.char_pointer(bytes) do |buffer|
+      buffer.write_string(message)
+
+      if dest_sockaddr.is_a?(String)
+        addr = RubySL::Socket::Foreign::Sockaddr_In.with_sockaddr(dest_sockaddr)
+
+        begin
+          bytes_sent = RubySL::Socket::Foreign
+            .sendto(descriptor, buffer, bytes, flags, addr, addr.size)
+        ensure
+          addr.free
+        end
+      else
+        bytes_sent = RubySL::Socket::Foreign
+          .send(descriptor, buffer, bytes, flags)
+      end
+    end
+
+    Errno.handle('send(2)') if bytes_sent < 0
 
     bytes_sent
   end
