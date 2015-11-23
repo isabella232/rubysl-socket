@@ -21,9 +21,15 @@ describe 'BasicSocket#sendmsg' do
       end
     end
 
-    describe 'with a destination address' do
+    describe 'with a destination address as a String' do
       it 'returns the amount of sent bytes' do
         @client.sendmsg('hello', 0, @server.getsockname).should == 5
+      end
+    end
+
+    describe 'with a destination address as an Addrinfo' do
+      it 'returns the amount of sent bytes' do
+        @client.sendmsg('hello', 0, @server.connect_address).should == 5
       end
     end
   end
