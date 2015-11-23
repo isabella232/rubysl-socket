@@ -150,7 +150,10 @@ class BasicSocket < IO
       begin
         need_more = false
 
-        RubySL::Socket::Foreign.recvmsg(descriptor, header.pointer, flags)
+        status = RubySL::Socket::Foreign
+          .recvmsg(descriptor, header.pointer, flags)
+
+        Errno.handle('recvmsg(2)') if status < 0
 
         if grow_msg and header.message_truncated?
           need_more = true
@@ -204,7 +207,12 @@ class BasicSocket < IO
         header.address = address
       end
 
-      RubySL::Socket::Foreign.sendmsg(descriptor, header.pointer, flags)
+      num_bytes = RubySL::Socket::Foreign
+        .sendmsg(descriptor, header.pointer, flags)
+
+      Errno.handle('sendmsg(2)') if num_bytes < 0
+
+      num_bytes
     ensure
       address.free if address
       header.free
