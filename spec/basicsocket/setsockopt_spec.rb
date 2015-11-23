@@ -1,333 +1,106 @@
+require 'socket'
 require File.expand_path('../../fixtures/classes', __FILE__)
 
-describe "BasicSocket#setsockopt" do
-
-  before(:each) do
-    @sock = Socket.new(Socket::AF_INET, Socket::SOCK_STREAM, 0)
+describe 'BasicSocket#setsockopt' do
+  before do
+    @socket = Socket.new(:INET, :STREAM)
   end
 
-  after :each do
-    @sock.close unless @sock.closed?
+  after do
+    @socket.close
   end
 
-  describe "using constants" do
-    platform_is :windows do
-      it "sets the socket linger to 0" do
-        linger = pack_int(0, 0)
-        @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_LINGER, linger).should == 0
-        n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_LINGER).to_s
-
-        n.should == pack_int(0)
-      end
-
-      it "sets the socket linger to some positive value" do
-        linger = pack_int(64, 64)
-        @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_LINGER, linger).should == 0
-        n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_LINGER).to_s
-        n.should == pack_int(64)
-      end
-    end
-    platform_is_not :windows do
-      it "sets the socket linger to 0" do
-        linger = pack_int(0, 0)
-        @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_LINGER, linger).should == 0
-        n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_LINGER).to_s
-
-        n.should == pack_int(0, 0)
-      end
-
-      it "sets the socket linger to some positive value" do
-        linger = pack_int(64, 64)
-        @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_LINGER, linger).should == 0
-        n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_LINGER).to_s
-        a = n.unpack('ii')
-        a[0].should_not == 0
-        a[1].should == 64
-      end
+  describe 'using separate arguments with Symbols' do
+    it 'raises TypeError when the first argument is nil' do
+      proc { @socket.setsockopt(nil, :REUSEADDR, true) }
+        .should raise_error(TypeError)
     end
 
-    it "sets the socket option Socket::SO_OOBINLINE" do
-      @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_OOBINLINE, true).should == 0
-      n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_OOBINLINE).to_s
-      n.should_not == pack_int(0)
+    it 'sets a boolean option' do
+      @socket.setsockopt(:SOCKET, :REUSEADDR, true).should == 0
 
-      @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_OOBINLINE, false).should == 0
-      n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_OOBINLINE).to_s
-      n.should == pack_int(0)
-
-      @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_OOBINLINE, 1).should == 0
-      n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_OOBINLINE).to_s
-      n.should_not == pack_int(0)
-
-      @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_OOBINLINE, 0).should == 0
-      n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_OOBINLINE).to_s
-      n.should == pack_int(0)
-
-      @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_OOBINLINE, 2).should == 0
-      n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_OOBINLINE).to_s
-      n.should_not == pack_int(0)
-
-      platform_is_not :os => :windows do
-        lambda {
-          @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_OOBINLINE, "")
-        }.should raise_error(SystemCallError)
-      end
-
-      @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_OOBINLINE, "blah").should == 0
-      n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_OOBINLINE).to_s
-      n.should_not == pack_int(0)
-
-      platform_is_not :os => :windows do
-        lambda {
-          @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_OOBINLINE, "0")
-        }.should raise_error(SystemCallError)
-      end
-
-      @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_OOBINLINE, "\x00\x00\x00\x00").should == 0
-      n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_OOBINLINE).to_s
-      n.should == pack_int(0)
-
-      platform_is_not :os => :windows do
-        lambda {
-          @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_OOBINLINE, "1")
-        }.should raise_error(SystemCallError)
-      end
-
-      platform_is_not :os => :windows do
-        lambda {
-          @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_OOBINLINE, "\x00\x00\x00")
-        }.should raise_error(SystemCallError)
-      end
-
-      @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_OOBINLINE, pack_int(1)).should == 0
-      n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_OOBINLINE).to_s
-      n.should_not == pack_int(0)
-
-      @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_OOBINLINE, pack_int(0)).should == 0
-      n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_OOBINLINE).to_s
-      n.should == pack_int(0)
-
-      @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_OOBINLINE, pack_int(1000)).should == 0
-      n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_OOBINLINE).to_s
-      n.should_not == pack_int(0)
+      @socket.getsockopt(:SOCKET, :REUSEADDR).bool.should == true
     end
 
-    it "sets the socket option Socket::SO_SNDBUF" do
-      @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_SNDBUF, 4000).should == 0
-      sndbuf = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_SNDBUF).to_s
-      # might not always be possible to set to exact size
-      sndbuf.unpack('i')[0].should >= 4000
+    it 'sets an integer option' do
+      @socket.setsockopt(:IP, :TTL, 255).should == 0
 
-      @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_SNDBUF, true).should == 0
-      n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_SNDBUF).to_s
-      n.unpack('i')[0].should >= 1
+      @socket.getsockopt(:IP, :TTL).int.should == 255
+    end
 
-      lambda {
-        @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_SNDBUF, nil).should == 0
-      }.should raise_error(TypeError)
-
-      @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_SNDBUF, 1).should == 0
-      n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_SNDBUF).to_s
-      n.unpack('i')[0].should >= 1
-
-      @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_SNDBUF, 2).should == 0
-      n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_SNDBUF).to_s
-      n.unpack('i')[0].should >= 2
-
-      lambda {
-        @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_SNDBUF, "")
-      }.should raise_error(SystemCallError)
-
-      lambda {
-        @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_SNDBUF, "bla")
-      }.should raise_error(SystemCallError)
-
-      lambda {
-        @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_SNDBUF, "0")
-      }.should raise_error(SystemCallError)
-
-      lambda {
-        @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_SNDBUF, "1")
-      }.should raise_error(SystemCallError)
-
-      lambda {
-        @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_SNDBUF, "\x00\x00\x00")
-      }.should raise_error(SystemCallError)
-
-      @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_SNDBUF, "\x00\x00\x01\x00").should == 0
-      n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_SNDBUF).to_s
-      n.unpack('i')[0].should >= "\x00\x00\x01\x00".unpack('i')[0]
-
-      @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_SNDBUF, pack_int(4000)).should == 0
-      n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_SNDBUF).to_s
-      n.unpack('i')[0].should >= 4000
-
-      @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_SNDBUF, pack_int(1000)).should == 0
-      n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_SNDBUF).to_s
-      n.unpack('i')[0].should >= 1000
+    it 'raises Errno::EINVAL when setting an invalid option value' do
+      proc { @socket.setsockopt(:SOCKET, :OOBINLINE, 'bla') }
+        .should raise_error(Errno::EINVAL)
     end
   end
 
-  ruby_version_is "1.9" do
-    describe "using strings" do
-      context "without prefix" do
+  describe 'using separate arguments with Symbols' do
+    it 'sets a boolean option' do
+      @socket.setsockopt('SOCKET', 'REUSEADDR', true).should == 0
 
-        platform_is :windows do
-          it "sets the socket linger to 0" do
-            linger = pack_int(0, 0)
-            @sock.setsockopt("SOCKET", "LINGER", linger).should == 0
-            n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_LINGER).to_s
+      @socket.getsockopt(:SOCKET, :REUSEADDR).bool.should == true
+    end
 
-            n.should == pack_int(0)
-          end
+    it 'sets an integer option' do
+      @socket.setsockopt('IP', 'TTL', 255).should == 0
 
-          it "sets the socket linger to some positive value" do
-            linger = pack_int(64, 64)
-            @sock.setsockopt("SOCKET", "LINGER", linger).should == 0
-            n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_LINGER).to_s
-            n.should == pack_int(64)
-          end
-        end
-        platform_is_not :windows do
-          it "sets the socket linger to 0" do
-            linger = pack_int(0, 0)
-            @sock.setsockopt("SOCKET", "LINGER", linger).should == 0
-            n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_LINGER).to_s
+      @socket.getsockopt(:IP, :TTL).int.should == 255
+    end
+  end
 
-            n.should == pack_int(0, 0)
-          end
+  describe 'using separate arguments with constants' do
+    it 'sets a boolean option' do
+      @socket.setsockopt(Socket::SOL_SOCKET, Socket::SO_REUSEADDR, true)
+        .should == 0
 
-          it "sets the socket linger to some positive value" do
-            linger = pack_int(64, 64)
-            @sock.setsockopt("SOCKET", "LINGER", linger).should == 0
-            n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_LINGER).to_s
-            a = n.unpack('ii')
-            a[0].should_not == 0
-            a[1].should == 64
-          end
-        end
+      @socket.getsockopt(:SOCKET, :REUSEADDR).bool.should == true
+    end
 
-        it "sets the socket option Socket::SO_OOBINLINE" do
-          @sock.setsockopt("SOCKET", "OOBINLINE", true).should == 0
-          n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_OOBINLINE).to_s
-          n.should_not == pack_int(0)
+    it 'sets an integer option' do
+      @socket.setsockopt(Socket::SOL_IP, Socket::IP_TTL, 255).should == 0
 
-          @sock.setsockopt("SOCKET", "OOBINLINE", false).should == 0
-          n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_OOBINLINE).to_s
-          n.should == pack_int(0)
+      @socket.getsockopt(:IP, :TTL).int.should == 255
+    end
+  end
 
-          @sock.setsockopt("SOCKET", "OOBINLINE", 1).should == 0
-          n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_OOBINLINE).to_s
-          n.should_not == pack_int(0)
+  describe 'using separate arguments with custom objects' do
+    it 'sets a boolean option' do
+      level = mock(:level)
+      name  = mock(:name)
 
-          @sock.setsockopt("SOCKET", "OOBINLINE", 0).should == 0
-          n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_OOBINLINE).to_s
-          n.should == pack_int(0)
+      level.stub!(:to_str).and_return('SOCKET')
+      name.stub!(:to_str).and_return('REUSEADDR')
 
-          @sock.setsockopt("SOCKET", "OOBINLINE", 2).should == 0
-          n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_OOBINLINE).to_s
-          n.should_not == pack_int(0)
+      @socket.setsockopt(level, name, true).should == 0
+    end
+  end
 
-          platform_is_not :os => :windows do
-            lambda {
-              @sock.setsockopt("SOCKET", "OOBINLINE", "")
-            }.should raise_error(SystemCallError)
-          end
+  describe 'using a Socket::Option as the first argument' do
+    it 'sets a boolean option' do
+      @socket.setsockopt(Socket::Option.bool(:INET, :SOCKET, :REUSEADDR, true))
+        .should == 0
 
-          @sock.setsockopt("SOCKET", "OOBINLINE", "blah").should == 0
-          n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_OOBINLINE).to_s
-          n.should_not == pack_int(0)
+      @socket.getsockopt(:SOCKET, :REUSEADDR).bool.should == true
+    end
 
-          platform_is_not :os => :windows do
-            lambda {
-              @sock.setsockopt("SOCKET", "OOBINLINE", "0")
-            }.should raise_error(SystemCallError)
-          end
+    it 'sets an integer option' do
+      @socket.setsockopt(Socket::Option.int(:INET, :IP, :TTL, 255)).should == 0
 
-          @sock.setsockopt("SOCKET", "OOBINLINE", "\x00\x00\x00\x00").should == 0
-          n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_OOBINLINE).to_s
-          n.should == pack_int(0)
+      @socket.getsockopt(:IP, :TTL).int.should == 255
+    end
 
-          platform_is_not :os => :windows do
-            lambda {
-              @sock.setsockopt("SOCKET", "OOBINLINE", "1")
-            }.should raise_error(SystemCallError)
-          end
+    it 'raises ArgumentError when passing 2 arguments' do
+      option = Socket::Option.bool(:INET, :SOCKET, :REUSEADDR, true)
 
-          platform_is_not :os => :windows do
-            lambda {
-              @sock.setsockopt("SOCKET", "OOBINLINE", "\x00\x00\x00")
-            }.should raise_error(SystemCallError)
-          end
+      proc { @socket.setsockopt(option, :REUSEADDR) }
+        .should raise_error(ArgumentError)
+    end
 
-          @sock.setsockopt("SOCKET", "OOBINLINE", pack_int(1)).should == 0
-          n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_OOBINLINE).to_s
-          n.should_not == pack_int(0)
+    it 'raises TypeError when passing 3 arguments' do
+      option = Socket::Option.bool(:INET, :SOCKET, :REUSEADDR, true)
 
-          @sock.setsockopt("SOCKET", "OOBINLINE", pack_int(0)).should == 0
-          n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_OOBINLINE).to_s
-          n.should == pack_int(0)
-
-          @sock.setsockopt("SOCKET", "OOBINLINE", pack_int(1000)).should == 0
-          n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_OOBINLINE).to_s
-          n.should_not == pack_int(0)
-        end
-
-        it "sets the socket option Socket::SO_SNDBUF" do
-          @sock.setsockopt("SOCKET", "SNDBUF", 4000).should == 0
-          sndbuf = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_SNDBUF).to_s
-          # might not always be possible to set to exact size
-          sndbuf.unpack('i')[0].should >= 4000
-
-          @sock.setsockopt("SOCKET", "SNDBUF", true).should == 0
-          n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_SNDBUF).to_s
-          n.unpack('i')[0].should >= 1
-
-          lambda {
-            @sock.setsockopt("SOCKET", "SNDBUF", nil).should == 0
-          }.should raise_error(TypeError)
-
-          @sock.setsockopt("SOCKET", "SNDBUF", 1).should == 0
-          n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_SNDBUF).to_s
-          n.unpack('i')[0].should >= 1
-
-          @sock.setsockopt("SOCKET", "SNDBUF", 2).should == 0
-          n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_SNDBUF).to_s
-          n.unpack('i')[0].should >= 2
-
-          lambda {
-            @sock.setsockopt("SOCKET", "SNDBUF", "")
-          }.should raise_error(SystemCallError)
-
-          lambda {
-            @sock.setsockopt("SOCKET", "SNDBUF", "bla")
-          }.should raise_error(SystemCallError)
-
-          lambda {
-            @sock.setsockopt("SOCKET", "SNDBUF", "0")
-          }.should raise_error(SystemCallError)
-
-          lambda {
-            @sock.setsockopt("SOCKET", "SNDBUF", "1")
-          }.should raise_error(SystemCallError)
-
-          lambda {
-            @sock.setsockopt("SOCKET", "SNDBUF", "\x00\x00\x00")
-          }.should raise_error(SystemCallError)
-
-          @sock.setsockopt("SOCKET", "SNDBUF", "\x00\x00\x01\x00").should == 0
-          n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_SNDBUF).to_s
-          n.unpack('i')[0].should >= "\x00\x00\x01\x00".unpack('i')[0]
-
-          @sock.setsockopt("SOCKET", "SNDBUF", pack_int(4000)).should == 0
-          n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_SNDBUF).to_s
-          n.unpack('i')[0].should >= 4000
-
-          @sock.setsockopt("SOCKET", "SNDBUF", pack_int(1000)).should == 0
-          n = @sock.getsockopt(Socket::SOL_SOCKET, Socket::SO_SNDBUF).to_s
-          n.unpack('i')[0].should >= 1000
-        end
-      end
+      proc { @socket.setsockopt(option, :REUSEADDR, true) }
+        .should raise_error(TypeError)
     end
   end
 end
