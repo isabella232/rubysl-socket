@@ -8,12 +8,20 @@ module RubySL
         def self.with_buffers(address, io_vec)
           header = new
 
-          header[:msg_name]    = address.pointer
-          header[:msg_namelen] = address.pointer.total
-          header[:msg_iov]     = io_vec.pointer
-          header[:msg_iovlen]  = 1
+          header.address = address
+          header.message = io_vec
 
           header
+        end
+
+        def address=(address)
+          self[:msg_name]    = address.pointer
+          self[:msg_namelen] = address.pointer.total
+        end
+
+        def message=(vec)
+          self[:msg_iov]    = vec.pointer
+          self[:msg_iovlen] = 1
         end
 
         def address_size

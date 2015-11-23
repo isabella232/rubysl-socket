@@ -14,6 +14,7 @@ module RubySL
       attach_function :send, [:int, :pointer, :size_t, :int], :ssize_t
       attach_function :recv, [:int, :pointer, :size_t, :int], :ssize_t
       attach_function :_recvmsg, :recvmsg, [:int, :pointer, :int], :ssize_t
+      attach_function :_sendmsg, :sendmsg, [:int, :pointer, :int], :ssize_t
 
       attach_function :recvfrom,
         [:int, :pointer, :size_t, :int, :pointer, :pointer], :int
@@ -276,6 +277,14 @@ module RubySL
         retval = _recvmsg(*args)
 
         Errno.handle('recvmsg(2)') if retval < 0
+
+        retval
+      end
+
+      def self.sendmsg(*args)
+        retval = _sendmsg(*args)
+
+        Errno.handle('sendmsg(2)') if retval < 0
 
         retval
       end

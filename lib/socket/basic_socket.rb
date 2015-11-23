@@ -182,6 +182,41 @@ class BasicSocket < IO
     recvmsg(max_msg_len, flags | Socket::MSG_DONTWAIT)
   end
 
+  def sendmsg(message, flags = 0, dest_sockaddr = nil, *_)
+    msg_buffer = RubySL::Socket::Foreign.char_pointer(message.bytesize)
+    io_vec     = RubySL::Socket::Foreign::Iovec.with_buffer(msg_buffer)
+    header     = RubySL::Socket::Foreign::Msghdr.new
+    address    = nil
+
+    begin
+      msg_buffer.write_string(message)
+
+      header.message = io_vec
+
+      if dest_sockaddr.is_a?(Addrinfo)
+        dest_sockaddr = dest_sockaddr.to_sockaddr
+      end
+
+      if dest_sockaddr.is_a?(String)
+        address = RubySL::Socket::Foreign::Sockaddr_In
+          .with_sockaddr(dest_sockaddr)
+
+        header.address = address
+      end
+
+      RubySL::Socket::Foreign.sendmsg(descriptor, header.pointer, flags)
+    ensure
+      address.free if address
+      header.free
+      io_vec.free
+      msg_buffer.free
+    end
+  end
+
+  def sendmsg_nonblock(message, flags = 0, dest_sockaddr = nil, *_)
+    sendmsg(message, flags | Socket::MSG_DONTWAIT, dest_sockaddr)
+  end
+
   def close_read
     ensure_open
 
