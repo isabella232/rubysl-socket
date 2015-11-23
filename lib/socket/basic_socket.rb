@@ -47,58 +47,55 @@ class BasicSocket < IO
     Socket::Option.new(family, level, optname, data)
   end
 
-  def setsockopt(level_or_option, optname=nil, optval=nil)
-    level = nil
+  def setsockopt(level_or_option, optname = nil, optval = nil)
+    if level_or_option and optname and optval
+      if level_or_option.is_a?(Socket::Option)
+        raise TypeError,
+          'expected the first argument to be a Fixnum, Symbol, or String'
+      end
 
-    case level_or_option
-    when Socket::Option
-      if !optname.nil?
-        raise ArgumentError, "given 2, expected 3"
-      end
-      level = level_or_option.level
-      optname = level_or_option.optname
-      optval = level_or_option.data
-    else
-      if level_or_option.nil? or optname.nil?
-        nb_arg = 3 - [level_or_option, optname, optval].count(nil)
-        raise ArgumentError, "given #{nb_arg}, expected 3"
-      end
       level = level_or_option
+    elsif level_or_option.is_a?(Socket::Option)
+      raise(ArgumentError, 'given 2, expected 1') if optname
+
+      level   = level_or_option.level
+      optname = level_or_option.optname
+      optval  = level_or_option.data
+    else
+      raise TypeError,
+        'expected the first argument to be a Fixnum, Symbol, String, or Socket::Option'
     end
 
     optval = 1 if optval == true
     optval = 0 if optval == false
 
-    error = 0
+    sockname = RubySL::Socket::Foreign.getsockname(descriptor)
+    family   = RubySL::Socket::Foreign.getnameinfo(sockname).first
+    level    = RubySL::Socket::SocketOptions.socket_level(level, family)
+    optname  = RubySL::Socket::SocketOptions.socket_option(level, optname)
+    error    = 0
 
-    sockname = RubySL::Socket::Foreign.getsockname descriptor
-    family = RubySL::Socket::Foreign.getnameinfo(sockname).first
+    if optval.is_a?(Fixnum)
+      RubySL::Socket::Foreign.memory_pointer(:socklen_t) do |pointer|
+        pointer.write_int(optval)
 
-    level = RubySL::Socket::SocketOptions.socket_level(level, family)
-    optname = RubySL::Socket::SocketOptions.socket_option(level, optname)
-
-    case optval
-    when Fixnum then
-      Rubinius::FFI::MemoryPointer.new :socklen_t do |val|
-        val.write_int optval
-        error = RubySL::Socket::Foreign.setsockopt(descriptor, level,
-                                           optname, val,
-                                           val.total)
+        error = RubySL::Socket::Foreign
+          .setsockopt(descriptor, level, optname, pointer, pointer.total)
       end
-    when String then
-      Rubinius::FFI::MemoryPointer.new optval.bytesize do |val|
-        val.write_string optval, optval.bytesize
-        error = RubySL::Socket::Foreign.setsockopt(descriptor, level,
-                                           optname, val,
-                                           optval.size)
+    elsif optval.is_a?(String)
+      RubySL::Socket::Foreign.memory_pointer(optval.bytesize) do |pointer|
+        pointer.write_string(optval)
+
+        error = RubySL::Socket::Foreign
+          .setsockopt(descriptor, level, optname, pointer, optval.bytesize)
       end
     else
-      raise TypeError, "socket option should be a String, a Fixnum, true, or false"
+      raise TypeError, 'socket option should be a Fixnum, String, true, or false'
     end
 
-    Errno.handle "Unable to set socket option" unless error == 0
+    Errno.handle('unable to set socket option') if error < 0
 
-    return 0
+    0
   end
 
   def getsockname

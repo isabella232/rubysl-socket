@@ -2,8 +2,7 @@ module RubySL
   module Socket
     module SocketOptions
       def self.socket_level(level, family = nil)
-        case level
-        when Symbol, String
+        if level.is_a?(Symbol) or level.is_a?(String)
           if ::Socket.const_defined?(level)
             ::Socket.const_get(level)
           else
@@ -13,6 +12,8 @@ module RubySL
               constant("SOL", level)
             end
           end
+        elsif level.respond_to?(:to_str)
+          socket_level(Helpers.coerce_to_string(level), family)
         else
           level
         end
@@ -44,7 +45,11 @@ module RubySL
             end
           end
         else
-          optname
+          if optname.respond_to?(:to_str)
+            socket_option(level, Helpers.coerce_to_string(optname))
+          else
+            optname
+          end
         end
       end
 

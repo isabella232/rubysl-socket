@@ -280,6 +280,10 @@ module RubySL
       def self.char_pointer(length, &block)
         Rubinius::FFI::MemoryPointer.new(:char, length, &block)
       end
+
+      def self.memory_pointer(*args, &block)
+        Rubinius::FFI::MemoryPointer.new(*args, &block)
+      end
     end
   end
 end
