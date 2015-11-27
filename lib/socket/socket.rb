@@ -277,38 +277,16 @@ class Socket < BasicSocket
     0
   end
 
-  def connect(sockaddr, extra=nil)
-    if extra
-      sockaddr = Socket.pack_sockaddr_in sockaddr, extra
-    else
-      sockaddr = StringValue(sockaddr)
-    end
+  def connect(sockaddr)
+    status = RubySL::Socket::Foreign.connect(descriptor, sockaddr)
 
-    status = RubySL::Socket::Foreign.connect descriptor, sockaddr
+    Errno.handle('connect(2)') if status < 0
 
-    if status < 0
-      begin
-        Errno.handle "connect(2)"
-      rescue Errno::EISCONN
-        return 0
-      end
-    end
-
-    return 0
+    0
   end
 
   def connect_nonblock(sockaddr)
     fcntl(Fcntl::F_SETFL, Fcntl::O_NONBLOCK)
-
-    if sockaddr.is_a?(Addrinfo)
-      sockaddr = sockaddr.to_sockaddr
-    else
-      sockaddr = RubySL::Socket::Helpers.coerce_to_string(sockaddr)
-    end
-
-    unless sockaddr.is_a?(String)
-      raise TypeError, "no implicit conversion of #{sockaddr.class} into String"
-    end
 
     status = RubySL::Socket::Foreign.connect(descriptor, sockaddr)
 

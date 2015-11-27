@@ -69,6 +69,17 @@ module RubySL
       def self.connect(descriptor, sockaddr)
         err = 0
 
+        if sockaddr.is_a?(::Addrinfo)
+          sockaddr = sockaddr.to_sockaddr
+        else
+          sockaddr = Helpers.coerce_to_string(sockaddr)
+        end
+
+        unless sockaddr.is_a?(String)
+          raise TypeError,
+            "no implicit conversion of #{sockaddr.class} into String"
+        end
+
         Rubinius::FFI::MemoryPointer.new(:char, sockaddr.bytesize) do |sockaddr_p|
           sockaddr_p.write_string(sockaddr, sockaddr.bytesize)
 
