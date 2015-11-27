@@ -133,6 +133,31 @@ module RubySL
 
         [family, port.to_i, host, ip]
       end
+
+      def self.shutdown_option(how)
+        case how
+        when String, Symbol
+          prefixed_socket_constant(how.to_s, 'SHUT_') do
+            "unknown shutdown argument: #{how}"
+          end
+        when Fixnum
+          if how == ::Socket::SHUT_RD or
+            how == ::Socket::SHUT_WR or
+            how == ::Socket::SHUT_RDWR
+            how
+          else
+            raise ArgumentError,
+              'argument should be :SHUT_RD, :SHUT_WR, or :SHUT_RDWR'
+          end
+        else
+          if how.respond_to?(:to_str)
+            shutdown_option(coerce_to_string(how))
+          else
+            raise TypeError,
+              "no implicit conversion of #{how.class} into Integer"
+          end
+        end
+      end
     end
   end
 end

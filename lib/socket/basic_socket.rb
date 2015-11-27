@@ -277,9 +277,13 @@ class BasicSocket < IO
     raise Errno::EAGAIN
   end
 
-  def shutdown(how = 2)
-    err = RubySL::Socket::Foreign.shutdown @descriptor, how
-    Errno.handle "shutdown" unless err == 0
+  def shutdown(how = Socket::SHUT_RDWR)
+    how = RubySL::Socket::Helpers.shutdown_option(how)
+    err = RubySL::Socket::Foreign.shutdown(descriptor, how)
+
+    Errno.handle('shutdown(2)') unless err == 0
+
+    0
   end
 
   # MRI defines this method in BasicSocket and stuffs all logic in it. Since
