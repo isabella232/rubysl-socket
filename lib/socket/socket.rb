@@ -300,12 +300,21 @@ class Socket < BasicSocket
   def connect_nonblock(sockaddr)
     fcntl(Fcntl::F_SETFL, Fcntl::O_NONBLOCK)
 
-    status = RubySL::Socket::Foreign.connect descriptor, StringValue(sockaddr)
-    if status < 0
-      Errno.handle "connect(2)"
+    if sockaddr.is_a?(Addrinfo)
+      sockaddr = sockaddr.to_sockaddr
+    else
+      sockaddr = RubySL::Socket::Helpers.coerce_to_string(sockaddr)
     end
 
-    return status
+    unless sockaddr.is_a?(String)
+      raise TypeError, "no implicit conversion of #{sockaddr.class} into String"
+    end
+
+    status = RubySL::Socket::Foreign.connect(descriptor, sockaddr)
+
+    Errno.handle('connect(2)') if status < 0
+
+    0
   end
 
   def local_address
