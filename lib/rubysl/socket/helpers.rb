@@ -120,16 +120,32 @@ module RubySL
         end
       end
 
-      def self.address_info(method, socket, reverse_lookup = nil)
-        sockaddr = Foreign.__send__(method, socket.descriptor)
+      def self.convert_reverse_lookup(socket = nil, reverse_lookup = nil)
+        if reverse_lookup.nil?
+          if socket
+            reverse_lookup = !socket.do_not_reverse_lookup
+          else
+            reverse_lookup = !BasicSocket.do_not_reverse_lookup
+          end
 
-        if reverse_lookup and
-          (reverse_lookup != true and reverse_lookup != :hostname)
+        elsif reverse_lookup == :hostname
+          reverse_lookup = true
+
+        elsif reverse_lookup == :numeric
+          reverse_lookup = false
+
+        elsif reverse_lookup != true and reverse_lookup != false
           raise ArgumentError,
             "invalid reverse_lookup flag: #{reverse_lookup.inspect}"
         end
 
-        reverse_lookup = !socket.do_not_reverse_lookup if reverse_lookup.nil?
+        reverse_lookup
+      end
+
+      def self.address_info(method, socket, reverse_lookup = nil)
+        sockaddr = Foreign.__send__(method, socket.descriptor)
+
+        reverse_lookup = convert_reverse_lookup(socket, reverse_lookup)
 
         options = ::Socket::Constants::NI_NUMERICHOST |
           ::Socket::Constants::NI_NUMERICSERV

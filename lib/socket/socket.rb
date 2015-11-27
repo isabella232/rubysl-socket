@@ -64,9 +64,8 @@ class Socket < BasicSocket
     addrinfos = RubySL::Socket::Foreign
       .getaddrinfo(host, service, family, socktype, protocol, flags)
 
-    if reverse_lookup.nil?
-      reverse_lookup = !BasicSocket.do_not_reverse_lookup
-    end
+    reverse_lookup = RubySL::Socket::Helpers
+      .convert_reverse_lookup(nil, reverse_lookup)
 
     addrinfos.map do |ai|
       addrinfo = []
