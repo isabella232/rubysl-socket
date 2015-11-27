@@ -1,54 +1,50 @@
-require File.expand_path('../../fixtures/classes', __FILE__)
-
 require 'socket'
 
-describe "Socket#connect_nonblock" do
-  before :each do
-    @hostname = "127.0.0.1"
-    @addr = Socket.sockaddr_in(SocketSpecs.port, @hostname)
-    @socket = Socket.new(Socket::AF_INET, Socket::SOCK_STREAM, 0)
-    @thread = nil
-  end
+describe 'Socket#connect_nonblock' do
+  describe 'using a DGRAM socket' do
+    before do
+      @server   = Socket.new(:INET, :DGRAM)
+      @client   = Socket.new(:INET, :DGRAM)
+      @sockaddr = Socket.sockaddr_in(0, '127.0.0.1')
 
-  after :each do
-    @socket.close
-    @thread.join if @thread
-  end
-
-  it "connects the socket to the remote side" do
-    ready = false
-    @thread = Thread.new do
-      server = TCPServer.new(@hostname, SocketSpecs.port)
-      ready = true
-      conn = server.accept
-      conn << "hello!"
-      conn.close
-      server.close
+      @server.bind(@sockaddr)
     end
 
-    Thread.pass while (@thread.status and @thread.status != 'sleep') or !ready
-
-    begin
-      @socket.connect_nonblock(@addr)
-    rescue Errno::EINPROGRESS
+    after do
+      @client.close
+      @server.close
     end
 
-    IO.select nil, [@socket]
-
-    begin
-      @socket.connect_nonblock(@addr)
-    rescue Errno::EISCONN
-      # Not all OS's use this errno, so we trap and ignore it
+    it 'returns 0 when successfully connected using a String' do
+      @client.connect_nonblock(@server.getsockname).should == 0
     end
 
-    @socket.read(6).should == "hello!"
+    it 'returns 0 when successfully connected using an Addrinfo' do
+      @client.connect_nonblock(@server.connect_address).should == 0
+    end
+
+    it 'raises TypeError when passed a Fixnum' do
+      proc { @client.connect_nonblock(666) }.should raise_error(TypeError)
+    end
   end
 
-  platform_is_not :freebsd do
-    it "raises IO::EINPROGRESSWaitWritable when the connect would block" do
-      lambda do
-        @socket.connect_nonblock(@addr)
-      end.should raise_error(IO::EINPROGRESSWaitWritable)
+  describe 'using a STREAM socket' do
+    before do
+      @server   = Socket.new(:INET, :STREAM)
+      @client   = Socket.new(:INET, :STREAM)
+      @sockaddr = Socket.sockaddr_in(0, '127.0.0.1')
+    end
+
+    after do
+      @client.close
+      @server.close
+    end
+
+    it 'raises IO:EINPROGRESSWaitWritable when the connection would block' do
+      @server.bind(@sockaddr)
+
+      proc { @client.connect_nonblock(@server.getsockname) }
+        .should raise_error(IO::EINPROGRESSWaitWritable)
     end
   end
 end
