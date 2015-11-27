@@ -265,10 +265,16 @@ class Socket < BasicSocket
     IO.setup self, descriptor, nil, true
   end
 
-  def bind(server_sockaddr)
-    err = RubySL::Socket::Foreign.bind(descriptor, server_sockaddr)
-    Errno.handle 'bind(2)' unless err == 0
-    err
+  def bind(addr)
+    if addr.is_a?(Addrinfo)
+      addr = addr.to_sockaddr
+    end
+
+    err = RubySL::Socket::Foreign.bind(descriptor, addr)
+
+    Errno.handle('bind(2)') unless err == 0
+
+    0
   end
 
   def connect(sockaddr, extra=nil)
