@@ -1,12 +1,10 @@
 class BasicSocket < IO
-  class << self
-    def from_descriptor(fixnum)
-      sock = allocate()
-      sock.from_descriptor(fixnum)
-      return sock
-    end
+  def self.for_fd(fixnum)
+    sock = allocate
 
-    alias :for_fd :from_descriptor
+    IO.setup(sock, fixnum, nil, true)
+
+    sock
   end
 
   def self.do_not_reverse_lookup=(setting)
@@ -16,12 +14,6 @@ class BasicSocket < IO
   def self.do_not_reverse_lookup
     @no_reverse_lookup = true unless defined?(@no_reverse_lookup)
     @no_reverse_lookup
-  end
-
-  def from_descriptor(fixnum)
-    IO.setup(self, fixnum, nil, true)
-
-    self
   end
 
   def do_not_reverse_lookup=(setting)

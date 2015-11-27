@@ -218,7 +218,7 @@ class Socket < BasicSocket
       RubySL::Socket::Foreign.socketpair(domain, type, protocol, mp)
       fd0, fd1 = mp.read_array_of_int(2)
 
-      [ klass.from_descriptor(fd0), klass.from_descriptor(fd1) ]
+      [ klass.for_fd(fd0), klass.for_fd(fd1) ]
     end
   end
 

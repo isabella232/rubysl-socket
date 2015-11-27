@@ -31,11 +31,6 @@ class UNIXSocket < BasicSocket
     return @path
   end
 
-  def from_descriptor(fixnum)
-    super
-    @path = nil
-  end
-
   def addr
     sockaddr = RubySL::Socket::Foreign.getsockname descriptor
     _, sock_path = sockaddr.unpack('SZ*')

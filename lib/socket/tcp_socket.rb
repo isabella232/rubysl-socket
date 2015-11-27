@@ -26,12 +26,6 @@ class TCPSocket < IPSocket
     super(bytes_to_read, flags)
   end
 
-  def from_descriptor(descriptor)
-    IO.setup self, descriptor, nil, true
-
-    self
-  end
-
   def local_address
     address  = addr
     sockaddr = Socket.pack_sockaddr_in(address[1], address[3])
