@@ -3,64 +3,80 @@ require File.expand_path('../../fixtures/classes', __FILE__)
 
 describe 'Socket#recvfrom' do
   before do
-    @server   = Socket.new(Socket::AF_INET, Socket::SOCK_STREAM, 0)
-    @client   = Socket.new(Socket::AF_INET, Socket::SOCK_STREAM, 0)
-    @sockaddr = Socket.pack_sockaddr_in(SocketSpecs.port, '127.0.0.1')
-
-    @server.bind(@sockaddr)
-    @server.listen(1)
+    @server = Socket.new(:INET, :DGRAM)
+    @client = Socket.new(:INET, :DGRAM)
   end
 
-  after do
-    @server.close
-    @client.close
+  describe 'using an unbound socket' do
+    it 'blocks the caller' do
+      SocketSpecs.blocking? { @server.recvfrom(1) }.should == true
+    end
   end
 
-  before do
-    @output = nil
-    @addr   = nil
-
-    thread = Thread.new do
-      client, _ = @server.accept
-
-      @output, @addr = client.recvfrom(2)
-
-      client.close
+  describe 'using a bound socket' do
+    before do
+      @server.bind(Socket.sockaddr_in(0, '127.0.0.1'))
+      @client.connect(@server.getsockname)
     end
 
-    @client.connect(@sockaddr)
-    @client.write('1234')
-
-    thread.join
-  end
-
-  it 'returns the read bytes as a String' do
-    @output.should == '12'
-  end
-
-  it 'returns an Addrinfo' do
-    @addr.should be_an_instance_of(Addrinfo)
-  end
-
-  describe 'the returned Addrinfo' do
-    it 'uses AF_UNSPEC as the address family' do
-      @addr.afamily.should == Socket::AF_UNSPEC
+    describe 'without any data available' do
+      it 'blocks the caller' do
+        SocketSpecs.blocking? { @server.recvfrom(1) }.should == true
+      end
     end
 
-    it 'uses PF_UNSPEC as the protocol family' do
-      @addr.pfamily.should == Socket::PF_UNSPEC
-    end
+    describe 'with data available' do
+      before do
+        @client.write('hello')
+      end
 
-    it 'uses SOCK_STREAM as the socket type' do
-      @addr.socktype.should == Socket::SOCK_STREAM
-    end
+      it 'returns an Array containing the data and an Addrinfo' do
+        @server.recvfrom(1).should be_an_instance_of(Array)
+      end
 
-    it 'raises SocketError when calling #ip_address' do
-      proc { @addr.ip_address }.should raise_error(SocketError)
-    end
+      describe 'the returned Array' do
+        before do
+          @array = @server.recvfrom(1)
+        end
 
-    it 'raises SocketError when calling #ip_port' do
-      proc { @addr.ip_port }.should raise_error(SocketError)
+        it 'contains the data at index 0' do
+          @array[0].should == 'h'
+        end
+
+        it 'contains an Addrinfo at index 1' do
+          @array[1].should be_an_instance_of(Addrinfo)
+        end
+      end
+
+      describe 'the returned Addrinfo' do
+        before do
+          @addr = @server.recvfrom(1)[1]
+        end
+
+        it 'uses AF_INET as the address family' do
+          @addr.afamily.should == Socket::AF_INET
+        end
+
+        it 'uses SOCK_DGRAM as the socket type' do
+          @addr.socktype.should == Socket::SOCK_DGRAM
+        end
+
+        it 'uses PF_INET as the protocol family' do
+          @addr.pfamily.should == Socket::PF_INET
+        end
+
+        it 'uses 0 as the protocol' do
+          @addr.protocol.should == 0
+        end
+
+        it 'uses the IP address of the client' do
+          @addr.ip_address.should == '127.0.0.1'
+        end
+
+        it 'uses the port of the client' do
+          @addr.ip_port.should == @client.local_address.ip_port
+        end
+      end
     end
   end
 end
