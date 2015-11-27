@@ -50,7 +50,7 @@ class Socket < BasicSocket
   end
 
   def self.getaddrinfo(host, service, family = 0, socktype = 0,
-                       protocol = 0, flags = 0)
+                       protocol = 0, flags = 0, reverse_lookup = nil)
     if service
       if service.kind_of?(Fixnum)
         service = service.to_s
@@ -64,12 +64,16 @@ class Socket < BasicSocket
     addrinfos = RubySL::Socket::Foreign
       .getaddrinfo(host, service, family, socktype, protocol, flags)
 
+    if reverse_lookup.nil?
+      reverse_lookup = !BasicSocket.do_not_reverse_lookup
+    end
+
     addrinfos.map do |ai|
       addrinfo = []
       addrinfo << Socket::Constants::AF_TO_FAMILY[ai[1]]
 
       sockaddr = RubySL::Socket::Foreign
-        .unpack_sockaddr_in(ai[4], !BasicSocket.do_not_reverse_lookup)
+        .unpack_sockaddr_in(ai[4], reverse_lookup)
 
       addrinfo << sockaddr.pop # port
       addrinfo.concat sockaddr # hosts
