@@ -51,12 +51,10 @@ class Socket < BasicSocket
 
   def self.getaddrinfo(host, service, family = 0, socktype = 0,
                        protocol = 0, flags = 0, reverse_lookup = nil)
-    if service
-      if service.kind_of?(Fixnum)
-        service = service.to_s
-      else
-        service = StringValue(service)
-      end
+    if service.kind_of?(Fixnum)
+      service = service.to_s
+    elsif service
+      service = RubySL::Socket::Helpers.coerce_to_string(service)
     end
 
     family    = RubySL::Socket::Helpers.address_family(family)
