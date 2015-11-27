@@ -1,79 +1,66 @@
-require File.expand_path('../../fixtures/classes', __FILE__)
+require 'socket'
 
-describe "Socket::IPSocket#peeraddr" do
-  before :all do
-    @do_not_reverse_lookup = BasicSocket.do_not_reverse_lookup
+describe 'IPSocket#peeraddr' do
+  before do
+    @ip     = '127.0.0.1'
+    @server = TCPServer.new(@ip, 0)
+    @port   = @server.connect_address.ip_port
+    @client = TCPSocket.new(@ip, @port)
   end
 
-  before :each do
-    @server = TCPServer.new("127.0.0.1", SocketSpecs.port)
-    @client = TCPSocket.new("127.0.0.1", SocketSpecs.port)
+  after do
+    @client.close
+    @server.close
   end
 
-  after :each do
-    @server.close unless @server.closed?
-    @client.close unless @client.closed?
-    BasicSocket.do_not_reverse_lookup = false
-  end
-
-  after :all do
-    BasicSocket.do_not_reverse_lookup = @do_not_reverse_lookup
-  end
-
-  it "raises error if socket is not connected" do
-    lambda { @server.peeraddr }.should raise_error
-  end
-
-
-  ruby_version_is ""..."1.9" do
-
-    it "returns an array of information on the peer" do
-      BasicSocket.do_not_reverse_lookup = false
-      addrinfo = @client.peeraddr
-      addrinfo[0].should == "AF_INET"
-      addrinfo[1].should == SocketSpecs.port
-      addrinfo[2].should == SocketSpecs.hostname
-      addrinfo[3].should == "127.0.0.1"
+  describe 'without reverse lookups' do
+    before do
+      @hostname = Socket.getaddrinfo(@ip, nil)[0][2]
     end
 
-    it "returns an IP instead of hostname if do_not_reverse_lookup is true" do
-      BasicSocket.do_not_reverse_lookup = true
-      addrinfo = @client.peeraddr
-      addrinfo[0].should == "AF_INET"
-      addrinfo[1].should == SocketSpecs.port
-      addrinfo[2].should == "127.0.0.1"
-      addrinfo[3].should == "127.0.0.1"
+    it 'returns an Array containing address information' do
+      @client.peeraddr.should == ['AF_INET', @port, @hostname, @ip]
     end
   end
 
-  ruby_version_is "1.9" do
+  describe 'with reverse lookups' do
+    before do
+      @hostname = Socket.getaddrinfo(@ip, nil, nil, 0, 0, 0, true)[0][2]
+    end
 
-    it "returns an array of information on the peer" do
+    describe 'using true as the argument' do
+      it 'returns an Array containing address information' do
+        @client.peeraddr(true).should == ['AF_INET', @port, @hostname, @ip]
+      end
+    end
+
+    describe 'using :hostname as the argument' do
+      it 'returns an Array containing address information' do
+        @client.peeraddr(:hostname).should == ['AF_INET', @port, @hostname, @ip]
+      end
+    end
+
+    describe 'using :cats as the argument' do
+      it 'raises ArgumentError' do
+        proc { @client.peeraddr(:cats) }.should raise_error(ArgumentError)
+      end
+    end
+  end
+
+  describe 'with do_not_reverse_lookup disabled on socket level' do
+    before do
       @client.do_not_reverse_lookup = false
-      BasicSocket.do_not_reverse_lookup = false
-      addrinfo = @client.peeraddr
-      addrinfo[0].should == "AF_INET"
-      addrinfo[1].should == SocketSpecs.port
-      addrinfo[2].should == SocketSpecs.hostname
-      addrinfo[3].should == "127.0.0.1"
+
+      @hostname = Socket.getaddrinfo(@ip, nil, nil, 0, 0, 0, true)[0][2]
+      @port     = @client.local_address.ip_port
     end
 
-    it "returns an IP instead of hostname if do_not_reverse_lookup is true" do
+    after do
       @client.do_not_reverse_lookup = true
-      BasicSocket.do_not_reverse_lookup = true
-      addrinfo = @client.peeraddr
-      addrinfo[0].should == "AF_INET"
-      addrinfo[1].should == SocketSpecs.port
-      addrinfo[2].should == "127.0.0.1"
-      addrinfo[3].should == "127.0.0.1"
     end
-    
-    it "returns an IP instead of hostname if passed false" do
-      addrinfo = @client.peeraddr(false)
-      addrinfo[0].should == "AF_INET"
-      addrinfo[1].should == SocketSpecs.port
-      addrinfo[2].should == "127.0.0.1"
-      addrinfo[3].should == "127.0.0.1"
+
+    it 'returns an Array containing address information' do
+      @client.addr.should == ['AF_INET', @port, @hostname, @ip]
     end
   end
 end
