@@ -1,72 +1,71 @@
-require File.expand_path('../../fixtures/classes', __FILE__)
+require 'socket'
 
-describe "Socket::IPSocket#addr" do
-  before :all do
-    @do_not_reverse_lookup = BasicSocket.do_not_reverse_lookup
+describe 'IPSocket#addr' do
+  before do
+    @ip     = '127.0.0.1'
+    @server = TCPServer.new(@ip, 0)
+    @port   = @server.connect_address.ip_port
   end
 
-
-  before :each do
-    @socket = TCPServer.new("127.0.0.1", SocketSpecs.port)
+  after do
+    @server.close
   end
 
-  after :each do
-    @socket.close unless @socket.closed?
-    BasicSocket.do_not_reverse_lookup = false
-  end
-
-  after :all do
-    BasicSocket.do_not_reverse_lookup = @do_not_reverse_lookup
-  end
-
-  ruby_version_is ""..."1.9" do
-    it "returns an array with the socket's information" do
-      BasicSocket.do_not_reverse_lookup = false
-
-      addrinfo = @socket.addr
-      addrinfo[0].should == "AF_INET"
-      addrinfo[1].should == SocketSpecs.port
-      addrinfo[2].should == SocketSpecs.hostname
-      addrinfo[3].should == "127.0.0.1"
+  describe 'without reverse lookups' do
+    before do
+      @hostname = Socket.getaddrinfo(@ip, nil)[0][2]
     end
 
-    it "returns an address in the array if do_not_reverse_lookup is true" do
-      BasicSocket.do_not_reverse_lookup = true
-      addrinfo = @socket.addr
-      addrinfo[0].should == "AF_INET"
-      addrinfo[1].should == SocketSpecs.port
-      addrinfo[2].should == "127.0.0.1"
-      addrinfo[3].should == "127.0.0.1"
+    it 'returns an Array containing address information' do
+      @server.addr.should == ['AF_INET', @port, @hostname, @ip]
     end
   end
 
-  ruby_version_is "1.9" do
-    it "returns an array with the socket's information" do
-      @socket.do_not_reverse_lookup = false
-      BasicSocket.do_not_reverse_lookup = false
-      addrinfo = @socket.addr
-      addrinfo[0].should == "AF_INET"
-      addrinfo[1].should == SocketSpecs.port
-      addrinfo[2].should == SocketSpecs.hostname
-      addrinfo[3].should == "127.0.0.1"
+  describe 'with reverse lookups' do
+    before do
+      @hostname = Socket.getaddrinfo(@ip, nil, nil, 0, 0, 0, true)[0][2]
     end
 
-    it "returns an address in the array if do_not_reverse_lookup is true" do
-      @socket.do_not_reverse_lookup = true
-      BasicSocket.do_not_reverse_lookup = true
-      addrinfo = @socket.addr
-      addrinfo[0].should == "AF_INET"
-      addrinfo[1].should == SocketSpecs.port
-      addrinfo[2].should == "127.0.0.1"
-      addrinfo[3].should == "127.0.0.1"
+    describe 'using true as the argument' do
+      it 'returns an Array containing address information' do
+        @server.addr(true).should == ['AF_INET', @port, @hostname, @ip]
+      end
     end
-    
-    it "returns an address in the array if passed false" do
-      addrinfo = @socket.addr(false)
-      addrinfo[0].should == "AF_INET"
-      addrinfo[1].should == SocketSpecs.port
-      addrinfo[2].should == "127.0.0.1"
-      addrinfo[3].should == "127.0.0.1"
+
+    describe 'using :hostname as the argument' do
+      it 'returns an Array containing address information' do
+        @server.addr(:hostname).should == ['AF_INET', @port, @hostname, @ip]
+      end
+    end
+
+    describe 'using :cats as the argument' do
+      it 'raises ArgumentError' do
+        proc { @server.addr(:cats) }.should raise_error(ArgumentError)
+      end
+    end
+  end
+
+  describe 'with do_not_reverse_lookup disabled on socket level' do
+    before do
+      @server.do_not_reverse_lookup = false
+
+      @hostname = Socket.getaddrinfo(@ip, nil, nil, 0, 0, 0, true)[0][2]
+    end
+
+    after do
+      @server.do_not_reverse_lookup = true
+    end
+
+    describe 'using true as the argument' do
+      it 'returns an Array containing address information' do
+        @server.addr.should == ['AF_INET', @port, @hostname, @ip]
+      end
+    end
+
+    describe 'using :hostname as the argument' do
+      it 'returns an Array containing address information' do
+        @server.addr.should == ['AF_INET', @port, @hostname, @ip]
+      end
     end
   end
 end
