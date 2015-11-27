@@ -313,4 +313,8 @@ class Socket < BasicSocket
 
     return bytes, addr
   end
+
+  def ipv6only!
+    setsockopt(:IPV6, :V6ONLY, 1)
+  end
 end
