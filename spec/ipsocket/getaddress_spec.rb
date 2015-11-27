@@ -1,26 +1,26 @@
-require File.expand_path('../../fixtures/classes', __FILE__)
+require 'socket'
 
-describe "Socket::IPSocket#getaddress" do
+describe 'IPSocket#getaddress' do
+  describe 'when given a hostname' do
+    it 'returns the IP address of the hostname' do
+      addr = IPSocket.getaddress('localhost')
 
-  it "returns the IP address of hostname" do
-    addr_local = IPSocket.getaddress(SocketSpecs.hostname)
-    ["127.0.0.1", "::1"].include?(addr_local).should == true
-  end
-
-  it "returns the IP address when passed an IP" do
-    IPSocket.getaddress("127.0.0.1").should == "127.0.0.1"
-    IPSocket.getaddress("0.0.0.0").should == "0.0.0.0"
-  end
-
-  # There is no way to make this fail-proof on all machines, because
-  # DNS servers like opendns return A records for ANY host, including
-  # traditionally invalidly named ones.
-  quarantine! do
-    it "raises an error on unknown hostnames" do
-      lambda {
-        IPSocket.getaddress("rubyspecdoesntexist.fallingsnow.net")
-      }.should raise_error(SocketError)
+      %w{127.0.0.1 ::1}.include?(addr).should == true
     end
   end
 
+  describe 'when given an IP address' do
+    it 'returns the IP address itself' do
+      IPSocket.getaddress('127.0.0.1').should == '127.0.0.1'
+      IPSocket.getaddress('::1').should == '::1'
+    end
+  end
+
+  describe 'when given a non existing hostname' do
+    it 'raises SocketError' do
+      block = proc { IPSocket.getaddress('cats.are.awesome.local') }
+
+      block.should raise_error(SocketError)
+    end
+  end
 end
