@@ -58,7 +58,7 @@ module RubySL
       end
 
       def self.ip_level_to_int(level)
-        prefixes = ["IPPROTO", "SOL"]
+        prefixes = ["IPPROTO", "SOL", "IPV6"]
 
         prefixes.each do |prefix|
           const = "#{prefix}_#{level}"

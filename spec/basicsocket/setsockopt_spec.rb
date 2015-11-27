@@ -28,6 +28,14 @@ describe 'BasicSocket#setsockopt' do
       @socket.getsockopt(:IP, :TTL).int.should == 255
     end
 
+    it 'sets an IPv6 boolean option' do
+      socket = Socket.new(:INET6, :STREAM)
+
+      socket.setsockopt(:IPV6, :V6ONLY, true).should == 0
+
+      socket.getsockopt(:IPV6, :V6ONLY).bool.should == true
+    end
+
     it 'raises Errno::EINVAL when setting an invalid option value' do
       proc { @socket.setsockopt(:SOCKET, :OOBINLINE, 'bla') }
         .should raise_error(Errno::EINVAL)

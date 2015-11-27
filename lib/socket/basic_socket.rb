@@ -25,8 +25,10 @@ class BasicSocket < IO
   end
 
   def getsockopt(level, optname)
-    level   = RubySL::Socket::SocketOptions.socket_level(level)
-    optname = RubySL::Socket::SocketOptions.socket_option(level, optname)
+    sockname = RubySL::Socket::Foreign.getsockname(descriptor)
+    family   = RubySL::Socket::Foreign.getnameinfo(sockname).first
+    level    = RubySL::Socket::SocketOptions.socket_level(level, family)
+    optname  = RubySL::Socket::SocketOptions.socket_option(level, optname)
 
     data     = RubySL::Socket::Foreign.getsockopt(descriptor, level, optname)
     sockaddr = RubySL::Socket::Foreign.getsockname(descriptor)
