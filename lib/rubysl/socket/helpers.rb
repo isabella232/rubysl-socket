@@ -123,6 +123,12 @@ module RubySL
       def self.address_info(method, socket, reverse_lookup = nil)
         sockaddr = Foreign.__send__(method, socket.descriptor)
 
+        if reverse_lookup and
+          (reverse_lookup != true and reverse_lookup != :hostname)
+          raise ArgumentError,
+            "invalid reverse_lookup flag: #{reverse_lookup.inspect}"
+        end
+
         reverse_lookup = !socket.do_not_reverse_lookup if reverse_lookup.nil?
 
         options = ::Socket::Constants::NI_NUMERICHOST |

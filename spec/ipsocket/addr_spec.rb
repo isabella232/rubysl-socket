@@ -56,16 +56,8 @@ describe 'IPSocket#addr' do
       @server.do_not_reverse_lookup = true
     end
 
-    describe 'using true as the argument' do
-      it 'returns an Array containing address information' do
-        @server.addr.should == ['AF_INET', @port, @hostname, @ip]
-      end
-    end
-
-    describe 'using :hostname as the argument' do
-      it 'returns an Array containing address information' do
-        @server.addr.should == ['AF_INET', @port, @hostname, @ip]
-      end
+    it 'returns an Array containing address information' do
+      @server.addr.should == ['AF_INET', @port, @hostname, @ip]
     end
   end
 end
