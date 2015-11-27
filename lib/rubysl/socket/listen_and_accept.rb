@@ -4,13 +4,13 @@ module RubySL
       include IO::Socketable
 
       def listen(backlog)
-        backlog = Rubinius::Type.coerce_to backlog, Fixnum, :to_int
+        backlog = Rubinius::Type.coerce_to(backlog, Fixnum, :to_int)
 
-        err = RubySL::Socket::Foreign.listen descriptor, backlog
+        err = RubySL::Socket::Foreign.listen(descriptor, backlog)
 
-        Errno.handle 'listen(2)' unless err == 0
+        Errno.handle('listen(2)') if err < 0
 
-        err
+        0
       end
 
       def accept
