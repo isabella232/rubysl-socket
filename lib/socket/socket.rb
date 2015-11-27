@@ -75,11 +75,13 @@ class Socket < BasicSocket
       sockaddr = RubySL::Socket::Foreign
         .unpack_sockaddr_in(ai[4], reverse_lookup)
 
-      addrinfo << sockaddr.pop # port
-      addrinfo.concat sockaddr # hosts
+      addrinfo << sockaddr.pop  # port
+      addrinfo.concat(sockaddr) # hosts
+
       addrinfo << ai[1]
       addrinfo << ai[2]
       addrinfo << ai[3]
+
       addrinfo
     end
   end
