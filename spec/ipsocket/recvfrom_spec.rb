@@ -1,64 +1,36 @@
-require File.expand_path('../../fixtures/classes', __FILE__)
+require 'socket'
 
-describe "Socket::IPSocket#recvfrom" do
+describe 'IPSocket#recvfrom' do
+  before do
+    @server = UDPSocket.new
+    @client = UDPSocket.new
+    @ip     = '127.0.0.1'
 
-  before :each do
-    @server = TCPServer.new("127.0.0.1", SocketSpecs.port)
-    @client = TCPSocket.new("127.0.0.1", SocketSpecs.port)
+    @server.bind(@ip, 0)
+    @client.connect(@ip, @server.connect_address.ip_port)
+
+    @hostname = Socket.getaddrinfo(@ip, nil)[0][2]
   end
 
-  after :each do
-    @server.close unless @server.closed?
-    @client.close unless @client.closed?
+  after do
+    @client.close
+    @server.close
   end
 
-  it "reads data from the connection" do
-    data = nil
-    t = Thread.new do
-      client = @server.accept
-      data = client.recvfrom(6)
-      client.close
-    end
+  it 'returns an Array containing up to N bytes and address information' do
+    @client.write('hello')
 
-    @client.send('hello', 0)
-    @client.shutdown rescue nil
-    # shutdown may raise Errno::ENOTCONN when sent data is pending.
-    t.join
+    port = @client.local_address.ip_port
+    ret  = @server.recvfrom(2)
 
-    data.first.should == 'hello'
+    ret.should == ['he', ['AF_INET', port, @hostname, @ip]]
   end
 
-  it "reads up to len bytes" do
-    data = nil
-    t = Thread.new do
-      client = @server.accept
-      data = client.recvfrom(3)
-      client.close
-    end
+  it 'allows specifying of flags when receiving data' do
+    @client.write('hello')
 
-    @client.send('hello', 0)
-    @client.shutdown rescue nil
-    t.join
+    @server.recvfrom(2, Socket::MSG_PEEK)[0].should == 'he'
 
-    data.first.should == 'hel'
+    @server.recvfrom(2)[0].should == 'he'
   end
-
-  it "returns an array with the data and connection info" do
-    data = nil
-    t = Thread.new do
-      client = @server.accept
-      data = client.recvfrom(3)
-      client.close
-    end
-
-    @client.send('hello', 0)
-    @client.shutdown rescue nil
-    t.join
-
-    data.size.should == 2
-    data.first.should == "hel"
-    # This does not apply to every platform, dependant on recvfrom(2)
-    # data.last.should == nil
-  end
-
 end
