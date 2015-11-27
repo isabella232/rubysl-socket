@@ -1,34 +1,41 @@
 require 'socket'
-require File.expand_path('../../fixtures/classes', __FILE__)
 
 describe 'Socket#connect' do
   before do
-    @sock = Socket.new(Socket::AF_INET, Socket::SOCK_STREAM, Socket::IPPROTO_TCP)
+    @server = Socket.new(:INET, :STREAM)
+    @client = Socket.new(:INET, :STREAM)
 
-    @sockaddr = Socket.pack_sockaddr_in(SocketSpecs.port, '127.0.0.1')
+    @server.bind(Socket.sockaddr_in(0, '127.0.0.1'))
   end
 
   after do
-    @sock.close
+    @client.close
+    @server.close
   end
 
-  describe 'using a valid address' do
-    before :all do
-      SocketSpecs::SpecTCPServer.start
-    end
+  it 'returns 0 when connected successfully using a String' do
+    @server.listen(1)
 
-    after :all do
-      SocketSpecs::SpecTCPServer.shutdown
-    end
-
-    it 'returns 0' do
-      @sock.connect(@sockaddr).should == 0
-    end
+    @client.connect(@server.getsockname).should == 0
   end
 
-  describe 'using an invalid address' do
-    it 'raises Errno::ECONNREFUSED' do
-      proc { @sock.connect(@sockaddr) }.should raise_error(Errno::ECONNREFUSED)
-    end
+  it 'returns 0 when connected successfully using an Addrinfo' do
+    @server.listen(1)
+
+    @client.connect(@server.connect_address).should == 0
+  end
+
+  it 'raises Errno::EISCONN when already connected' do
+    @server.listen(1)
+
+    @client.connect(@server.getsockname).should == 0
+
+    proc { @client.connect(@server.getsockname) }
+      .should raise_error(Errno::EISCONN)
+  end
+
+  it 'raises Errno::ECONNREFUSED when the connection failed' do
+    proc { @client.connect(@server.getsockname) }
+      .should raise_error(Errno::ECONNREFUSED)
   end
 end
