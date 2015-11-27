@@ -171,9 +171,9 @@ class BasicSocket < IO
 
         # When a socket is actually connected the address structure is not used.
         if header.address_size > 0
-          addr = Addrinfo.new(address.to_s, socket_type)
+          addr = Addrinfo.new(address.to_s, address.family, socket_type)
         else
-          addr = Addrinfo.new([Socket::AF_UNSPEC])
+          addr = Addrinfo.new([Socket::AF_UNSPEC], nil, socket_type)
         end
 
         return msg_buffer.read_string, addr, header.flags

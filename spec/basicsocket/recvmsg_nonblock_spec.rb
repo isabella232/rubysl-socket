@@ -86,7 +86,11 @@ describe 'BasicSocket#recvmsg_nonblock' do
             end
 
             it 'uses the correct protocol family' do
-              @addr.pfamily.should == Socket::SOCK_DGRAM
+              @addr.pfamily.should == Socket::PF_INET
+            end
+
+            it 'uses the correct socket type' do
+              @addr.socktype.should == Socket::SOCK_DGRAM
             end
 
             it 'uses the port number of the client' do
@@ -175,8 +179,12 @@ describe 'BasicSocket#recvmsg_nonblock' do
             @addr.afamily.should == Socket::AF_UNSPEC
           end
 
-          it 'returns 0 for the protocol family' do
+          it 'uses 0 for the protocol family' do
             @addr.pfamily.should == 0
+          end
+
+          it 'uses the correct socket type' do
+            @addr.socktype.should == Socket::SOCK_STREAM
           end
 
           it 'raises when receiving the ip_port message' do

@@ -12,6 +12,10 @@ module RubySL
           new(pointer)
         end
 
+        def family
+          self[:sin_family]
+        end
+
         def to_s
           pointer.read_string(pointer.total)
         end
