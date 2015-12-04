@@ -1,20 +1,14 @@
 require 'socket'
-require File.expand_path('../../fixtures/classes', __FILE__)
 
 describe 'TCPSocket#remote_address' do
-  before :all do
-    SocketSpecs::SpecTCPServer.start
-  end
-
-  after :all do
-    SocketSpecs::SpecTCPServer.cleanup
-  end
-
   before do
-    server = SocketSpecs::SpecTCPServer.get
+    @server = TCPServer.new('127.0.0.1', 0)
+    @host   = @server.connect_address.ip_address
+    @port   = @server.connect_address.ip_port
+  end
 
-    @host = server.hostname
-    @port = server.port
+  after do
+    @server.close
   end
 
   describe 'using an explicit hostname' do
