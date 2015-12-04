@@ -1,30 +1,31 @@
-require File.expand_path('../../fixtures/classes', __FILE__)
+require 'socket'
 
-describe "Socket::TCPServer.accept_nonblock" do
-  before :each do
-    @server =  TCPServer.new("127.0.0.1", SocketSpecs.port)
+describe 'TCPServer#accept' do
+  before do
+    @server = TCPServer.new('127.0.0.1', 0)
   end
 
-  after :each do
+  after do
     @server.close
   end
 
-  it "accepts non blocking connections" do
-    @server.listen(5)
-    lambda { @server.accept_nonblock}.should raise_error(Errno::EAGAIN)
+  describe 'without a connected client' do
+    it 'raises IO::EAGAINWaitReadable' do
+      proc { @server.accept_nonblock }.should raise_error(IO::EAGAINWaitReadable)
+    end
+  end
 
-    c = TCPSocket.new("127.0.0.1", SocketSpecs.port)
-    sleep 0.1
-    s = @server.accept_nonblock
+  describe 'with a connected client' do
+    before do
+      @client = TCPSocket.new('127.0.0.1', @server.connect_address.ip_port)
+    end
 
-    # commenting while we get some input on the current JRuby situation
-    #    port, address = Socket.unpack_sockaddr_in(s.getsockname)
+    after do
+      @client.close
+    end
 
-    #    port.should == SocketSpecs.port
-    #    address.should == "127.0.0.1"
-    s.should be_kind_of(TCPSocket)
-
-    c.close
-    s.close
+    it 'returns a TCPSocket' do
+      @server.accept_nonblock.should be_an_instance_of(TCPSocket)
+    end
   end
 end
