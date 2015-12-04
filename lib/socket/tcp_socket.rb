@@ -1,17 +1,17 @@
 class TCPSocket < IPSocket
   def self.gethostbyname(hostname)
-    addrinfos = Socket.getaddrinfo(hostname, nil)
+    addrinfos = Socket.getaddrinfo(hostname, nil, 0, 0, 0, 0, true)
 
-    hostname     = addrinfos.first[2]
-    family       = addrinfos.first[4]
-    addresses    = []
+    hostname     = addrinfos[0][2]
+    family       = addrinfos[0][4]
+    addresses    = addrinfos.map { |a| a[3] }
     alternatives = []
-    addrinfos.each do |a|
-      alternatives << a[2] unless a[2] == hostname
-      addresses    << a[3] if a[4] == family
+
+    RubySL::Socket.aliases_for_hostname(hostname).each do |name|
+      alternatives << name unless name == hostname
     end
 
-    [hostname, alternatives.uniq, family] + addresses.uniq
+    [hostname, alternatives, family] + addresses.uniq
   end
 
   def initialize(host, port, local_host=nil, local_service=nil)
