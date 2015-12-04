@@ -315,6 +315,12 @@ class Socket < BasicSocket
     recvmsg_nonblock(bytes, flags)
   end
 
+  def sysaccept
+    socket, addrinfo = accept
+
+    return socket.fileno, addrinfo
+  end
+
   def ipv6only!
     setsockopt(:IPV6, :V6ONLY, 1)
   end

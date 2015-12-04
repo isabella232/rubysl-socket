@@ -12,7 +12,7 @@ module RubySL
       end
 
       def accept
-        return if closed?
+        raise IOError, 'socket has been closed' if closed?
 
         sockaddr = RubySL::Socket::Foreign::Sockaddr.new
 
@@ -45,12 +45,7 @@ module RubySL
         end
       end
 
-      #
-      # Set nonblocking and accept.
-      #
       def accept_nonblock
-        return if closed?
-
         fcntl(::Fcntl::F_SETFL, ::Fcntl::O_NONBLOCK)
 
         accept
