@@ -2,22 +2,29 @@ class TCPServer < TCPSocket
   def initialize(host, port = nil)
     @no_reverse_lookup = self.class.do_not_reverse_lookup
 
-    if Fixnum === host and port.nil? then
+    if host.is_a?(Fixnum) and port.nil?
       port = host
       host = nil
     end
 
-    if String === host and port.nil? then
-      port = Integer(host)
+    if host.is_a?(String) and port.nil?
+      begin
+        port = Integer(host)
+      rescue ArgumentError
+        raise SocketError, "invalid port number: #{host}"
+      end
+
       host = nil
     end
 
-    port = StringValue port unless port.kind_of? Fixnum
+    unless port.kind_of?(Fixnum)
+      port = RubySL::Socket::Helpers.coerce_to_string(port)
+    end
 
     @host = host
     @port = port
 
-    tcp_setup @host, @port, nil, nil, true
+    tcp_setup(@host, @port, nil, nil, true)
   end
 
   def listen(backlog)
