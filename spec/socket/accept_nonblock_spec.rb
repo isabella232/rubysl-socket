@@ -9,7 +9,7 @@ describe 'Socket#accept_nonblock' do
   end
 
   after do
-    @server.close
+    @server.close unless @server.closed?
   end
 
   describe 'using an unbound socket' do
@@ -25,6 +25,14 @@ describe 'Socket#accept_nonblock' do
 
     it 'raises Errno::EINVAL' do
       proc { @server.accept_nonblock }.should raise_error(Errno::EINVAL)
+    end
+  end
+
+  describe 'using a closed socket' do
+    it 'raises IOError' do
+      @server.close
+
+      proc { @server.accept_nonblock }.should raise_error(IOError)
     end
   end
 
