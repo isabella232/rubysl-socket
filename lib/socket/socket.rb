@@ -1,6 +1,4 @@
 class Socket < BasicSocket
-  include RubySL::Socket::ListenAndAccept
-
   def self.ip_address_list
     struct = RubySL::Socket::Foreign::Ifaddrs.new
     status = RubySL::Socket::Foreign.getifaddrs(struct)
@@ -313,6 +311,18 @@ class Socket < BasicSocket
 
   def recvfrom_nonblock(bytes, flags = 0)
     recvmsg_nonblock(bytes, flags)
+  end
+
+  def listen(backlog)
+    RubySL::Socket::Listen.listen(self, backlog)
+  end
+
+  def accept
+    RubySL::Socket::Accept.accept(self, Socket)
+  end
+
+  def accept_nonblock
+    RubySL::Socket::Accept.accept_nonblock(self, Socket)
   end
 
   def sysaccept
