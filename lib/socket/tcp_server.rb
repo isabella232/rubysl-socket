@@ -28,17 +28,17 @@ class TCPServer < TCPSocket
   end
 
   def listen(backlog)
-    RubySL::Socket::Listen.listen(self, backlog)
+    RubySL::Socket.listen(self, backlog)
   end
 
   def accept
-    socket, _ = RubySL::Socket::Accept.accept(self, TCPSocket)
+    socket, _ = RubySL::Socket.accept(self, TCPSocket)
 
     socket
   end
 
   def accept_nonblock
-    socket, _ = RubySL::Socket::Accept.accept_nonblock(self, TCPSocket)
+    socket, _ = RubySL::Socket.accept_nonblock(self, TCPSocket)
 
     socket
   end

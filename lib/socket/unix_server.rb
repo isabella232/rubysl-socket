@@ -6,14 +6,14 @@ class UNIXServer < UNIXSocket
   end
 
   def listen(backlog)
-    RubySL::Socket::Listen.listen(self, backlog)
+    RubySL::Socket.listen(self, backlog)
   end
 
   def accept
-    RubySL::Socket::Accept.accept(self, UNIXSocket)
+    RubySL::Socket.accept(self, UNIXSocket)
   end
 
   def accept_nonblock
-    RubySL::Socket::Accept.accept_nonblock(self, UNIXSocket)
+    RubySL::Socket.accept_nonblock(self, UNIXSocket)
   end
 end

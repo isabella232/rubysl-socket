@@ -5,8 +5,6 @@ require 'rubysl/socket'
 require 'rubysl/socket/version'
 require 'rubysl/socket/helpers'
 require 'rubysl/socket/socket_options'
-require 'rubysl/socket/listen'
-require 'rubysl/socket/accept'
 
 require 'socket/socket_error'
 require 'socket/basic_socket'

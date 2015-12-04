@@ -314,15 +314,15 @@ class Socket < BasicSocket
   end
 
   def listen(backlog)
-    RubySL::Socket::Listen.listen(self, backlog)
+    RubySL::Socket.listen(self, backlog)
   end
 
   def accept
-    RubySL::Socket::Accept.accept(self, Socket)
+    RubySL::Socket.accept(self, Socket)
   end
 
   def accept_nonblock
-    RubySL::Socket::Accept.accept_nonblock(self, Socket)
+    RubySL::Socket.accept_nonblock(self, Socket)
   end
 
   def sysaccept
