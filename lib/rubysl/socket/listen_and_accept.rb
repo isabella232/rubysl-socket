@@ -1,8 +1,6 @@
 module RubySL
   module Socket
     module ListenAndAccept
-      include IO::Socketable
-
       def listen(backlog)
         backlog = Rubinius::Type.coerce_to(backlog, Fixnum, :to_int)
 
@@ -16,12 +14,35 @@ module RubySL
       def accept
         return if closed?
 
-        fd = super
+        sockaddr = RubySL::Socket::Foreign::Sockaddr.new
 
-        socket = self.class.superclass.allocate
-        IO.setup socket, fd, nil, true
-        socket.binmode
-        socket
+        begin
+          fd = RubySL::Socket::Foreign.memory_pointer(:int) do |size_p|
+            size_p.write_int(sockaddr.size)
+
+            RubySL::Socket::Foreign.accept(descriptor, sockaddr.pointer, size_p)
+          end
+
+          Errno.handle('accept(2)') if fd < 0
+
+          # Socket#accept should produce a Socket, TCPServer#accept should
+          # produce a TCPSocket, etc.
+          if self.class == ::Socket
+            socket = ::Socket.allocate
+          else
+            socket = self.class.superclass.allocate
+          end
+
+          IO.setup(socket, fd, nil, true)
+          socket.binmode
+
+          socktype = getsockopt(:SOCKET, :TYPE).int
+          addrinfo = Addrinfo.new(sockaddr.to_s, sockaddr.family, socktype)
+
+          return socket, addrinfo
+        ensure
+          sockaddr.free
+        end
       end
 
       #
@@ -32,21 +53,7 @@ module RubySL
 
         fcntl(::Fcntl::F_SETFL, ::Fcntl::O_NONBLOCK)
 
-        fd = nil
-        sockaddr = nil
-
-        Rubinius::FFI::MemoryPointer.new 1024 do |sockaddr_p| # HACK from MRI
-          Rubinius::FFI::MemoryPointer.new :int do |size_p|
-            fd = RubySL::Socket::Foreign.accept descriptor, sockaddr_p, size_p
-          end
-        end
-
-        Errno.handle 'accept(2)' if fd < 0
-
-        # TCPServer -> TCPSocket etc. *sigh*
-        socket = self.class.superclass.allocate
-        IO.setup socket, fd, nil, true
-        socket
+        accept
       end
     end
   end
