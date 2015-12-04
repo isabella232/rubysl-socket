@@ -1,62 +1,39 @@
-require File.expand_path('../../fixtures/classes', __FILE__)
+require 'socket'
 
-# TODO: verify these for windows
-describe "TCPSocket#gethostbyname" do
-  before :each do
-    @host_info = TCPSocket.gethostbyname(SocketSpecs.hostname)
+describe 'TCPSocket.gethostbyname' do
+  before do
+    @hostname = Socket.getaddrinfo('localhost', nil, 0, 0, 0, 0, true)[0][2]
   end
 
-  it "returns an array elements of information on the hostname" do
-    @host_info.should be_kind_of(Array)
+  it 'returns an Array' do
+    TCPSocket.gethostbyname('localhost').should be_an_instance_of(Array)
   end
 
-  platform_is_not :windows do
-    it "returns the canonical name as first value" do
-    @host_info[0].should == SocketSpecs.hostname
+  describe 'the returned Array' do
+    before do
+      @array = TCPSocket.gethostbyname('localhost')
     end
 
-    not_compliant_on :jruby do
-      it "returns the address type as the third value" do
-        address_type = @host_info[2]
-        [Socket::AF_INET, Socket::AF_INET6].include?(address_type).should be_true
-      end
-
-      it "returns the IP address as the fourth value" do
-        ip = @host_info[3]
-        ["127.0.0.1", "::1"].include?(ip).should be_true
-      end
+    it 'includes the canonical name as the first value' do
+      @array[0].should == @hostname
     end
 
-    deviates_on :jruby do
-      it "returns the address type as the third value" do
-        address_type = @host_info[2]
-        [Socket::AF_INET, Socket::AF_INET6].include?(address_type).should be_true
-      end
-
-      it "returns the IP address as the fourth value" do
-        ip = @host_info[3]
-        ["127.0.0.1", "::1"].include?(ip).should be_true
-      end
-    end
-  end
-
-  platform_is :windows do
-    it "returns the canonical name as first value" do
-      host = "#{ENV['COMPUTERNAME'].downcase}"
-      host << ".#{ENV['USERDNSDOMAIN'].downcase}" if ENV['USERDNSDOMAIN']
-      @host_info[0].should == host
+    it 'includes an array of alternative hostnames as the 2nd value' do
+      @array[1].should be_an_instance_of(Array)
     end
 
-    it "returns the address type as the third value" do
-      @host_info[2].should == Socket::AF_INET
+    it 'includes the address type as the 3rd value' do
+      @array[2].should be_an_instance_of(Fixnum)
     end
 
-    it "returns the IP address as the fourth value" do
-      @host_info[3].should == "127.0.0.1"
-    end
-  end
+    it 'includes the IP addresses as all the remaining values' do
+      ips = %w{::1 127.0.0.1}
 
-  it "returns any aliases to the address as second value" do
-    @host_info[1].should be_kind_of(Array)
+      ips.include?(@array[3]).should == true
+
+      # Not all machines might have both IPv4 and IPv6 set up, so this value is
+      # optional.
+      ips.include?(@array[4]).should == true if @array[4]
+    end
   end
 end
