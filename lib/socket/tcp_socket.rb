@@ -14,12 +14,13 @@ class TCPSocket < IPSocket
     [hostname, alternatives, family] + addresses.uniq
   end
 
-  def initialize(host, port, local_host=nil, local_service=nil)
+  def initialize(host, port, local_host = nil, local_service = nil)
     @no_reverse_lookup = self.class.do_not_reverse_lookup
+
     @host = host
     @port = port
 
-    tcp_setup @host, @port, local_host, local_service
+    tcp_setup(@host, @port, local_host, local_service)
   end
 
   def send(bytes_to_read, flags, to = nil)
