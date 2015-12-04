@@ -1,6 +1,5 @@
 require 'socket'
 require File.expand_path('../../fixtures/classes', __FILE__)
-require File.expand_path('../../shared/accept', __FILE__)
 
 describe 'Socket#accept' do
   before do
