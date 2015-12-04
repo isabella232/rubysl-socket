@@ -25,10 +25,14 @@ class TCPServer < TCPSocket
   end
 
   def accept
-    RubySL::Socket::Accept.accept(self, TCPSocket)
+    socket, _ = RubySL::Socket::Accept.accept(self, TCPSocket)
+
+    socket
   end
 
   def accept_nonblock
-    RubySL::Socket::Accept.accept_nonblock(self, TCPSocket)
+    socket, _ = RubySL::Socket::Accept.accept_nonblock(self, TCPSocket)
+
+    socket
   end
 end
