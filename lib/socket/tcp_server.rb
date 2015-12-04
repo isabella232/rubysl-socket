@@ -35,4 +35,8 @@ class TCPServer < TCPSocket
 
     socket
   end
+
+  def sysaccept
+    accept.fileno
+  end
 end
