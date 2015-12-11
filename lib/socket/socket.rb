@@ -290,11 +290,15 @@ class Socket < BasicSocket
   end
 
   def recvfrom(bytes, flags = 0)
-    recvmsg(bytes, flags)
+    message, addr = recvmsg(bytes, flags)
+
+    return message, addr
   end
 
   def recvfrom_nonblock(bytes, flags = 0)
-    recvmsg_nonblock(bytes, flags)
+    message, addr = recvmsg_nonblock(bytes, flags)
+
+    return message, addr
   end
 
   def listen(backlog)

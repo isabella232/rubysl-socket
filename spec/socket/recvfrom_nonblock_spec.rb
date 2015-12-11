@@ -32,7 +32,10 @@ describe 'Socket#recvfrom_nonblock' do
       end
 
       it 'returns an Array containing the data and an Addrinfo' do
-        @server.recvfrom_nonblock(1).should be_an_instance_of(Array)
+        ret = @server.recvfrom_nonblock(1)
+
+        ret.should be_an_instance_of(Array)
+        ret.length.should == 2
       end
 
       describe 'the returned Array' do
