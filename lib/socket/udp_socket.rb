@@ -1,13 +1,14 @@
 class UDPSocket < IPSocket
   def initialize(family = Socket::AF_INET)
     @no_reverse_lookup = self.class.do_not_reverse_lookup
-    @family = family
-    status = RubySL::Socket::Foreign.socket @family,
-                                    Socket::SOCK_DGRAM,
-                                    Socket::IPPROTO_UDP
-    Errno.handle 'socket(2)' if status < 0
+    @family            = RubySL::Socket::Helpers.address_family(family)
 
-    IO.setup self, status, nil, true
+    status = RubySL::Socket::Foreign
+      .socket(@family, Socket::SOCK_DGRAM, Socket::IPPROTO_UDP)
+
+    Errno.handle('socket(2)') if status < 0
+
+    IO.setup(self, status, nil, true)
   end
 
   def bind(host, port)
