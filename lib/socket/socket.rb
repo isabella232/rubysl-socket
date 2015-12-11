@@ -175,9 +175,9 @@ class Socket < BasicSocket
     _, address, port = RubySL::Socket::Foreign
       .unpack_sockaddr_in(sockaddr, false)
 
-    return [port, address]
+    return port, address
   rescue SocketError => e
-    if e.message =~ /ai_family not supported/ then # HACK platform specific?
+    if e.message =~ /ai_family not supported/
       raise ArgumentError, 'not an AF_INET/AF_INET6 sockaddr'
     else
       raise e
@@ -212,22 +212,26 @@ class Socket < BasicSocket
     alias_method :pair, :socketpair
   end
 
-  # Only define these methods if we support unix sockets
-  if RubySL::Socket::Foreign.const_defined?(:Sockaddr_Un)
+  if RubySL::Socket.unix_socket_support?
     def self.pack_sockaddr_un(file)
-      RubySL::Socket::Foreign::Sockaddr_Un.new(file).to_s
+      sockaddr = [Socket::AF_UNIX].pack('s') + file
+      struct   = RubySL::Socket::Foreign::Sockaddr_Un.with_sockaddr(sockaddr)
+
+      begin
+        struct.to_s
+      ensure
+        struct.free
+      end
     end
 
     def self.unpack_sockaddr_un(addr)
+      struct = RubySL::Socket::Foreign::Sockaddr_Un.with_sockaddr(addr)
 
-      if addr.bytesize > Rubinius::FFI.config("sockaddr_un.sizeof")
-        raise TypeError, "too long sockaddr_un - #{addr.bytesize} longer than #{Rubinius::FFI.config("sockaddr_un.sizeof")}"
+      begin
+        struct[:sun_path]
+      ensure
+        struct.free
       end
-
-      struct = RubySL::Socket::Foreign::Sockaddr_Un.new
-      struct.pointer.write_string(addr, addr.bytesize)
-
-      struct[:sun_path]
     end
 
     class << self

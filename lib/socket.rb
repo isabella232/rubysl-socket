@@ -16,7 +16,11 @@ require 'rubysl/socket/foreign/ifaddrs'
 require 'rubysl/socket/foreign/sockaddr'
 require 'rubysl/socket/foreign/sockaddr_in'
 require 'rubysl/socket/foreign/sockaddr_in6'
-require 'rubysl/socket/foreign/sockaddr_un'
+
+if RubySL::Socket.unix_socket_support?
+  require 'rubysl/socket/foreign/sockaddr_un'
+end
+
 require 'rubysl/socket/foreign/iovec'
 require 'rubysl/socket/foreign/msghdr'
 require 'rubysl/socket/foreign/hostent'

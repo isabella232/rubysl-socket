@@ -4,6 +4,10 @@ module RubySL
       Rubinius.bsd? || Rubinius.darwin?
     end
 
+    def self.unix_socket_support?
+      ::Socket::Constants.const_defined?(:AF_UNIX)
+    end
+
     def self.aliases_for_hostname(hostname)
       pointer  = Foreign.gethostbyname(hostname)
       struct   = Foreign::Hostent.new(pointer)

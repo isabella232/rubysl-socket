@@ -1,16 +1,23 @@
-require File.expand_path('../../fixtures/classes', __FILE__)
 require 'socket'
 
-describe "Socket#unpack_sockaddr_in" do
+describe 'Socket.unpack_sockaddr_in' do
+  describe 'using an IPv4 address' do
+    it 'returns an Array containing the port and IP address' do
+      port = 80
+      ip   = '127.0.0.1'
+      addr = Socket.pack_sockaddr_in(port, ip)
 
-  it "decodes the host name and port number of a packed sockaddr_in" do
-    sockaddr = Socket.sockaddr_in SocketSpecs.port, '127.0.0.1'
-    Socket.unpack_sockaddr_in(sockaddr).should == [SocketSpecs.port, '127.0.0.1']
+      Socket.unpack_sockaddr_in(addr).should == [port, ip]
+    end
   end
 
-  it "raises an ArgumentError when the sin_family is not AF_INET" do
-    sockaddr = Socket.sockaddr_un '/tmp/x'
-    lambda { Socket.unpack_sockaddr_in sockaddr }.should raise_error(ArgumentError)
-  end
+  describe 'using an IPv6 address' do
+    it 'returns an Array containing the port and IP address' do
+      port = 80
+      ip   = '::1'
+      addr = Socket.pack_sockaddr_in(port, ip)
 
+      Socket.unpack_sockaddr_in(addr).should == [port, ip]
+    end
+  end
 end
