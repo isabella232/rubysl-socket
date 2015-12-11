@@ -52,7 +52,7 @@ class UDPSocket < IPSocket
   end
 
   def inspect
-    "#<#{self.class}:0x#{object_id.to_s(16)} #{@host}:#{@port}>"
+    "#<#{self.class}:fd #{fileno}>"
   end
 
   def local_address
