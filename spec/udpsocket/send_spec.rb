@@ -1,68 +1,78 @@
+require 'socket'
 require File.expand_path('../../fixtures/classes', __FILE__)
 
-describe "UDPSocket.send" do
-  before :each do
-    @ready = false
-    @server_thread = Thread.new do
-      @server = UDPSocket.open
-      @server.bind(nil, SocketSpecs.port)
-      @ready = true
-      begin
-        @msg = @server.recvfrom_nonblock(64)
-      rescue Errno::EAGAIN
-        IO.select([@server])
-        retry
+describe 'UDPSocket#send' do
+  before do
+    @server = UDPSocket.new
+    @client = UDPSocket.new
+
+    @server.bind('127.0.0.1', 0)
+
+    @addr = @server.connect_address
+  end
+
+  after do
+    @server.close
+    @client.close
+  end
+
+  describe 'using a disconnected socket' do
+    describe 'without a destination address' do
+      it 'raises Errno::EDESTADDRREQ' do
+        proc { @client.send('hello', 0) }
+          .should raise_error(Errno::EDESTADDRREQ)
       end
-      @server.close
     end
-    Thread.pass while @server_thread.status and !@ready
+
+    describe 'with a destination address as separate arguments' do
+      it 'returns the amount of sent bytes' do
+        @client.send('hello', 0, @addr.ip_address, @addr.ip_port).should == 5
+      end
+
+      it 'does not persist the connection after sending data' do
+        @client.send('hello', 0, @addr.ip_address, @addr.ip_port)
+
+        proc { @client.send('hello', 0) }
+          .should raise_error(Errno::EDESTADDRREQ)
+      end
+    end
+
+    describe 'with a destination address as a single String argument' do
+      it 'returns the amount of sent bytes' do
+        @client.send('hello', 0, @server.getsockname).should == 5
+      end
+    end
   end
 
-  after :each do
-    @socket.close if @socket and !@socket.closed?
-  end
+  describe 'using a connected socket' do
+    before do
+      @client.connect(@addr.ip_address, @addr.ip_port)
+    end
 
-  it "sends data in ad hoc mode" do
-    @socket = UDPSocket.open
-    @socket.send("ad hoc", 0, SocketSpecs.hostname,SocketSpecs.port)
-    @socket.close
-    @server_thread.join
+    describe 'without an explicit destination address' do
+      it 'returns the amount of bytes written' do
+        @client.send('hello', 0).should == 5
+      end
+    end
 
-    @msg[0].should == "ad hoc"
-    @msg[1][0].should == "AF_INET"
-    @msg[1][1].should be_kind_of(Fixnum)
-    @msg[1][3].should == "127.0.0.1"
-  end
+    describe 'with an explicit destination address' do
+      before do
+        @alt_server = UDPSocket.new
 
-  it "sends data in ad hoc mode (with port given as a String)" do
-    @socket = UDPSocket.open
-    @socket.send("ad hoc", 0, SocketSpecs.hostname,SocketSpecs.str_port)
-    @socket.close
-    @server_thread.join
+        @alt_server.bind('127.0.0.1', 0)
+      end
 
-    @msg[0].should == "ad hoc"
-    @msg[1][0].should == "AF_INET"
-    @msg[1][1].should be_kind_of(Fixnum)
-    @msg[1][3].should == "127.0.0.1"
-  end
+      after do
+        @alt_server.close
+      end
 
-  it "sends data in connection mode" do
-    @socket = UDPSocket.open
-    @socket.connect(SocketSpecs.hostname,SocketSpecs.port)
-    @socket.send("connection-based", 0)
-    @socket.close
-    @server_thread.join
+      it 'sends the data to the given address instead' do
+        @client.send('hello', 0, @alt_server.getsockname).should == 5
 
-    @msg[0].should == "connection-based"
-    @msg[1][0].should == "AF_INET"
-    @msg[1][1].should be_kind_of(Fixnum)
-    @msg[1][3].should == "127.0.0.1"
-  end
+        SocketSpecs.blocking? { @server.recv(5) }.should == true
 
-  it "returns the length of the message in bytes and ignores errors sending data when the socket is not connected" do
-    @socket = UDPSocket.open
-    @socket.send("this", 0, "127.0.0.1", SocketSpecs.port + 1).should == 4
-    @socket.send("is", 0, "127.0.0.1", SocketSpecs.port + 1).should == 2
-    @socket.send("nonsense", 0, "127.0.0.1", SocketSpecs.port + 1).should == 8
+        @alt_server.recv(5).should == 'hello'
+      end
+    end
   end
 end
