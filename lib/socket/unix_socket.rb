@@ -43,7 +43,7 @@ class UNIXSocket < BasicSocket
     ['AF_UNIX', path]
   end
 
-  def recv_io(klass=IO, mode=nil)
+  def recv_io(klass = IO, mode = nil)
     begin
       fd = recv_fd
     rescue PrimitiveFailure
@@ -52,7 +52,7 @@ class UNIXSocket < BasicSocket
 
     return fd unless klass
 
-    if klass < BasicSocket
+    if klass.is_a?(BasicSocket)
       klass.for_fd(fd)
     else
       klass.for_fd(fd, mode)
