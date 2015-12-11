@@ -28,4 +28,8 @@ class UNIXServer < UNIXSocket
   def accept_nonblock
     RubySL::Socket.accept_nonblock(self, UNIXSocket)[0]
   end
+
+  def sysaccept
+    accept.fileno
+  end
 end
