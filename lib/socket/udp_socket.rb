@@ -12,30 +12,12 @@ class UDPSocket < IPSocket
   end
 
   def bind(host, port)
-    @host = host.to_s if host
-    @port = port.to_s if port
+    addr   = Socket.sockaddr_in(port.to_i, host)
+    status = RubySL::Socket::Foreign.bind(descriptor, addr)
 
-    addrinfos = RubySL::Socket::Foreign.getaddrinfo(@host,
-                                           @port,
-                                           @family,
-                                           Socket::SOCK_DGRAM, 0,
-                                           Socket::AI_PASSIVE)
+    Errno.handle('bind(2)') if status < 0
 
-    status = -1
-
-    addrinfos.each do |addrinfo|
-      flags, family, socket_type, protocol, sockaddr, canonname = addrinfo
-
-      status = RubySL::Socket::Foreign.bind descriptor, sockaddr
-
-      break if status >= 0
-    end
-
-    if status < 0
-      Errno.handle 'bind(2)'
-    end
-
-    status
+    0
   end
 
   def connect(host, port)
