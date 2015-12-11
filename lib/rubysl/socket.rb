@@ -19,7 +19,14 @@ module RubySL
     def self.accept(source, new_class)
       raise IOError, 'socket has been closed' if source.closed?
 
-      sockaddr = RubySL::Socket::Foreign::Sockaddr.new
+      case Helpers.address_info(:getsockname, source)[0]
+      when 'AF_INET6'
+        sockaddr = RubySL::Socket::Foreign::Sockaddr_In6.new
+      when 'AF_UNIX'
+        sockaddr = RubySL::Socket::Foreign::Sockaddr_Un.new
+      else
+        sockaddr = RubySL::Socket::Foreign::Sockaddr_In.new
+      end
 
       begin
         fd = RubySL::Socket::Foreign.memory_pointer(:int) do |size_p|
