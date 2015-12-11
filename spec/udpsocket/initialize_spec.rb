@@ -1,0 +1,23 @@
+require 'socket'
+
+describe 'UDPSocket#initialize' do
+  it 'initializes a new UDPSocket' do
+    UDPSocket.new.should be_an_instance_of(UDPSocket)
+  end
+
+  it 'initializes a new UDPSocket using a Fixnum' do
+    UDPSocket.new(Socket::AF_INET).should be_an_instance_of(UDPSocket)
+  end
+
+  it 'initializes a new UDPSocket using a Symbol' do
+    UDPSocket.new(:INET).should be_an_instance_of(UDPSocket)
+  end
+
+  it 'initializes a new UDPSocket using a String' do
+    UDPSocket.new('INET').should be_an_instance_of(UDPSocket)
+  end
+
+  it 'raises Errno::EAFNOSUPPORT when given an invalid address family' do
+    proc { UDPSocket.new(666) }.should raise_error(Errno::EAFNOSUPPORT)
+  end
+end
