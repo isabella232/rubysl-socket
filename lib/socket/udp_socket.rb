@@ -29,19 +29,16 @@ class UDPSocket < IPSocket
     0
   end
 
-  def send(message, flags, *to)
-    connect *to unless to.empty?
-
-    bytes = message.bytesize
-    bytes_sent = 0
-
-    Rubinius::FFI::MemoryPointer.new :char, bytes + 1 do |buffer|
-      buffer.write_string message, bytes
-      bytes_sent = RubySL::Socket::Foreign.send(descriptor, buffer, bytes, flags)
-      Errno.handle 'send(2)' if bytes_sent < 0
+  def send(message, flags, host = nil, port = nil)
+    if host and port
+      addr = Socket.sockaddr_in(port.to_i, host)
+    elsif host
+      addr = host
+    else
+      addr = nil
     end
 
-    bytes_sent
+    super(message, flags, addr)
   end
 
   def recvfrom_nonblock(maxlen, flags = 0)
