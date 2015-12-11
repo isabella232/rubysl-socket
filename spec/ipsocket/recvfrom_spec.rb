@@ -33,4 +33,21 @@ describe 'IPSocket#recvfrom' do
 
     @server.recvfrom(2)[0].should == 'he'
   end
+
+  describe 'using reverse lookups' do
+    before do
+      @server.do_not_reverse_lookup = false
+
+      @hostname = Socket.getaddrinfo(@ip, nil, 0, 0, 0, 0, true)[0][2]
+    end
+
+    it 'includes the hostname in the address Array' do
+      @client.write('hello')
+
+      port = @client.local_address.ip_port
+      ret  = @server.recvfrom(2)
+
+      ret.should == ['he', ['AF_INET', port, @hostname, @ip]]
+    end
+  end
 end
