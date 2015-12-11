@@ -1,11 +1,11 @@
 class UNIXSocket < BasicSocket
   include IO::TransferIO
 
-  class << self
-    def socketpair(type=Socket::SOCK_STREAM, protocol=0)
-      Socket.socketpair(Socket::PF_UNIX, type, protocol, self)
-    end
+  def self.socketpair(type = Socket::SOCK_STREAM, protocol = 0)
+    Socket.socketpair(Socket::AF_UNIX, type, protocol, self)
+  end
 
+  class << self
     alias_method :pair, :socketpair
   end
 
