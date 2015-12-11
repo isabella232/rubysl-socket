@@ -30,24 +30,17 @@ class UNIXSocket < BasicSocket
   end
 
   def path
-    unless @path
-      sockaddr = RubySL::Socket::Foreign.getsockname descriptor
-      _, @path = sockaddr.unpack('SZ*')
-    end
-
-    return @path
+    @path ||= RubySL::Socket::Foreign.getsockname(descriptor).unpack('SZ*')[1]
   end
 
   def addr
-    sockaddr = RubySL::Socket::Foreign.getsockname descriptor
-    _, sock_path = sockaddr.unpack('SZ*')
-    ["AF_UNIX", sock_path]
+    ['AF_UNIX', path]
   end
 
   def peeraddr
-    sockaddr = RubySL::Socket::Foreign.getpeername descriptor
-    _, sock_path = sockaddr.unpack('SZ*')
-    ["AF_UNIX", sock_path]
+    path = RubySL::Socket::Foreign.getpeername(descriptor).unpack('SZ*')[1]
+
+    ['AF_UNIX', path]
   end
 
   def recv_io(klass=IO, mode=nil)
