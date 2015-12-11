@@ -26,6 +26,6 @@ class UNIXServer < UNIXSocket
   end
 
   def accept_nonblock
-    RubySL::Socket.accept_nonblock(self, UNIXSocket)
+    RubySL::Socket.accept_nonblock(self, UNIXSocket)[0]
   end
 end
