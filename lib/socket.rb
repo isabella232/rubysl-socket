@@ -20,6 +20,7 @@ require 'rubysl/socket/foreign/sockaddr_un'
 require 'rubysl/socket/foreign/iovec'
 require 'rubysl/socket/foreign/msghdr'
 require 'rubysl/socket/foreign/hostent'
+require 'rubysl/socket/foreign/servent'
 
 require 'rubysl/socket/ancillary_data'
 require 'rubysl/socket/foreign'

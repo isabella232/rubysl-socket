@@ -151,22 +151,6 @@ class Socket < BasicSocket
     [hostname, alternatives.uniq, family] + addresses.uniq
   end
 
-
-  class Servent < Rubinius::FFI::Struct
-    config("rbx.platform.servent", :s_name, :s_aliases, :s_port, :s_proto)
-
-    def initialize(data)
-      @p = Rubinius::FFI::MemoryPointer.new data.bytesize
-      @p.write_string(data, data.bytesize)
-      super(@p)
-    end
-
-    def to_s
-      @p.read_string(size)
-    end
-
-  end
-
   def self.getservbyname(service, proto='tcp')
     Rubinius::FFI::MemoryPointer.new :char, service.length + 1 do |svc|
       Rubinius::FFI::MemoryPointer.new :char, proto.length + 1 do |prot|
@@ -176,7 +160,7 @@ class Socket < BasicSocket
 
         raise SocketError, "no such service #{service}/#{proto}" if fn.nil?
 
-        s = Servent.new(fn.read_string(Servent.size))
+        s = RubySL::Socket::Foreign::Servent.new(fn.read_string(Servent.size))
         return RubySL::Socket::Foreign.ntohs(s[:s_port])
       end
     end
