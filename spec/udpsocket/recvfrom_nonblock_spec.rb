@@ -66,12 +66,16 @@ describe 'UDPSocket#recvfrom_nonblock' do
           @addr[0].should == 'AF_INET'
         end
 
-        it 'uses the IP address of the client' do
+        it 'uses the port of the client' do
+          @addr[1].should == @client.local_address.ip_port
+        end
+
+        it 'uses the hostname of the client' do
           @addr[2].should == '127.0.0.1'
         end
 
-        it 'uses the port of the client' do
-          @addr[1].should == @client.local_address.ip_port
+        it 'uses the IP address of the client' do
+          @addr[3].should == '127.0.0.1'
         end
       end
     end
