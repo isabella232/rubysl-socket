@@ -1,29 +1,30 @@
-require File.expand_path('../../fixtures/classes', __FILE__)
+require 'socket'
 
-describe "UNIXSocket#peeraddr" do
+require 'socket'
 
-  platform_is_not :windows do
-    before :each do
-      @path = SocketSpecs.socket_path
-      rm_r @path
+describe 'UNIXSocket#peeraddr' do
+  before do
+    @path   = tmp('unix_socket')
+    @server = UNIXServer.new(@path)
+    @client = UNIXSocket.new(@path)
+  end
 
-      @server = UNIXServer.open(@path)
-      @client = UNIXSocket.open(@path)
-    end
+  after do
+    @client.close
+    @server.close
 
-    after :each do
-      @client.close
-      @server.close
-      rm_r @path
-    end
+    rm_r(@path)
+  end
 
-    it "returns the address familly and path of the server end of the connection" do
-      @client.peeraddr.should == ["AF_UNIX", @path]
-    end
-
-    it "raises an error in server sockets" do
-      lambda { @server.peeraddr }.should raise_error
+  describe 'for the client socket' do
+    it 'returns an Array containing the address family and the socket path' do
+      @client.peeraddr.should == ['AF_UNIX', @path]
     end
   end
 
+  describe 'for the server socket' do
+    it 'raises Errno::ENOTCONN' do
+      proc { @server.peeraddr }.should raise_error(Errno::ENOTCONN)
+    end
+  end
 end
