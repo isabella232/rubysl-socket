@@ -9,17 +9,24 @@ class UNIXSocket < BasicSocket
     alias_method :pair, :socketpair
   end
 
-  # Coding to the lowest standard here.
-  def recvfrom(bytes_read, flags = 0)
-    # FIXME 2 is hardcoded knowledge from io.cpp
-    socket_recv(bytes_read, flags, 2)
-  end
-
   def initialize(path)
     @no_reverse_lookup = self.class.do_not_reverse_lookup
-    @path = path
-    unix_setup
-    @path = ""  # Client
+    @path              = '' # empty for client sockets
+
+    fd = RubySL::Socket::Foreign.socket(Socket::AF_UNIX, Socket::SOCK_STREAM, 0)
+
+    Errno.handle('socket(2)') if fd < 0
+
+    IO.setup(self, fd, 'r+', true)
+
+    sockaddr = Socket.sockaddr_un(path)
+    status   = RubySL::Socket::Foreign.connect(descriptor, sockaddr)
+
+    Errno.handle('connect(2)') if status < 0
+  end
+
+  def recvfrom(bytes_read, flags = 0)
+    socket_recv(bytes_read, flags, 2)
   end
 
   def path
@@ -69,44 +76,5 @@ class UNIXSocket < BasicSocket
     address = peeraddr
 
     Addrinfo.new(Socket.pack_sockaddr_un(address[1]), :UNIX, :STREAM)
-  end
-
-  private
-
-  def unix_setup(server = false)
-    status = nil
-    phase = 'socket(2)'
-    sock = RubySL::Socket::Foreign
-      .socket(Socket::Constants::AF_UNIX, Socket::Constants::SOCK_STREAM, 0)
-
-    Errno.handle phase if sock < 0
-
-    IO.setup self, sock, 'r+', true
-
-    sockaddr = Socket.pack_sockaddr_un(@path)
-
-    if server then
-      phase = 'bind(2)'
-      status = RubySL::Socket::Foreign.bind descriptor, sockaddr
-    else
-      phase = 'connect(2)'
-      status = RubySL::Socket::Foreign.connect descriptor, sockaddr
-    end
-
-    if status < 0 then
-      close
-      Errno.handle phase
-    end
-
-    if server then
-      phase = 'listen(2)'
-      status = RubySL::Socket::Foreign.listen descriptor, 5
-      if status < 0
-        close
-        Errno.handle phase
-      end
-    end
-
-    return sock
   end
 end
