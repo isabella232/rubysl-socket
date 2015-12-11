@@ -1,64 +1,71 @@
+require 'socket'
 require File.expand_path('../../fixtures/classes', __FILE__)
 
-platform_is_not :windows do
-  describe "UNIXServer#accept" do
-    before :each do
-      @path = SocketSpecs.socket_path
-      rm_r @path
+describe 'UNIXServer#accept' do
+  before do
+    @path   = tmp('unix_socket')
+    @server = UNIXServer.new(@path)
+  end
+
+  after do
+    @server.close
+
+    rm_r(@path)
+  end
+
+  describe 'without a client' do
+    it 'blocks the calling thread' do
+      SocketSpecs.blocking? { @server.accept }.should == true
+    end
+  end
+
+  describe 'with a client' do
+    before do
+      @client = UNIXSocket.new(@path)
     end
 
-    after :each do
-      rm_r @path
+    after do
+      @client.close
     end
 
-    it "accepts what is written by the client" do
-      server = UNIXServer.open(SocketSpecs.socket_path)
-      client = UNIXSocket.open(SocketSpecs.socket_path)
+    describe 'without any data' do
+      it 'returns a UNIXSocket' do
+        socket = @server.accept
 
-      client.send('hello', 0)
-
-      sock = server.accept
-      data, info = sock.recvfrom(5)
-
-      data.should == 'hello'
-
-      server.close
-      client.close
-      sock.close
-    end
-
-    it "can be interrupted by Thread#kill" do
-      server = UNIXServer.new(@path)
-      t = Thread.new {
-        server.accept
-      }
-      Thread.pass while t.status and t.status != "sleep"
-
-      # kill thread, ensure it dies in a reasonable amount of time
-      t.kill
-      a = 1
-      while a < 2000
-        break unless t.alive?
-        Thread.pass
-        sleep 0.2
-        a += 1
+        begin
+          socket.should be_an_instance_of(UNIXSocket)
+        ensure
+          socket.close
+        end
       end
-      a.should < 2000
-      server.close
     end
 
-    it "can be interrupted by Thread#raise" do
-      server = UNIXServer.new(@path)
-      t = Thread.new {
-        server.accept
-      }
-      Thread.pass while t.status and t.status != "sleep"
+    describe 'with data available' do
+      before do
+        @client.write('hello')
+      end
 
-      # raise in thread, ensure the raise happens
-      ex = Exception.new
-      t.raise ex
-      lambda { t.join }.should raise_error(Exception)
-      server.close
+      it 'returns a UNIXSocket' do
+        socket = @server.accept
+
+        begin
+          socket.should be_an_instance_of(UNIXSocket)
+        ensure
+          socket.close
+        end
+      end
+
+      describe 'the returned UNIXSocket' do
+        it 'can read the data written' do
+          socket = @server.accept
+
+          begin
+            socket.recv(5).should == 'hello'
+          ensure
+            socket.close
+          end
+        end
+      end
     end
   end
 end
