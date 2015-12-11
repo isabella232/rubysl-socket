@@ -3,12 +3,12 @@ class UDPSocket < IPSocket
     @no_reverse_lookup = self.class.do_not_reverse_lookup
     @family            = RubySL::Socket::Helpers.address_family(family)
 
-    status = RubySL::Socket::Foreign
+    descriptor = RubySL::Socket::Foreign
       .socket(@family, Socket::SOCK_DGRAM, Socket::IPPROTO_UDP)
 
-    Errno.handle('socket(2)') if status < 0
+    Errno.handle('socket(2)') if descriptor < 0
 
-    IO.setup(self, status, nil, true)
+    IO.setup(self, descriptor, nil, true)
   end
 
   def bind(host, port)
