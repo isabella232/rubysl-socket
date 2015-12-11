@@ -44,6 +44,16 @@ class UDPSocket < IPSocket
     bytes_sent
   end
 
+  def recvfrom_nonblock(maxlen, flags = 0)
+    fcntl(Fcntl::F_SETFL, Fcntl::O_NONBLOCK)
+
+    flags = 0 if flags.nil?
+
+    flags |= Socket::MSG_DONTWAIT
+
+    recvfrom(maxlen, flags)
+  end
+
   def inspect
     "#<#{self.class}:0x#{object_id.to_s(16)} #{@host}:#{@port}>"
   end
