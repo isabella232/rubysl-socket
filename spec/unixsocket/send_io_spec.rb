@@ -1,30 +1,22 @@
-require File.expand_path('../../fixtures/classes', __FILE__)
+require 'socket'
 
-describe "UNIXSocket#send_io" do
+describe 'UNIXSocket#send_io' do
+  before do
+    @file = File.open('/dev/null', 'w')
 
-  platform_is_not :windows do
-    before :each do
-      @path = SocketSpecs.socket_path
-      rm_r @path
+    @client, @server = UNIXSocket.socketpair
+  end
 
-      @server = UNIXServer.open(@path)
-      @client = UNIXSocket.open(@path)
-    end
+  after do
+    @client.close
+    @server.close
 
-    after :each do
-      @client.close
-      @server.close
-      rm_r @path
-    end
+    @file.close
+  end
 
-    it "sends the fd for an IO object across the socket" do
-      path = File.expand_path('../../fixtures/send_io.txt', __FILE__)
-      f = File.open(path)
+  it 'sends an IO object' do
+    @client.send_io(@file)
 
-      @client.send_io(f)
-      io = @server.accept.recv_io
-
-      io.read.should == File.read(path)
-    end
+    @server.recv_io.should be_an_instance_of(IO)
   end
 end

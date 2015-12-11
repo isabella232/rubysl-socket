@@ -1,40 +1,40 @@
-require File.expand_path('../../fixtures/classes', __FILE__)
+require 'socket'
 
-describe "UNIXSocket#recv_io" do
+describe 'UNIXSocket#recv_io' do
+  before do
+    @file = File.open('/dev/null', 'w')
 
-  platform_is_not :windows do
-    before :each do
-      @path = SocketSpecs.socket_path
-      rm_r @path
+    @client, @server = UNIXSocket.socketpair
+  end
 
-      @server = UNIXServer.open(@path)
-      @client = UNIXSocket.open(@path)
+  after do
+    @client.close
+    @server.close
+
+    @file.close
+  end
+
+  describe 'without a custom class' do
+    it 'returns an IO' do
+      @client.send_io(@file)
+
+      @server.recv_io.should be_an_instance_of(IO)
     end
+  end
 
-    after :each do
-      @client.close
-      @server.close
-      rm_r @path
+  describe 'with a custom class' do
+    it 'returns an instance of the custom class' do
+      @client.send_io(@file)
+
+      @server.recv_io(File).should be_an_instance_of(File)
     end
+  end
 
-    it "reads an IO object across the socket" do
-      path = File.expand_path('../../fixtures/send_io.txt', __FILE__)
-      f = File.open(path)
+  describe 'with a custom mode' do
+    it 'opens the IO using the given mode' do
+      @client.send_io(@file)
 
-      @client.send_io(f)
-      io = @server.accept.recv_io
-
-      io.read.should == File.read(path)
-    end
-
-    it "takes an optional class to use" do
-      path = File.expand_path('../../fixtures/send_io.txt', __FILE__)
-      f = File.open(path)
-
-      @client.send_io(f)
-      io = @server.accept.recv_io(File)
-
-      io.should be_kind_of(File)
+      @server.recv_io(File, File::WRONLY).should be_an_instance_of(File)
     end
   end
 end
