@@ -21,14 +21,10 @@ class UDPSocket < IPSocket
   end
 
   def connect(host, port)
-    sockaddr = RubySL::Socket::Foreign.pack_sockaddr_in host, port, @family, Socket::SOCK_DGRAM, 0
+    sockaddr = Socket.sockaddr_in(port.to_i, host)
+    status   = RubySL::Socket::Foreign.connect(descriptor, sockaddr)
 
-    syscall = 'connect(2)'
-    status = RubySL::Socket::Foreign.connect descriptor, sockaddr
-
-    if status < 0
-      Errno.handle syscall
-    end
+    Errno.handle('connect(2)') if status < 0
 
     0
   end
