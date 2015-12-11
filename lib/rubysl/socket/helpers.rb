@@ -66,6 +66,39 @@ module RubySL
         end
       end
 
+      def self.address_family_name(family_int)
+        # Since this list doesn't change very often (if ever) we're using a
+        # plain old "case" instead of something like Socket.constants.grep(...)
+        case family_int
+        when ::Socket::AF_APPLETALK
+          'AF_APPLETALK'
+        when ::Socket::AF_AX25
+          'AF_AX25'
+        when ::Socket::AF_INET
+          'AF_INET'
+        when ::Socket::AF_INET6
+          'AF_INET6'
+        when ::Socket::AF_IPX
+          'AF_IPX'
+        when ::Socket::AF_ISDN
+          'AF_ISDN'
+        when ::Socket::AF_LOCAL
+          'AF_LOCAL'
+        when ::Socket::AF_MAX
+          'AF_MAX'
+        when ::Socket::AF_PACKET
+          'AF_PACKET'
+        when ::Socket::AF_ROUTE
+          'AF_ROUTE'
+        when ::Socket::AF_SNA
+          'AF_SNA'
+        when ::Socket::AF_UNIX
+          'AF_UNIX'
+        else
+          'AF_UNSPEC'
+        end
+      end
+
       def self.protocol_family(family)
         case family
         when Symbol, String
