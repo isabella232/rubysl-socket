@@ -18,9 +18,9 @@ class Socket < BasicSocket
         if family == AF_INET or family == AF_INET6
 
           if AF_INET6
-            size = family == RubySL::Socket::Foreign::Sockaddr_In6.size
+            size = family == RubySL::Socket::Foreign::SockaddrIn6.size
           else
-            size = family = RubySL::Socket::Foreign::Sockaddr_In.size
+            size = family = RubySL::Socket::Foreign::SockaddrIn.size
           end
 
           host = Rubinius::FFI::MemoryPointer.new(:char, Constants::NI_MAXHOST)
@@ -215,7 +215,7 @@ class Socket < BasicSocket
   if RubySL::Socket.unix_socket_support?
     def self.pack_sockaddr_un(file)
       sockaddr = [Socket::AF_UNIX].pack('s') + file
-      struct   = RubySL::Socket::Foreign::Sockaddr_Un.with_sockaddr(sockaddr)
+      struct   = RubySL::Socket::Foreign::SockaddrUn.with_sockaddr(sockaddr)
 
       begin
         struct.to_s
@@ -225,7 +225,7 @@ class Socket < BasicSocket
     end
 
     def self.unpack_sockaddr_un(addr)
-      struct = RubySL::Socket::Foreign::Sockaddr_Un.with_sockaddr(addr)
+      struct = RubySL::Socket::Foreign::SockaddrUn.with_sockaddr(addr)
 
       begin
         struct[:sun_path]

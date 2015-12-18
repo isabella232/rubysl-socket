@@ -21,11 +21,11 @@ module RubySL
 
       case Helpers.address_info(:getsockname, source)[0]
       when 'AF_INET6'
-        sockaddr = RubySL::Socket::Foreign::Sockaddr_In6.new
+        sockaddr = RubySL::Socket::Foreign::SockaddrIn6.new
       when 'AF_UNIX'
-        sockaddr = RubySL::Socket::Foreign::Sockaddr_Un.new
+        sockaddr = RubySL::Socket::Foreign::SockaddrUn.new
       else
-        sockaddr = RubySL::Socket::Foreign::Sockaddr_In.new
+        sockaddr = RubySL::Socket::Foreign::SockaddrIn.new
       end
 
       begin

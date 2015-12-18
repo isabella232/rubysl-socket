@@ -1,7 +1,7 @@
 module RubySL
   module Socket
     module Foreign
-      class Sockaddr_In < Rubinius::FFI::Struct
+      class SockaddrIn < Rubinius::FFI::Struct
         config("rbx.platform.sockaddr_in",
                :sin_family, :sin_port, :sin_addr, :sin_zero)
 
