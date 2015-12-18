@@ -16,6 +16,16 @@ describe 'Socket.getaddrinfo' do
         Socket::SOCK_STREAM,
         Socket::IPPROTO_TCP
       ]
+
+      Socket.getaddrinfo(nil, 'http', Socket::AF_INET6)[0].should == [
+        'AF_INET6',
+        80,
+        '::1',
+        '::1',
+        Socket::AF_INET6,
+        Socket::SOCK_STREAM,
+        Socket::IPPROTO_TCP
+      ]
     end
 
     it 'accepts a Symbol as the address family' do
@@ -28,6 +38,16 @@ describe 'Socket.getaddrinfo' do
         Socket::SOCK_STREAM,
         Socket::IPPROTO_TCP
       ]
+
+      Socket.getaddrinfo(nil, 'http', :INET6)[0].should == [
+        'AF_INET6',
+        80,
+        '::1',
+        '::1',
+        Socket::AF_INET6,
+        Socket::SOCK_STREAM,
+        Socket::IPPROTO_TCP
+      ]
     end
 
     it 'accepts a String as the address family' do
@@ -37,6 +57,16 @@ describe 'Socket.getaddrinfo' do
         '127.0.0.1',
         '127.0.0.1',
         Socket::AF_INET,
+        Socket::SOCK_STREAM,
+        Socket::IPPROTO_TCP
+      ]
+
+      Socket.getaddrinfo(nil, 'http', 'INET6')[0].should == [
+        'AF_INET6',
+        80,
+        '::1',
+        '::1',
+        Socket::AF_INET6,
         Socket::SOCK_STREAM,
         Socket::IPPROTO_TCP
       ]
