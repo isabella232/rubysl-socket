@@ -3,6 +3,8 @@ module RubySL
     module Foreign
       extend Rubinius::FFI::Library
 
+      SIZEOF_INT = Rubinius::FFI.type_size(:int)
+
       attach_function :_bind, :bind, [:int, :pointer, :socklen_t], :int
       attach_function :_connect, :connect, [:int, :pointer, :socklen_t], :int
 

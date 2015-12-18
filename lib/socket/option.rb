@@ -3,39 +3,31 @@ class Socket < BasicSocket
     attr_reader :family, :level, :optname, :data
 
     def self.bool(family, level, optname, bool)
-      data = [(bool ? 1 : 0)].pack('i')
-      new family, level, optname, data
+      new(family, level, optname, [bool ? 1 : 0].pack('i'))
     end
 
     def self.int(family, level, optname, integer)
-      new family, level, optname, [integer].pack('i')
+      new(family, level, optname, [integer].pack('i'))
     end
 
     def self.linger(onoff, secs)
       linger = RubySL::Socket::Foreign::Linger.new
 
-      case onoff
-      when Integer
-        linger[:l_onoff] = onoff
-      else
-        linger[:l_onoff] = onoff ? 1 : 0
+      begin
+        linger.on_off = onoff
+        linger.linger = secs
+
+        new(:UNSPEC, :SOCKET, :LINGER, linger.to_s)
+      ensure
+        linger.free
       end
-      linger[:l_linger] = secs
-
-      p = linger.to_ptr
-      data = p.read_string(p.total)
-
-      new :UNSPEC, :SOCKET, :LINGER, data
     end
 
     def initialize(family, level, optname, data)
-      @family = RubySL::Socket::Helpers.address_family(family)
-      @family_name = family
-      @level = RubySL::Socket::SocketOptions.socket_level(level, @family)
-      @level_name = level
+      @family  = RubySL::Socket::Helpers.address_family(family)
+      @level   = RubySL::Socket::SocketOptions.socket_level(level, @family)
       @optname = RubySL::Socket::SocketOptions.socket_option(@level, optname)
-      @opt_name = optname
-      @data = data
+      @data    = data
     end
 
     def unpack(template)
@@ -47,43 +39,56 @@ class Socket < BasicSocket
     end
 
     def bool
-      unless @data.length == Rubinius::FFI.type_size(:int)
-        raise TypeError, "size differ. expected as sizeof(int)=" +
-          "#{Rubinius::FFI.type_size(:int)} but #{@data.length}"
+      expected_size = RubySL::Socket::Foreign::SIZEOF_INT
+
+      unless @data.bytesize == expected_size
+        raise TypeError,
+          "invalid size, expected #{expected_size} but got #{@data.bytesize}"
       end
 
-      i = @data.unpack('i').first
-      i == 0 ? false : true
+      if @data.unpack('i')[0] == 1
+        true
+      else
+        false
+      end
     end
 
     def int
-      unless @data.length == Rubinius::FFI.type_size(:int)
-        raise TypeError, "size differ. expected as sizeof(int)=" +
-          "#{Rubinius::FFI.type_size(:int)} but #{@data.length}"
+      expected_size = RubySL::Socket::Foreign::SIZEOF_INT
+
+      unless @data.bytesize == expected_size
+        raise TypeError,
+          "invalid size, expected #{expected_size} but got #{@data.bytesize}"
       end
-      @data.unpack('i').first
+
+      @data.unpack('i')[0]
     end
 
     def linger
       if @level != Socket::SOL_SOCKET || @optname != Socket::SO_LINGER
-        raise TypeError, "linger socket option expected"
-      end
-      if @data.bytesize != Rubinius::FFI.config("linger.sizeof")
-        raise TypeError, "size differ. expected as sizeof(struct linger)=" +
-          "#{Rubinius::FFI.config("linger.sizeof")} but #{@data.length}"
+        raise TypeError, 'linger socket option expected'
       end
 
-      linger = RubySL::Socket::Foreign::Linger.new
-      linger.to_ptr.write_string @data, @data.bytesize
+      expected_size = RubySL::Socket::Foreign::Linger.size
 
-      onoff = nil
-      case linger[:l_onoff]
-      when 0 then onoff = false
-      when 1 then onoff = true
-      else onoff = linger[:l_onoff].to_i
+      if @data.bytesize != expected_size
+        raise TypeError,
+          "invalid size, expected #{expected_size} but got #{@data.bytesize}"
       end
 
-      [onoff, linger[:l_linger].to_i]
+      linger = RubySL::Socket::Foreign::Linger.from_string(@data)
+      onoff  = nil
+
+      case linger.on_off
+      when 0
+        onoff = false
+      when 1
+        onoff = true
+      else
+        onoff = linger.onoff.to_i
+      end
+
+      [onoff, linger.linger]
     end
 
     alias :to_s :data
