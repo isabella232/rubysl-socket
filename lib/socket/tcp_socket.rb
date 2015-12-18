@@ -14,13 +14,79 @@ class TCPSocket < IPSocket
     [hostname, alternatives, family] + addresses.uniq
   end
 
-  def initialize(host, port, local_host = nil, local_service = nil)
+  def initialize(host, service, local_host = nil, local_service = nil)
     @no_reverse_lookup = self.class.do_not_reverse_lookup
 
-    @host = host
-    @port = port
+    if host
+      host = RubySL::Socket::Helpers.coerce_to_string(host)
+    else
+      host = ''
+    end
 
-    tcp_setup(@host, @port, local_host, local_service)
+    if service.is_a?(Fixnum)
+      service = service.to_s
+    else
+      service = RubySL::Socket::Helpers.coerce_to_string(service)
+    end
+
+    local_addrinfo = nil
+
+    # When a local address and/or service/port are given we should bind the
+    # socket to said address (besides also connecting to the remote address).
+    if local_host or local_service
+      if local_host
+        local_host = RubySL::Socket::Helpers.coerce_to_string(local_host)
+      end
+
+      if local_service.is_a?(Fixnum)
+        local_service = local_service.to_s
+      elsif local_service
+        local_service = RubySL::Socket::Helpers.coerce_to_string(local_service)
+      end
+
+      local_addrinfo = Socket
+        .getaddrinfo(local_host, local_service, :UNSPEC, :STREAM)
+    end
+
+    # Because we don't know exactly what address family to bind to we'll just
+    # grab all the available ones and try every one of them, bailing out on the
+    # first address that we can connect to.
+    #
+    # This code is loosely based on the behaviour of CRuby's
+    # "init_inetsock_internal()" function as of Ruby 2.2.
+    Socket.getaddrinfo(host, service, :UNSPEC, :STREAM).each do |addrinfo|
+      _, port, address, _, family, socktype, protocol = addrinfo
+
+      descriptor = RubySL::Socket::Foreign.socket(family, socktype, protocol)
+
+      next if descriptor < 0
+
+      # If any local address details were given we should bind to one that
+      # matches the remote address connected to above.
+      if local_addrinfo
+        local_info = local_addrinfo.find do |addr|
+          addr[4] == family && addr[5] == socktype
+        end
+
+        if local_info
+          status = RubySL::Socket::Foreign
+            .bind(descriptor, Socket.sockaddr_in(local_info[1], local_info[2]))
+
+          Errno.handle('bind(2)') if status < 0
+        end
+      end
+
+      status = RubySL::Socket::Foreign
+        .connect(descriptor, Socket.sockaddr_in(port, address))
+
+      if status < 0
+        RubySL::Socket::Foreign.close(descriptor)
+        Errno.handle('connect(2)')
+      else
+        IO.setup(self, descriptor, nil, true)
+        break
+      end
+    end
   end
 
   def local_address
@@ -35,111 +101,5 @@ class TCPSocket < IPSocket
     sockaddr = Socket.pack_sockaddr_in(address[1], address[3])
 
     Addrinfo.new(sockaddr, address[0], :STREAM)
-  end
-
-  private
-
-  def tcp_setup(remote_host, remote_service, local_host = nil,
-                local_service = nil, server = false)
-    status = nil
-    syscall = nil
-    remote_host    = StringValue(remote_host)    if remote_host
-    if remote_service
-      if remote_service.kind_of? Fixnum
-        remote_service = remote_service.to_s
-      else
-        remote_service = StringValue(remote_service)
-      end
-    end
-
-    flags = server ? Socket::AI_PASSIVE : 0
-    @remote_addrinfo = RubySL::Socket::Foreign.getaddrinfo(remote_host,
-                                                   remote_service,
-                                                   Socket::AF_UNSPEC,
-                                                   Socket::SOCK_STREAM, 0,
-                                                   flags)
-
-    if server == false and (local_host or local_service)
-      local_host    = local_host.to_s    if local_host
-      local_service = local_service.to_s if local_service
-      @local_addrinfo = RubySL::Socket::Foreign.getaddrinfo(local_host,
-                                                    local_service,
-                                                    Socket::AF_UNSPEC,
-                                                    Socket::SOCK_STREAM, 0, 0)
-    end
-
-    sock = nil
-
-    @remote_addrinfo.each do |addrinfo|
-      flags, family, socket_type, protocol, sockaddr, canonname = addrinfo
-
-      sock = RubySL::Socket::Foreign.socket family, socket_type, protocol
-      syscall = 'socket(2)'
-
-      next if sock < 0
-
-      if server
-        Rubinius::FFI::MemoryPointer.new :socklen_t do |val|
-          val.write_int 1
-          level = Socket::Constants::SOL_SOCKET
-          optname = Socket::Constants::SO_REUSEADDR
-          error = RubySL::Socket::Foreign.setsockopt(sock, level,
-                                             optname, val,
-                                             val.total)
-          # Don't check error because if this fails, we just continue
-          # anyway.
-        end
-
-        status = RubySL::Socket::Foreign.bind sock, sockaddr
-        syscall = 'bind(2)'
-      else
-        if @local_addrinfo
-          # Pick a local_addrinfo for the family and type of
-          # the remote side
-          li = @local_addrinfo.find do |i|
-            i[1] == family && i[2] == socket_type
-          end
-
-          if li
-            status = RubySL::Socket::Foreign.bind sock, li[4]
-            syscall = 'bind(2)'
-          else
-            status = 1
-          end
-        else
-          status = 1
-        end
-
-        if status >= 0
-          status = RubySL::Socket::Foreign.connect sock, sockaddr
-          syscall = 'connect(2)'
-        end
-      end
-
-      if status < 0
-        RubySL::Socket::Foreign.close sock
-      else
-        break
-      end
-    end
-
-    if status < 0
-      Errno.handle syscall
-    end
-
-    if server
-      err = RubySL::Socket::Foreign.listen sock, 5
-      unless err == 0
-        RubySL::Socket::Foreign.close sock
-        Errno.handle syscall
-      end
-    end
-
-    # Only setup once we have found a socket we can use. Otherwise
-    # because we manually close a socket fd, we can create an IO fd
-    # alias condition which causes EBADF because when an IO is finalized
-    # and it's fd has been closed underneith it, we close someone elses
-    # fd!
-    IO.setup self, sock, nil, true
   end
 end

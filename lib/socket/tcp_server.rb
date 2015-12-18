@@ -1,15 +1,15 @@
 class TCPServer < TCPSocket
-  def initialize(host, port = nil)
+  def initialize(host, service = nil)
     @no_reverse_lookup = self.class.do_not_reverse_lookup
 
-    if host.is_a?(Fixnum) and port.nil?
-      port = host
-      host = nil
+    if host.is_a?(Fixnum) and service.nil?
+      service = host
+      host    = nil
     end
 
-    if host.is_a?(String) and port.nil?
+    if host.is_a?(String) and service.nil?
       begin
-        port = Integer(host)
+        service = Integer(host)
       rescue ArgumentError
         raise SocketError, "invalid port number: #{host}"
       end
@@ -17,14 +17,43 @@ class TCPServer < TCPSocket
       host = nil
     end
 
-    unless port.kind_of?(Fixnum)
-      port = RubySL::Socket::Helpers.coerce_to_string(port)
+    unless service.is_a?(Fixnum)
+      service = RubySL::Socket::Helpers.coerce_to_string(service)
     end
 
-    @host = host
-    @port = port
+    if host
+      host = RubySL::Socket::Helpers.coerce_to_string(host)
+    else
+      host = ''
+    end
 
-    tcp_setup(@host, @port, nil, nil, true)
+    remote_addrs = Socket
+      .getaddrinfo(host, service, :UNSPEC, :STREAM, 0, Socket::AI_PASSIVE)
+
+    remote_addrs.each do |addrinfo|
+      _, port, address, _, family, socktype, protocol = addrinfo
+
+      descriptor = RubySL::Socket::Foreign.socket(family, socktype, protocol)
+
+      next if descriptor < 0
+
+      status = RubySL::Socket::Foreign
+        .bind(descriptor, Socket.sockaddr_in(port, address))
+
+      if status < 0
+        RubySL::Socket::Foreign.close(descriptor)
+
+        Errno.handle('bind(2)')
+      else
+        IO.setup(self, descriptor, nil, true)
+
+        setsockopt(:SOCKET, :REUSEADDR, true)
+
+        break
+      end
+    end
+
+    listen(5)
   end
 
   def listen(backlog)
