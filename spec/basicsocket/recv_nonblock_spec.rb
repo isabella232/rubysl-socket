@@ -1,10 +1,10 @@
 require 'socket'
 
 describe 'BasicSocket#recv_nonblock' do
-  describe 'using IPv4' do
+  each_ip_protocol do |family, ip_address|
     before do
-      @server = Socket.new(:INET, :DGRAM)
-      @client = Socket.new(:INET, :DGRAM)
+      @server = Socket.new(family, :DGRAM)
+      @client = Socket.new(family, :DGRAM)
     end
 
     after do
@@ -21,7 +21,7 @@ describe 'BasicSocket#recv_nonblock' do
 
     describe 'using a bound socket' do
       before do
-        @server.bind(Socket.sockaddr_in(0, '127.0.0.1'))
+        @server.bind(Socket.sockaddr_in(0, ip_address))
 
         @client.connect(@server.getsockname)
       end
@@ -39,31 +39,6 @@ describe 'BasicSocket#recv_nonblock' do
 
           @server.recv_nonblock(2).should == 'he'
         end
-      end
-    end
-  end
-
-  describe 'using IPv6' do
-    before do
-      @server = Socket.new(:INET6, :DGRAM)
-      @client = Socket.new(:INET6, :DGRAM)
-    end
-
-    after do
-      @client.close
-      @server.close
-    end
-
-    describe 'using a bound socket with data available' do
-      before do
-        @server.bind(Socket.sockaddr_in(0, '::1'))
-        @client.connect(@server.getsockname)
-      end
-
-      it 'returns the given amount of bytes' do
-        @client.write('hello')
-
-        @server.recv_nonblock(2).should == 'he'
       end
     end
   end
