@@ -1,5 +1,4 @@
 require 'socket'
-require File.expand_path('../../fixtures/classes', __FILE__)
 
 describe 'BasicSocket#recv' do
   each_ip_protocol do |family, ip_address|
@@ -15,7 +14,7 @@ describe 'BasicSocket#recv' do
 
     describe 'using an unbound socket' do
       it 'blocks the caller' do
-        SocketSpecs.blocking? { @server.recv(4) }.should == true
+        proc { @server.recv(4) }.should block_caller
       end
     end
 
@@ -26,7 +25,7 @@ describe 'BasicSocket#recv' do
 
       describe 'without any data available' do
         it 'blocks the caller' do
-          SocketSpecs.blocking? { @server.recv(4) }.should == true
+          proc { @server.recv(4) }.should block_caller
         end
       end
 
@@ -52,7 +51,7 @@ describe 'BasicSocket#recv' do
 
           @server.recv(2).should == 'he'
 
-          SocketSpecs.blocking? { @server.recv(4) }.should == true
+          proc { @server.recv(4) }.should block_caller
         end
 
         it 'takes a peek at the data when using the MSG_PEEK flag' do

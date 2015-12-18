@@ -1,5 +1,4 @@
 require 'socket'
-require File.expand_path('../../fixtures/classes', __FILE__)
 
 describe 'BasicSocket#recvmsg' do
   describe 'using a disconnected socket' do
@@ -15,7 +14,7 @@ describe 'BasicSocket#recvmsg' do
 
     describe 'using an unbound socket' do
       it 'blocks the caller' do
-        SocketSpecs.blocking? { @server.recvmsg }.should == true
+        proc { @server.recvmsg }.should block_caller
       end
     end
 
@@ -26,7 +25,7 @@ describe 'BasicSocket#recvmsg' do
 
       describe 'without any data available' do
         it 'blocks the caller' do
-          SocketSpecs.blocking? { @server.recvmsg }.should == true
+          proc { @server.recvmsg }.should block_caller
         end
       end
 
@@ -118,7 +117,7 @@ describe 'BasicSocket#recvmsg' do
 
     describe 'without any data available' do
       it 'blocks the caller' do
-        blocking = SocketSpecs.blocking? do
+        block = proc do
           socket, _ = @server.accept
 
           begin
@@ -128,7 +127,7 @@ describe 'BasicSocket#recvmsg' do
           end
         end
 
-        blocking.should == true
+        block.should block_caller
       end
     end
 

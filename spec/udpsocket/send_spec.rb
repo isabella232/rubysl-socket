@@ -69,7 +69,7 @@ describe 'UDPSocket#send' do
       it 'sends the data to the given address instead' do
         @client.send('hello', 0, @alt_server.getsockname).should == 5
 
-        SocketSpecs.blocking? { @server.recv(5) }.should == true
+        proc { @server.recv(5) }.should block_caller
 
         @alt_server.recv(5).should == 'hello'
       end

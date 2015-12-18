@@ -9,7 +9,7 @@ describe 'Socket#recvfrom' do
 
   describe 'using an unbound socket' do
     it 'blocks the caller' do
-      SocketSpecs.blocking? { @server.recvfrom(1) }.should == true
+      proc { @server.recvfrom(1) }.should block_caller
     end
   end
 
@@ -21,7 +21,7 @@ describe 'Socket#recvfrom' do
 
     describe 'without any data available' do
       it 'blocks the caller' do
-        SocketSpecs.blocking? { @server.recvfrom(1) }.should == true
+        proc { @server.recvfrom(1) }.should block_caller
       end
     end
 

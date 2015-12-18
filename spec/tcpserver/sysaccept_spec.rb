@@ -12,7 +12,7 @@ describe 'TCPServer#sysaccept' do
 
   describe 'without a connected client' do
     it 'blocks the caller' do
-      SocketSpecs.blocking? { @server.sysaccept }.should == true
+      proc { @server.sysaccept }.should block_caller
     end
   end
 

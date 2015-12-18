@@ -68,7 +68,7 @@ describe 'BasicSocket#sendmsg' do
       it 'sends the message to the given address instead' do
         @client.sendmsg('hello', 0, @alt_server.getsockname).should == 5
 
-        SocketSpecs.blocking? { @server.recv(5) }.should == true
+        proc { @server.recv(5) }.should block_caller
 
         @alt_server.recv(5).should == 'hello'
       end
@@ -94,11 +94,11 @@ describe 'BasicSocket#sendmsg' do
     it 'blocks when the underlying buffer is full' do
       # Buffer sizes may differ per platform, so sadly this is the only
       # reliable way of testing blocking behaviour.
-      blocking = SocketSpecs.blocking? do
+      block = proc do
         10.times { @client.sendmsg('hello' * 1_000_000) }
       end
 
-      blocking.should == true
+      block.should block_caller
     end
   end
 end

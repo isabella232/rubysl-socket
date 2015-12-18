@@ -15,7 +15,7 @@ describe 'UNIXServer#sysaccept' do
 
   describe 'without a client' do
     it 'blocks the calling thread' do
-      SocketSpecs.blocking? { @server.sysaccept }.should == true
+      proc { @server.sysaccept }.should block_caller
     end
   end
 
