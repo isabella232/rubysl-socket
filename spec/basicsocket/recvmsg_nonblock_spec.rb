@@ -1,5 +1,4 @@
 require 'socket'
-require File.expand_path('../../fixtures/classes', __FILE__)
 
 describe 'BasicSocket#recvmsg_nonblock' do
   each_ip_protocol do |family, ip_address|
