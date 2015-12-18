@@ -278,8 +278,8 @@ class BasicSocket < IO
   end
 
   def recv_nonblock(bytes_to_read, flags = 0)
-    fcntl Fcntl::F_SETFL, Fcntl::O_NONBLOCK
-    socket_recv bytes_to_read, flags, 0
+    fcntl(Fcntl::F_SETFL, Fcntl::O_NONBLOCK)
+    socket_recv(bytes_to_read, flags, 0)
   rescue Errno::EWOULDBLOCK
     raise Errno::EAGAIN
   end
