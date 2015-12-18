@@ -16,17 +16,34 @@ module RubySL
       pointers.map { |p| p.read_string }
     end
 
+    def self.sockaddr_class_for_socket(socket)
+      case Helpers.address_info(:getsockname, socket)[0]
+      when 'AF_INET6'
+        RubySL::Socket::Foreign::SockaddrIn6
+      when 'AF_UNIX'
+        RubySL::Socket::Foreign::SockaddrUn
+      else
+        RubySL::Socket::Foreign::SockaddrIn
+      end
+    end
+
+    def self.sockaddr_class_for_string(sockaddr)
+      case sockaddr.bytesize
+      when 16
+        RubySL::Socket::Foreign::SockaddrIn
+      when 28
+        RubySL::Socket::Foreign::SockaddrIn6
+      when 110
+        RubySL::Socket::Foreign::SockaddrUn
+      else
+        raise ArgumentError, 'invalid destination address'
+      end
+    end
+
     def self.accept(source, new_class)
       raise IOError, 'socket has been closed' if source.closed?
 
-      case Helpers.address_info(:getsockname, source)[0]
-      when 'AF_INET6'
-        sockaddr = RubySL::Socket::Foreign::SockaddrIn6.new
-      when 'AF_UNIX'
-        sockaddr = RubySL::Socket::Foreign::SockaddrUn.new
-      else
-        sockaddr = RubySL::Socket::Foreign::SockaddrIn.new
-      end
+      sockaddr = sockaddr_class_for_socket(source).new
 
       begin
         fd = RubySL::Socket::Foreign.memory_pointer(:int) do |size_p|

@@ -112,20 +112,8 @@ class BasicSocket < IO
       buffer.write_string(message)
 
       if dest_sockaddr.is_a?(String)
-        addr_klass = nil
-
-        case dest_sockaddr.bytesize
-        when 16
-          addr_klass = RubySL::Socket::Foreign::SockaddrIn
-        when 28
-          addr_klass = RubySL::Socket::Foreign::SockaddrIn6
-        when 110
-          addr_klass = RubySL::Socket::Foreign::SockaddrUn
-        else
-          raise ArgumentError, 'invalid destination address'
-        end
-
-        addr = addr_klass.with_sockaddr(dest_sockaddr)
+        addr = RubySL::Socket.sockaddr_class_for_string(dest_sockaddr)
+          .with_sockaddr(dest_sockaddr)
 
         begin
           bytes_sent = RubySL::Socket::Foreign
@@ -163,7 +151,7 @@ class BasicSocket < IO
 
     loop do
       msg_buffer = RubySL::Socket::Foreign.char_pointer(msg_len)
-      address    = RubySL::Socket::Foreign::SockaddrIn.new
+      address    = RubySL::Socket.sockaddr_class_for_socket(self).new
       io_vec     = RubySL::Socket::Foreign::Iovec.with_buffer(msg_buffer)
       header     = RubySL::Socket::Foreign::Msghdr.with_buffers(address, io_vec)
 
