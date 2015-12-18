@@ -36,5 +36,14 @@ describe 'TCPSocket#initialize' do
       socket.remote_address.ip_address.should == @server.local_address.ip_address
       socket.remote_address.ip_port.should    == @server.local_address.ip_port
     end
+
+    describe 'using a local address and service' do
+      it 'binds the client socket to the local address and service' do
+        socket = TCPSocket.new('127.0.0.1', @port, '127.0.0.2', @port)
+
+        socket.local_address.ip_address.should == '127.0.0.2'
+        socket.local_address.ip_port.should    == @port
+      end
+    end
   end
 end
