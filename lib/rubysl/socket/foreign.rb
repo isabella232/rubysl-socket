@@ -298,6 +298,21 @@ module RubySL
       def self.memory_pointer(*args, &block)
         Rubinius::FFI::MemoryPointer.new(*args, &block)
       end
+
+      def self.pointers_of_type(current, type)
+        pointers = []
+        size     = Rubinius::FFI.type_size(type)
+        pointer  = current.read_pointer
+
+        until pointer.null?
+          pointers << pointer
+
+          current = current + size
+          pointer = current.read_pointer
+        end
+
+        pointers
+      end
     end
   end
 end

@@ -9,11 +9,9 @@ module RubySL
     end
 
     def self.aliases_for_hostname(hostname)
-      pointer  = Foreign.gethostbyname(hostname)
-      struct   = Foreign::Hostent.new(pointer)
-      pointers = struct[:h_aliases].get_array_of_pointer(0, struct[:h_length])
+      pointer = Foreign.gethostbyname(hostname)
 
-      pointers.map { |p| p.read_string }
+      Foreign::Hostent.new(pointer).aliases
     end
 
     def self.sockaddr_class_for_socket(socket)
