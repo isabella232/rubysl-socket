@@ -151,6 +151,31 @@ class Socket < BasicSocket
     [hostname, alternatives.uniq, family] + addresses.uniq
   end
 
+  def self.gethostbyaddr(addr, family = nil)
+    if !family and addr.bytesize == 16
+      family = Socket::AF_INET6
+    elsif !family
+      family = Socket::AF_INET
+    end
+
+    family = RubySL::Socket::Helpers.address_family(family)
+
+    RubySL::Socket::Foreign.char_pointer(addr.bytesize) do |in_pointer|
+      in_pointer.write_string(addr)
+
+      out_pointer = RubySL::Socket::Foreign
+        .gethostbyaddr(in_pointer, in_pointer.total, family)
+
+      unless out_pointer
+        raise SocketError, "No host found for address #{addr.inspect}"
+      end
+
+      struct = RubySL::Socket::Foreign::Hostent.new(out_pointer)
+
+      [struct.hostname, struct.aliases, struct.type, *struct.addresses]
+    end
+  end
+
   def self.getservbyname(service, proto='tcp')
     Rubinius::FFI::MemoryPointer.new :char, service.length + 1 do |svc|
       Rubinius::FFI::MemoryPointer.new :char, proto.length + 1 do |prot|
