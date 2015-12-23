@@ -2,7 +2,12 @@ class UNIXSocket < BasicSocket
   include IO::TransferIO
 
   def self.socketpair(type = Socket::SOCK_STREAM, protocol = 0)
-    Socket.socketpair(Socket::AF_UNIX, type, protocol, self)
+    family = Socket::AF_UNIX
+    type   = RubySL::Socket::Helpers.socket_type(type)
+
+    fd0, fd1 = RubySL::Socket::Foreign.socketpair(family, type, protocol)
+
+    [for_fd(fd0), for_fd(fd1)]
   end
 
   class << self
