@@ -7,6 +7,11 @@ describe 'Socket#recvfrom' do
       @client = Socket.new(family, :DGRAM)
     end
 
+    after do
+      @client.close
+      @server.close
+    end
+
     describe 'using an unbound socket' do
       it 'blocks the caller' do
         proc { @server.recvfrom(1) }.should block_caller
