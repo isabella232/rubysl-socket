@@ -5,6 +5,10 @@ describe 'Socket#local_address' do
     @sock = Socket.new(Socket::AF_INET, Socket::SOCK_STREAM, Socket::IPPROTO_TCP)
   end
 
+  after do
+    @sock.close
+  end
+
   it 'returns an Addrinfo' do
     @sock.local_address.should be_an_instance_of(Addrinfo)
   end
