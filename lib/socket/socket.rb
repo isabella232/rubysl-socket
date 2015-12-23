@@ -120,9 +120,10 @@ class Socket < BasicSocket
   end
 
   def self.gethostname
-    Rubinius::FFI::MemoryPointer.new :char, 1024 do |mp|  #magic number 1024 comes from MRI
-      RubySL::Socket::Foreign.gethostname(mp, 1024) # same here
-      return mp.read_string
+    RubySL::Socket::Foreign.char_pointer(1024) do |pointer|
+      RubySL::Socket::Foreign.gethostname(pointer, pointer.total)
+
+      pointer.read_string
     end
   end
 
