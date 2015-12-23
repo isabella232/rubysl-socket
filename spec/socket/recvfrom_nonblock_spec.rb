@@ -1,84 +1,86 @@
 require 'socket'
 
 describe 'Socket#recvfrom_nonblock' do
-  before do
-    @server = Socket.new(:INET, :DGRAM)
-    @client = Socket.new(:INET, :DGRAM)
-  end
-
-  describe 'using an unbound socket' do
-    it 'raises IO::EAGAINWaitReadable' do
-      proc { @server.recvfrom_nonblock(1) }
-        .should raise_error(IO::EAGAINWaitReadable)
-    end
-  end
-
-  describe 'using a bound socket' do
+  each_ip_protocol do |family, ip_address|
     before do
-      @server.bind(Socket.sockaddr_in(0, '127.0.0.1'))
-      @client.connect(@server.getsockname)
+      @server = Socket.new(family, :DGRAM)
+      @client = Socket.new(family, :DGRAM)
     end
 
-    describe 'without any data available' do
+    describe 'using an unbound socket' do
       it 'raises IO::EAGAINWaitReadable' do
         proc { @server.recvfrom_nonblock(1) }
           .should raise_error(IO::EAGAINWaitReadable)
       end
     end
 
-    describe 'with data available' do
+    describe 'using a bound socket' do
       before do
-        @client.write('hello')
+        @server.bind(Socket.sockaddr_in(0, ip_address))
+        @client.connect(@server.getsockname)
       end
 
-      it 'returns an Array containing the data and an Addrinfo' do
-        ret = @server.recvfrom_nonblock(1)
-
-        ret.should be_an_instance_of(Array)
-        ret.length.should == 2
+      describe 'without any data available' do
+        it 'raises IO::EAGAINWaitReadable' do
+          proc { @server.recvfrom_nonblock(1) }
+            .should raise_error(IO::EAGAINWaitReadable)
+        end
       end
 
-      describe 'the returned Array' do
+      describe 'with data available' do
         before do
-          @array = @server.recvfrom_nonblock(1)
+          @client.write('hello')
         end
 
-        it 'contains the data at index 0' do
-          @array[0].should == 'h'
+        it 'returns an Array containing the data and an Addrinfo' do
+          ret = @server.recvfrom_nonblock(1)
+
+          ret.should be_an_instance_of(Array)
+          ret.length.should == 2
         end
 
-        it 'contains an Addrinfo at index 1' do
-          @array[1].should be_an_instance_of(Addrinfo)
-        end
-      end
+        describe 'the returned Array' do
+          before do
+            @array = @server.recvfrom_nonblock(1)
+          end
 
-      describe 'the returned Addrinfo' do
-        before do
-          @addr = @server.recvfrom_nonblock(1)[1]
-        end
+          it 'contains the data at index 0' do
+            @array[0].should == 'h'
+          end
 
-        it 'uses AF_INET as the address family' do
-          @addr.afamily.should == Socket::AF_INET
-        end
-
-        it 'uses SOCK_DGRAM as the socket type' do
-          @addr.socktype.should == Socket::SOCK_DGRAM
+          it 'contains an Addrinfo at index 1' do
+            @array[1].should be_an_instance_of(Addrinfo)
+          end
         end
 
-        it 'uses PF_INET as the protocol family' do
-          @addr.pfamily.should == Socket::PF_INET
-        end
+        describe 'the returned Addrinfo' do
+          before do
+            @addr = @server.recvfrom_nonblock(1)[1]
+          end
 
-        it 'uses 0 as the protocol' do
-          @addr.protocol.should == 0
-        end
+          it 'uses AF_INET as the address family' do
+            @addr.afamily.should == family
+          end
 
-        it 'uses the IP address of the client' do
-          @addr.ip_address.should == '127.0.0.1'
-        end
+          it 'uses SOCK_DGRAM as the socket type' do
+            @addr.socktype.should == Socket::SOCK_DGRAM
+          end
 
-        it 'uses the port of the client' do
-          @addr.ip_port.should == @client.local_address.ip_port
+          it 'uses PF_INET as the protocol family' do
+            @addr.pfamily.should == family
+          end
+
+          it 'uses 0 as the protocol' do
+            @addr.protocol.should == 0
+          end
+
+          it 'uses the IP address of the client' do
+            @addr.ip_address.should == ip_address
+          end
+
+          it 'uses the port of the client' do
+            @addr.ip_port.should == @client.local_address.ip_port
+          end
         end
       end
     end
