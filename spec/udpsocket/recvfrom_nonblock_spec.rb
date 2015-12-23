@@ -1,81 +1,83 @@
 require 'socket'
 
 describe 'UDPSocket#recvfrom_nonblock' do
-  before do
-    @server = UDPSocket.new
-    @client = UDPSocket.new
-  end
-
-  after do
-    @client.close
-    @server.close
-  end
-
-  describe 'using an unbound socket' do
-    it 'raises IO::EAGAINWaitReadable' do
-      proc { @server.recvfrom_nonblock(1) }
-        .should raise_error(IO::EAGAINWaitReadable)
-    end
-  end
-
-  describe 'using a bound socket' do
+  each_ip_protocol do |family, ip_address, family_name|
     before do
-      @server.bind('127.0.0.1', 0)
-
-      addr = @server.connect_address
-
-      @client.connect(addr.ip_address, addr.ip_port)
+      @server = UDPSocket.new(family)
+      @client = UDPSocket.new(family)
     end
 
-    describe 'without any data available' do
+    after do
+      @client.close
+      @server.close
+    end
+
+    describe 'using an unbound socket' do
       it 'raises IO::EAGAINWaitReadable' do
         proc { @server.recvfrom_nonblock(1) }
           .should raise_error(IO::EAGAINWaitReadable)
       end
     end
 
-    describe 'with data available' do
+    describe 'using a bound socket' do
       before do
-        @client.write('hello')
+        @server.bind(ip_address, 0)
+
+        addr = @server.connect_address
+
+        @client.connect(addr.ip_address, addr.ip_port)
       end
 
-      it 'returns an Array containing the data and an Array' do
-        @server.recvfrom_nonblock(1).should be_an_instance_of(Array)
+      describe 'without any data available' do
+        it 'raises IO::EAGAINWaitReadable' do
+          proc { @server.recvfrom_nonblock(1) }
+            .should raise_error(IO::EAGAINWaitReadable)
+        end
       end
 
-      describe 'the returned Array' do
+      describe 'with data available' do
         before do
-          @array = @server.recvfrom_nonblock(1)
+          @client.write('hello')
         end
 
-        it 'contains the data at index 0' do
-          @array[0].should == 'h'
+        it 'returns an Array containing the data and an Array' do
+          @server.recvfrom_nonblock(1).should be_an_instance_of(Array)
         end
 
-        it 'contains an Array at index 1' do
-          @array[1].should be_an_instance_of(Array)
-        end
-      end
+        describe 'the returned Array' do
+          before do
+            @array = @server.recvfrom_nonblock(1)
+          end
 
-      describe 'the returned address Array' do
-        before do
-          @addr = @server.recvfrom_nonblock(1)[1]
-        end
+          it 'contains the data at index 0' do
+            @array[0].should == 'h'
+          end
 
-        it 'uses AF_INET as the address family' do
-          @addr[0].should == 'AF_INET'
-        end
-
-        it 'uses the port of the client' do
-          @addr[1].should == @client.local_address.ip_port
+          it 'contains an Array at index 1' do
+            @array[1].should be_an_instance_of(Array)
+          end
         end
 
-        it 'uses the hostname of the client' do
-          @addr[2].should == '127.0.0.1'
-        end
+        describe 'the returned address Array' do
+          before do
+            @addr = @server.recvfrom_nonblock(1)[1]
+          end
 
-        it 'uses the IP address of the client' do
-          @addr[3].should == '127.0.0.1'
+          it 'uses the correct address family' do
+            @addr[0].should == family_name
+          end
+
+          it 'uses the port of the client' do
+            @addr[1].should == @client.local_address.ip_port
+          end
+
+          it 'uses the hostname of the client' do
+            @addr[2].should == ip_address
+          end
+
+          it 'uses the IP address of the client' do
+            @addr[3].should == ip_address
+          end
         end
       end
     end
