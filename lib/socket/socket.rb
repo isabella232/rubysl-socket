@@ -65,17 +65,23 @@ class Socket < BasicSocket
 
     addrinfos.map do |ai|
       addrinfo = []
-      addrinfo << Socket::Constants::AF_TO_FAMILY[ai[1]]
 
-      sockaddr = RubySL::Socket::Foreign
+      unpacked = RubySL::Socket::Foreign
         .unpack_sockaddr_in(ai[4], reverse_lookup)
 
-      addrinfo << sockaddr.pop  # port
-      addrinfo.concat(sockaddr) # hosts
+      addrinfo << Socket::Constants::AF_TO_FAMILY[ai[1]]
+      addrinfo << unpacked.pop # port
 
-      addrinfo << ai[1]
-      addrinfo << ai[2]
-      addrinfo << ai[3]
+      # Canonical host is present (e.g. when AI_CANONNAME was used)
+      if ai[5] and !reverse_lookup
+        unpacked[0] = ai[5]
+      end
+
+      addrinfo.concat(unpacked) # hosts
+
+      addrinfo << ai[1] # family
+      addrinfo << ai[2] # socktype
+      addrinfo << ai[3] # protocol
 
       addrinfo
     end
