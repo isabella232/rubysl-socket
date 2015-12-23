@@ -170,9 +170,8 @@ class Socket < BasicSocket
     RubySL::Socket::Foreign.ntohs(struct.port)
   end
 
-  def self.pack_sockaddr_in(port, host, type = Socket::SOCK_DGRAM, flags = 0)
-    RubySL::Socket::Foreign
-      .pack_sockaddr_in(host, port, Socket::AF_UNSPEC, type, flags)
+  def self.pack_sockaddr_in(port, host)
+    RubySL::Socket::Foreign.pack_sockaddr_in(host, port)
   end
 
   def self.unpack_sockaddr_in(sockaddr)

@@ -237,7 +237,8 @@ module RubySL
         end
       end
 
-      def self.pack_sockaddr_in(host, port, family, type, flags)
+      def self.pack_sockaddr_in(host, port, family = ::Socket::AF_UNSPEC,
+                                type = 0, flags = 0)
         hints = Addrinfo.new
 
         hints[:ai_family]   = family
