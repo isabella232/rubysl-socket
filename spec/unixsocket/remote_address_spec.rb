@@ -1,54 +1,42 @@
 require 'socket'
-require File.expand_path('../../fixtures/classes', __FILE__)
 
 describe 'UNIXSocket#remote_address' do
-  platform_is_not :windows do
-    before :all do
-      @path = SocketSpecs.socket_path
+  before do
+    @path   = tmp('unix_socket')
+    @server = UNIXServer.new(@path)
+    @client = UNIXSocket.new(@path)
+  end
 
-      rm_r @path
+  after do
+    @client.close
+    @server.close
 
-      @server = UNIXServer.new(@path)
+    rm_r(@path)
+  end
+
+  it 'returns an Addrinfo' do
+    @client.remote_address.should be_an_instance_of(Addrinfo)
+  end
+
+  describe 'the returned Addrinfo' do
+    it 'uses AF_UNIX as the address family' do
+      @client.remote_address.afamily.should == Socket::AF_UNIX
     end
 
-    after :all do
-      @server.close
-
-      rm_r @path
+    it 'uses PF_UNIX as the protocol family' do
+      @client.remote_address.pfamily.should == Socket::PF_UNIX
     end
 
-    before do
-      @sock = UNIXSocket.new(@path)
+    it 'uses SOCK_STREAM as the socket type' do
+      @client.remote_address.socktype.should == Socket::SOCK_STREAM
     end
 
-    after do
-      @sock.close
+    it 'uses the correct socket path' do
+      @client.remote_address.unix_path.should == @path
     end
 
-    it 'returns an Addrinfo' do
-      @sock.remote_address.should be_an_instance_of(Addrinfo)
-    end
-
-    describe 'the returned Addrinfo' do
-      it 'uses AF_UNIX as the address family' do
-        @sock.remote_address.afamily.should == Socket::AF_UNIX
-      end
-
-      it 'uses PF_UNIX as the protocol family' do
-        @sock.remote_address.pfamily.should == Socket::PF_UNIX
-      end
-
-      it 'uses SOCK_STREAM as the socket type' do
-        @sock.remote_address.socktype.should == Socket::SOCK_STREAM
-      end
-
-      it 'uses the correct socket path' do
-        @sock.remote_address.unix_path.should == @path
-      end
-
-      it 'uses 0 as the protocol' do
-        @sock.remote_address.protocol.should == 0
-      end
+    it 'uses 0 as the protocol' do
+      @client.remote_address.protocol.should == 0
     end
   end
 end
