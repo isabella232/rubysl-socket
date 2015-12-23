@@ -20,8 +20,6 @@ class TCPSocket < IPSocket
 
     if host
       host = RubySL::Socket::Helpers.coerce_to_string(host)
-    else
-      host = ''
     end
 
     if service.is_a?(Fixnum)
@@ -48,6 +46,9 @@ class TCPSocket < IPSocket
       local_addrinfo = Socket
         .getaddrinfo(local_host, local_service, :UNSPEC, :STREAM)
     end
+
+    descriptor     = nil
+    connect_status = 0
 
     # Because we don't know exactly what address family to bind to we'll just
     # grab all the available ones and try every one of them, bailing out on the
@@ -77,16 +78,18 @@ class TCPSocket < IPSocket
         end
       end
 
-      status = RubySL::Socket::Foreign
+      connect_status = RubySL::Socket::Foreign
         .connect(descriptor, Socket.sockaddr_in(port, address))
 
-      if status < 0
-        RubySL::Socket::Foreign.close(descriptor)
-        Errno.handle('connect(2)')
-      else
-        IO.setup(self, descriptor, nil, true)
-        break
-      end
+      break if connect_status >= 0
+    end
+
+    if connect_status < 0
+      RubySL::Socket::Foreign.close(descriptor)
+
+      Errno.handle('connect(2)')
+    else
+      IO.setup(self, descriptor, nil, true)
     end
   end
 
