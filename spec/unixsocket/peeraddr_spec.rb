@@ -1,7 +1,5 @@
 require 'socket'
 
-require 'socket'
-
 describe 'UNIXSocket#peeraddr' do
   before do
     @path   = tmp('unix_socket')
