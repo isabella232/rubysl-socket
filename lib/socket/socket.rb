@@ -243,16 +243,17 @@ class Socket < BasicSocket
     end
   end
 
-  def initialize(family, socket_type, protocol=0)
+  def initialize(family, socket_type, protocol = 0)
     @no_reverse_lookup = self.class.do_not_reverse_lookup
-    @family = RubySL::Socket::Helpers.protocol_family(family)
+
+    @family      = RubySL::Socket::Helpers.protocol_family(family)
     @socket_type = RubySL::Socket::Helpers.socket_type(socket_type)
 
     descriptor = RubySL::Socket::Foreign.socket(@family, @socket_type, protocol)
 
-    Errno.handle 'socket(2)' if descriptor < 0
+    Errno.handle('socket(2)') if descriptor < 0
 
-    IO.setup self, descriptor, nil, true
+    IO.setup(self, descriptor, nil, true)
   end
 
   def bind(addr)
