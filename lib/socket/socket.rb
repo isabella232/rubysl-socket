@@ -1,50 +1,32 @@
 class Socket < BasicSocket
   def self.ip_address_list
-    struct = RubySL::Socket::Foreign::Ifaddrs.new
-    status = RubySL::Socket::Foreign.getifaddrs(struct)
-    addrs  = []
+    initial = RubySL::Socket::Foreign::Ifaddrs.new
+    status  = RubySL::Socket::Foreign.getifaddrs(initial)
+    addrs   = []
 
-    if status == -1
-      raise "System call to getifaddrs() returned #{status.inspect}"
-    end
+    Errno.handle('getifaddrs()') if status < 0
 
-    pointer = struct
+    begin
+      next_pointer = initial.next
 
-    while pointer[:ifa_next]
-      if pointer[:ifa_addr]
-        addr   = RubySL::Socket::Foreign::Sockaddr.new(pointer[:ifa_addr])
-        family = addr[:sa_family]
+      while next_pointer
+        ifaddrs_struct  = RubySL::Socket::Foreign::Ifaddrs.new(next_pointer)
+        sockaddr_struct = ifaddrs_struct.to_sockaddr
 
-        if family == AF_INET or family == AF_INET6
+        if sockaddr_struct.family == AF_INET
+          addrs << Addrinfo.new(ifaddrs_struct.to_sockaddr_in.to_s)
 
-          if AF_INET6
-            size = family == RubySL::Socket::Foreign::SockaddrIn6.size
-          else
-            size = family = RubySL::Socket::Foreign::SockaddrIn.size
-          end
-
-          host = Rubinius::FFI::MemoryPointer.new(:char, Constants::NI_MAXHOST)
-
-          status = RubySL::Socket::Foreign._getnameinfo(addr,
-                                size,
-                                host,
-                                Socket::Constants::NI_MAXHOST,
-                                nil,
-                                0,
-                                Constants::NI_NUMERICHOST)
-
-          addrs << Addrinfo.ip(host.read_string)
-
-          host.free
+        elsif sockaddr_struct.family == AF_INET6
+          addrs << Addrinfo.new(ifaddrs_struct.to_sockaddr_in6.to_s)
         end
+
+        next_pointer = ifaddrs_struct.next
       end
 
-      pointer = RubySL::Socket::Foreign::Ifaddrs.new(pointer[:ifa_next])
+      addrs
+    ensure
+      RubySL::Socket::Foreign.freeifaddrs(initial)
     end
-
-    RubySL::Socket::Foreign.freeifaddrs(struct)
-
-    addrs
   end
 
   def self.getaddrinfo(host, service, family = 0, socktype = 0,
