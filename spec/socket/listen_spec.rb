@@ -10,6 +10,11 @@ describe 'Socket#listen' do
         @server.bind(Socket.sockaddr_in(0, ip_address))
       end
 
+      after do
+        @client.close
+        @server.close
+      end
+
       it 'raises Errno::EOPNOTSUPP' do
         proc { @server.listen(1) }.should raise_error(Errno::EOPNOTSUPP)
       end
@@ -21,6 +26,11 @@ describe 'Socket#listen' do
         @client = Socket.new(family, :STREAM)
 
         @server.bind(Socket.sockaddr_in(0, ip_address))
+      end
+
+      after do
+        @client.close
+        @server.close
       end
 
       it 'returns 0' do
