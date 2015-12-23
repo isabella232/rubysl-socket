@@ -46,21 +46,23 @@ describe 'TCPServer#initialize' do
   end
 
   describe 'with a String and a Fixnum' do
-    before do
-      @server = TCPServer.new('127.0.0.1', 0)
-    end
+    each_ip_protocol do |family, ip_address|
+      before do
+        @server = TCPServer.new(ip_address, 0)
+      end
 
-    after do
-      @server.close
-    end
+      after do
+        @server.close
+      end
 
-    it 'sets the port to the given port argument' do
-      @server.local_address.ip_port.should be_an_instance_of(Fixnum)
-      @server.local_address.ip_port.should > 0
-    end
+      it 'sets the port to the given port argument' do
+        @server.local_address.ip_port.should be_an_instance_of(Fixnum)
+        @server.local_address.ip_port.should > 0
+      end
 
-    it 'sets the hostname to the given host argument' do
-      @server.local_address.ip_address.should == '127.0.0.1'
+      it 'sets the hostname to the given host argument' do
+        @server.local_address.ip_address.should == ip_address
+      end
     end
   end
 
