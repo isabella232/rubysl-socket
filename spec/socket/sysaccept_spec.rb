@@ -37,13 +37,20 @@ describe 'Socket#accept' do
       end
 
       describe 'without a connected client' do
+        before do
+          @client = Socket.new(family, :STREAM)
+        end
+
+        after do
+          @client.close
+        end
+
         it 'blocks the caller until a connection is available' do
-          client = Socket.new(family, :STREAM)
           thread = Thread.new do
             @server.sysaccept
           end
 
-          client.connect(@server_addr)
+          @client.connect(@server_addr)
 
           thread.join(5)
 
@@ -56,6 +63,10 @@ describe 'Socket#accept' do
           @client = Socket.new(family, :STREAM)
 
           @client.connect(@server.getsockname)
+        end
+
+        after do
+          @client.close
         end
 
         it 'returns an Array containing a Fixnum and an Addrinfo' do
