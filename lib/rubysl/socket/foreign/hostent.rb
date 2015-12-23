@@ -14,11 +14,15 @@ module RubySL
         end
 
         def aliases
+          return [] unless self[:h_aliases]
+
           RubySL::Socket::Foreign.pointers_of_type(self[:h_aliases], :string)
             .map(&:read_string)
         end
 
         def addresses
+          return [] unless self[:h_addr_list]
+
           RubySL::Socket::Foreign.pointers_of_type(self[:h_addr_list], :string)
             .map { |pointer| pointer.read_string(self[:h_length]) }
         end

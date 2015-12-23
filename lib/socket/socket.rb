@@ -127,34 +127,29 @@ class Socket < BasicSocket
   end
 
   def self.gethostbyname(hostname)
-    addrinfos = Socket.getaddrinfo(hostname, nil)
+    addrinfos = Socket
+      .getaddrinfo(hostname, nil, nil, :STREAM, nil, Socket::AI_CANONNAME)
 
-    hostname     = addrinfos.first[2]
-    family       = addrinfos.first[4]
+    hostname     = addrinfos[0][2]
+    family       = addrinfos[0][4]
     addresses    = []
-    alternatives = []
+    alternatives = RubySL::Socket.aliases_for_hostname(hostname)
+
     addrinfos.each do |a|
-      alternatives << a[2] unless a[2] == hostname
-      # transform addresses to packed strings
-      if a[4] == family
-        sockaddr = Socket.sockaddr_in(1, a[3])
-        if family == AF_INET
-          # IPv4 address
-          offset = Rubinius::FFI.config("sockaddr_in.sin_addr.offset")
-          size = Rubinius::FFI.config("sockaddr_in.sin_addr.size")
-          addresses << sockaddr.byteslice(offset, size)
-        elsif family == AF_INET6
-          # Ipv6 address
-          offset = Rubinius::FFI.config("sockaddr_in6.sin6_addr.offset")
-          size = Rubinius::FFI.config("sockaddr_in6.sin6_addr.size")
-          addresses << sockaddr.byteslice(offset, size)
-        else
-          addresses << a[3]
-        end
+      sockaddr = Socket.sockaddr_in(0, a[3])
+
+      if a[4] == AF_INET
+        offset, size = RubySL::Socket::Foreign::SockaddrIn.layout[:sin_addr]
+
+        addresses << sockaddr.byteslice(offset, size)
+      elsif a[4] == AF_INET6
+        offset, size = RubySL::Socket::Foreign::SockaddrIn6.layout[:sin6_addr]
+
+        addresses << sockaddr.byteslice(offset, size)
       end
     end
 
-    [hostname, alternatives.uniq, family] + addresses.uniq
+    [hostname, alternatives, family, *addresses]
   end
 
   def self.gethostbyaddr(addr, family = nil)
