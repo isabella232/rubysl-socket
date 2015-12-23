@@ -1,6 +1,7 @@
 class TCPSocket < IPSocket
   def self.gethostbyname(hostname)
-    addrinfos = Socket.getaddrinfo(hostname, nil, 0, 0, 0, 0, true)
+    addrinfos = Socket
+      .getaddrinfo(hostname, nil, nil, :STREAM, nil, Socket::AI_CANONNAME)
 
     hostname     = addrinfos[0][2]
     family       = addrinfos[0][4]
@@ -11,7 +12,7 @@ class TCPSocket < IPSocket
       alternatives << name unless name == hostname
     end
 
-    [hostname, alternatives, family] + addresses.uniq
+    [hostname, alternatives, family, *addresses]
   end
 
   def initialize(host, service, local_host = nil, local_service = nil)
