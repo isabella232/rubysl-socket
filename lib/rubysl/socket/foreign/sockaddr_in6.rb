@@ -17,7 +17,7 @@ module RubySL
         end
 
         def to_s
-          pointer.read_string(pointer.total)
+          pointer.read_string(self.class.size)
         end
       end
     end
