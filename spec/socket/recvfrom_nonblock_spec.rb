@@ -7,6 +7,11 @@ describe 'Socket#recvfrom_nonblock' do
       @client = Socket.new(family, :DGRAM)
     end
 
+    after do
+      @client.close
+      @server.close
+    end
+
     describe 'using an unbound socket' do
       it 'raises IO::EAGAINWaitReadable' do
         proc { @server.recvfrom_nonblock(1) }
