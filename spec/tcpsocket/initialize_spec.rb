@@ -1,48 +1,52 @@
 require 'socket'
 
 describe 'TCPSocket#initialize' do
-  describe 'when no server is listening on the given address' do
-    it 'raises Errno::ECONNREFUSED' do
-      proc { TCPSocket.new('127.0.0.1', 0) }
-        .should raise_error(Errno::ECONNREFUSED)
-    end
-  end
-
-  describe 'when a server is listening on the given address' do
-    before do
-      @server = TCPServer.new('127.0.0.1', 0)
-      @port   = @server.connect_address.ip_port
+  each_ip_protocol do |family, ip_address|
+    describe 'when no server is listening on the given address' do
+      it 'raises Errno::ECONNREFUSED' do
+        proc { TCPSocket.new(ip_address, 0) }
+          .should raise_error(Errno::ECONNREFUSED)
+      end
     end
 
-    after do
-      @server.close
-    end
+    describe 'when a server is listening on the given address' do
+      before do
+        @server = TCPServer.new(ip_address, 0)
+        @port   = @server.connect_address.ip_port
+      end
 
-    it 'returns a TCPSocket when using a Fixnum as the port' do
-      TCPSocket.new('127.0.0.1', @port).should be_an_instance_of(TCPSocket)
-    end
+      after do
+        @server.close
+      end
 
-    it 'returns a TCPSocket when using a String as the port' do
-      TCPSocket.new('127.0.0.1', @port.to_s).should be_an_instance_of(TCPSocket)
-    end
+      it 'returns a TCPSocket when using a Fixnum as the port' do
+        TCPSocket.new(ip_address, @port).should be_an_instance_of(TCPSocket)
+      end
 
-    it 'raises SocketError when the port number is a non numeric String' do
-      proc { TCPSocket.new('127.0.0.1', 'cats') }.should raise_error(SocketError)
-    end
+      it 'returns a TCPSocket when using a String as the port' do
+        TCPSocket.new(ip_address, @port.to_s).should be_an_instance_of(TCPSocket)
+      end
 
-    it 'connects to the right address' do
-      socket = TCPSocket.new('127.0.0.1', @port)
+      it 'raises SocketError when the port number is a non numeric String' do
+        proc { TCPSocket.new(ip_address, 'cats') }.should raise_error(SocketError)
+      end
 
-      socket.remote_address.ip_address.should == @server.local_address.ip_address
-      socket.remote_address.ip_port.should    == @server.local_address.ip_port
-    end
+      it 'connects to the right address' do
+        socket = TCPSocket.new(ip_address, @port)
 
-    describe 'using a local address and service' do
-      it 'binds the client socket to the local address and service' do
-        socket = TCPSocket.new('127.0.0.1', @port, '127.0.0.2', @port)
+        socket.remote_address.ip_address.should == @server.local_address.ip_address
+        socket.remote_address.ip_port.should    == @server.local_address.ip_port
+      end
 
-        socket.local_address.ip_address.should == '127.0.0.2'
-        socket.local_address.ip_port.should    == @port
+      describe 'using a local address and service' do
+        it 'binds the client socket to the local address and service' do
+          socket = TCPSocket.new(ip_address, @port, ip_address, 0)
+
+          socket.local_address.ip_address.should == ip_address
+
+          socket.local_address.ip_port.should > 0
+          socket.local_address.ip_port.should_not == @port
+        end
       end
     end
   end
