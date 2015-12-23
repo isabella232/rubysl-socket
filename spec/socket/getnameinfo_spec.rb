@@ -1,57 +1,84 @@
-require File.expand_path('../../fixtures/classes', __FILE__)
-
 require 'socket'
 
-describe "Socket.getnameinfo" do
-  before :all do
-    @reverse_lookup = BasicSocket.do_not_reverse_lookup
-    BasicSocket.do_not_reverse_lookup = true
+describe 'Socket.getnameinfo' do
+  before do
+    @hostname = Socket.getaddrinfo('localhost', nil, 0, 0, 0, 0, true)[0][2]
   end
 
-  after :all do
-    BasicSocket.do_not_reverse_lookup = @reverse_lookup
+  describe 'using a String as the first argument' do
+    before do
+      @addr = Socket.sockaddr_in(80, 'localhost')
+    end
+
+    it 'raises SocketError when using an invalid String' do
+      proc { Socket.getnameinfo('cats') }.should raise_error(SocketError)
+    end
+
+    describe 'without custom flags' do
+      it 'returns an Array containing the hostname and service name' do
+        Socket.getnameinfo(@addr).should == [@hostname, 'http']
+      end
+    end
+
+    describe 'using NI_NUMERICHOST as the flag' do
+      it 'returns an Array containing the numeric hostname and service name' do
+        array = Socket.getnameinfo(@addr, Socket::NI_NUMERICHOST)
+
+        %w{127.0.0.1 ::1}.include?(array[0]).should == true
+
+        array[1].should == 'http'
+      end
+    end
   end
 
-  it "gets the name information and don't resolve it" do
-    sockaddr = Socket.sockaddr_in SocketSpecs.port, '127.0.0.1'
-    name_info = Socket.getnameinfo(sockaddr, Socket::NI_NUMERICHOST | Socket::NI_NUMERICSERV)
-    name_info.should == ['127.0.0.1', "#{SocketSpecs.port}"]
-  end
+  each_ip_protocol do |family, ip_address, family_name|
+    describe 'using a 3 element Array as the first argument' do
+      before do
+        @addr = [family_name, 80, 'localhost']
+      end
 
-  it "gets the name information and resolve the host" do
-    sockaddr = Socket.sockaddr_in SocketSpecs.port, '127.0.0.1'
-    name_info = Socket.getnameinfo(sockaddr, Socket::NI_NUMERICSERV)
-    name_info[0].should be_valid_DNS_name
-    name_info[1].should == SocketSpecs.port.to_s
-  end
+      it 'raises ArgumentError when using an invalid Array' do
+        proc { Socket.getnameinfo([family_name]) }
+          .should raise_error(ArgumentError)
+      end
 
-  it "gets the name information and resolves the service" do
-    sockaddr = Socket.sockaddr_in 80, '127.0.0.1'
-    name_info = Socket.getnameinfo(sockaddr)
-    name_info.size.should == 2
-    name_info[0].should be_valid_DNS_name
-    # see http://www.iana.org/assignments/port-numbers
-    name_info[1].should =~ /^(www|http|www-http)$/
-  end
+      describe 'without custom flags' do
+        it 'returns an Array containing the hostname and service name' do
+          Socket.getnameinfo(@addr).should == [@hostname, 'http']
+        end
+      end
 
-  it "gets a 3-element array and doesn't resolve hostname" do
-    name_info = Socket.getnameinfo(["AF_INET", SocketSpecs.port, '127.0.0.1'], Socket::NI_NUMERICHOST | Socket::NI_NUMERICSERV)
-    name_info.should == ['127.0.0.1', "#{SocketSpecs.port}"]
-  end
+      describe 'using NI_NUMERICHOST as the flag' do
+        it 'returns an Array containing the numeric hostname and service name' do
+          Socket.getnameinfo(@addr, Socket::NI_NUMERICHOST)
+            .should == [ip_address, 'http']
+        end
+      end
+    end
 
-  it "gets a 3-element array and resolves the service" do
-    name_info = Socket.getnameinfo ["AF_INET", 80, '127.0.0.1']
-    name_info[1].should =~ /^(www|http|www-http)$/
-  end
+    describe 'using a 4 element Array as the first argument' do
+      before do
+        @addr = [family_name, 80, ip_address, ip_address]
+      end
 
-  it "gets a 4-element array and doesn't resolve hostname" do
-    name_info = Socket.getnameinfo(["AF_INET", SocketSpecs.port, 'foo', '127.0.0.1'], Socket::NI_NUMERICHOST | Socket::NI_NUMERICSERV)
-    name_info.should == ['127.0.0.1', "#{SocketSpecs.port}"]
-  end
+      describe 'without custom flags' do
+        it 'returns an Array containing the hostname and service name' do
+          Socket.getnameinfo(@addr).should == [@hostname, 'http']
+        end
 
-  it "gets a 4-element array and resolves the service" do
-    name_info = Socket.getnameinfo ["AF_INET", 80, 'foo', '127.0.0.1']
-    name_info[1].should =~ /^(www|http|www-http)$/
-  end
+        it 'uses the 3rd value as the hostname if the 4th is not present' do
+          addr = [family_name, 80, ip_address, nil]
 
+          Socket.getnameinfo(addr).should == [@hostname, 'http']
+        end
+      end
+
+      describe 'using NI_NUMERICHOST as the flag' do
+        it 'returns an Array containing the numeric hostname and service name' do
+          Socket.getnameinfo(@addr, Socket::NI_NUMERICHOST)
+            .should == [ip_address, 'http']
+        end
+      end
+    end
+  end
 end
