@@ -1,5 +1,4 @@
 require 'socket'
-require File.expand_path('../../fixtures/classes', __FILE__)
 
 describe 'UNIXServer#sysaccept' do
   before do
