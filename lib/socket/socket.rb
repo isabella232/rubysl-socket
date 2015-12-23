@@ -188,27 +188,13 @@ class Socket < BasicSocket
     end
   end
 
-  def self.socketpair(domain, type, protocol, klass=self)
-    if domain.kind_of? String
-      if domain.prefix? "AF_" or domain.prefix? "PF_"
-        begin
-          domain = Socket::Constants.const_get(domain)
-        rescue NameError
-          raise SocketError, "unknown socket domain #{domani}"
-        end
-      else
-        raise SocketError, "unknown socket domain #{domani}"
-      end
-    end
+  def self.socketpair(family, type, protocol = 0)
+    family = RubySL::Socket::Helpers.address_family(family)
+    type   = RubySL::Socket::Helpers.socket_type(type)
 
-    type = RubySL::Socket::Helpers.socket_type(type)
+    fd0, fd1 = RubySL::Socket::Foreign.socketpair(family, type, protocol)
 
-    Rubinius::FFI::MemoryPointer.new :int, 2 do |mp|
-      RubySL::Socket::Foreign.socketpair(domain, type, protocol, mp)
-      fd0, fd1 = mp.read_array_of_int(2)
-
-      [ klass.for_fd(fd0), klass.for_fd(fd1) ]
-    end
+    [for_fd(fd0), for_fd(fd1)]
   end
 
   class << self

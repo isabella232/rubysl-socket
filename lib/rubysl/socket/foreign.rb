@@ -44,7 +44,8 @@ module RubySL
       attach_function :_getsockname,
         :getsockname, [:int, :pointer, :pointer], :int
 
-      attach_function :socketpair, [:int, :int, :int, :pointer], :int
+      attach_function :_socketpair,
+        :socketpair, [:int, :int, :int, :pointer], :int
 
       attach_function :gethostname, [:pointer, :size_t], :int
       attach_function :getservbyname, [:string, :string], :pointer
@@ -289,6 +290,14 @@ module RubySL
       def self.getpeereid(*)
         raise NotImplementedError,
           'getpeereid() is not supported on this platform'
+      end
+
+      def self.socketpair(family, type, protocol)
+        memory_pointer(:int, 2) do |pointer|
+          _socketpair(family, type, protocol, pointer)
+
+          pointer.read_array_of_int(2)
+        end
       end
 
       def self.char_pointer(length, &block)
