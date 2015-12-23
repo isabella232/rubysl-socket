@@ -91,30 +91,30 @@ class Socket < BasicSocket
     port   = nil
     host   = nil
     family = Socket::AF_UNSPEC
+
     if sockaddr.is_a?(Array)
       if sockaddr.size == 3
-        af = sockaddr[0]
-        port = sockaddr[1]
-        host = sockaddr[2]
+        af, port, host = sockaddr
       elsif sockaddr.size == 4
-        af = sockaddr[0]
+        af   = sockaddr[0]
         port = sockaddr[1]
         host = sockaddr[3] || sockaddr[2]
       else
-        raise ArgumentError, "array size should be 3 or 4, #{sockaddr.size} given"
+        raise ArgumentError,
+          "array size should be 3 or 4, #{sockaddr.size} given"
       end
 
-      if family == "AF_INET"
+      if af == 'AF_INET'
         family = Socket::AF_INET
-      elsif family == "AF_INET6"
+      elsif af == 'AF_INET6'
         family = Socket::AF_INET6
       end
 
       sockaddr = RubySL::Socket::Foreign
-        .pack_sockaddr_in(host, port, family, Socket::SOCK_DGRAM, 0)
+        .pack_sockaddr_in(host, port, family, Socket::SOCK_STREAM, 0)
     end
 
-    family, port, host, _ = RubySL::Socket::Foreign.getnameinfo(sockaddr, flags)
+    _, port, host, _ = RubySL::Socket::Foreign.getnameinfo(sockaddr, flags)
 
     [host, port]
   end

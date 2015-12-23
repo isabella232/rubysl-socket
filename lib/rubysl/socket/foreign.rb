@@ -175,11 +175,10 @@ module RubySL
       def self.getnameinfo(sockaddr, flags = ::Socket::NI_NUMERICHOST | ::Socket::NI_NUMERICSERV,
                            reverse_lookup = !BasicSocket.do_not_reverse_lookup)
         name_info = []
-        value = nil
 
-        Rubinius::FFI::MemoryPointer.new(:char, sockaddr.bytesize) do |sockaddr_p|
-          Rubinius::FFI::MemoryPointer.new(:char, ::Socket::NI_MAXHOST) do |node|
-            Rubinius::FFI::MemoryPointer.new(:char, ::Socket::NI_MAXSERV) do |service|
+        char_pointer(sockaddr.bytesize) do |sockaddr_p|
+          char_pointer(::Socket::NI_MAXHOST) do |node|
+            char_pointer(::Socket::NI_MAXSERV) do |service|
               sockaddr_p.write_string(sockaddr, sockaddr.bytesize)
 
               if reverse_lookup
@@ -193,7 +192,6 @@ module RubySL
                                  ::Socket::NI_MAXHOST, service,
                                  ::Socket::NI_MAXSERV, flags)
 
-
               raise SocketError, gai_strerror(err) unless err == 0
 
               sa_family = SockaddrIn.with_sockaddr(sockaddr)[:sin_family]
@@ -205,7 +203,8 @@ module RubySL
           end
         end
 
-        name_info[2] = name_info[3] if name_info[2].nil?
+        name_info[2] = name_info[3] unless name_info[2]
+
         name_info
       end
 
