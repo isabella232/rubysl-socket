@@ -178,19 +178,14 @@ class Socket < BasicSocket
     end
   end
 
-  def self.getservbyname(service, proto='tcp')
-    Rubinius::FFI::MemoryPointer.new :char, service.length + 1 do |svc|
-      Rubinius::FFI::MemoryPointer.new :char, proto.length + 1 do |prot|
-        svc.write_string(service + "\0")
-        prot.write_string(proto + "\0")
-        fn = RubySL::Socket::Foreign.getservbyname(svc, prot)
+  def self.getservbyname(service, proto = 'tcp')
+    pointer = RubySL::Socket::Foreign.getservbyname(service, proto)
 
-        raise SocketError, "no such service #{service}/#{proto}" if fn.nil?
+    raise SocketError, "no such service #{service}/#{proto}" unless pointer
 
-        s = RubySL::Socket::Foreign::Servent.new(fn.read_string(Servent.size))
-        return RubySL::Socket::Foreign.ntohs(s[:s_port])
-      end
-    end
+    struct = RubySL::Socket::Foreign::Servent.new(pointer)
+
+    RubySL::Socket::Foreign.ntohs(struct.port)
   end
 
   def self.pack_sockaddr_in(port, host, type = Socket::SOCK_DGRAM, flags = 0)

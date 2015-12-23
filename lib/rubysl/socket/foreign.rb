@@ -47,7 +47,7 @@ module RubySL
       attach_function :socketpair, [:int, :int, :int, :pointer], :int
 
       attach_function :gethostname, [:pointer, :size_t], :int
-      attach_function :getservbyname, [:pointer, :pointer], :pointer
+      attach_function :getservbyname, [:string, :string], :pointer
       attach_function :gethostbyname, [:string], :pointer
       attach_function :gethostbyaddr, [:pointer, :socklen_t, :int], :pointer
 
