@@ -1,32 +1,34 @@
 require 'socket'
 
 describe 'UDPSocket#connect' do
-  before do
-    @socket = UDPSocket.new
-  end
+  each_ip_protocol do |family, ip_address|
+    before do
+      @socket = UDPSocket.new(family)
+    end
 
-  after do
-    @socket.close
-  end
+    after do
+      @socket.close
+    end
 
-  it 'connects to an address even when it is not used' do
-    @socket.connect('127.0.0.1', 0).should == 0
-  end
+    it 'connects to an address even when it is not used' do
+      @socket.connect(ip_address, 0).should == 0
+    end
 
-  it 'can send data after connecting' do
-    receiver = UDPSocket.new
+    it 'can send data after connecting' do
+      receiver = UDPSocket.new(family)
 
-    receiver.bind('127.0.0.1', 0)
+      receiver.bind(ip_address, 0)
 
-    addr = receiver.connect_address
+      addr = receiver.connect_address
 
-    @socket.connect(addr.ip_address, addr.ip_port)
-    @socket.write('hello')
+      @socket.connect(addr.ip_address, addr.ip_port)
+      @socket.write('hello')
 
-    begin
-      receiver.recv(6).should == 'hello'
-    ensure
-      receiver.close
+      begin
+        receiver.recv(6).should == 'hello'
+      ensure
+        receiver.close
+      end
     end
   end
 end
