@@ -180,4 +180,8 @@ class Addrinfo
       Socket.sockaddr_in(@ip_port.to_i, @ip_address.to_s)
     end
   end
+
+  def getnameinfo(flags = 0)
+    Socket.getnameinfo(to_sockaddr, flags)
+  end
 end
