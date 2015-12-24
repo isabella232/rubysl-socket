@@ -55,6 +55,11 @@ class Addrinfo
       @afamily    = RubySL::Socket::Helpers.address_family(sockaddr[0])
       @ip_port    = sockaddr[1]
       @ip_address = sockaddr[3]
+
+      # When using AF_INET6 the protocol family can only be PF_INET6
+      if @afamily == Socket::AF_INET6 and !pfamily
+        pfamily = Socket::PF_INET6
+      end
     else
       if sockaddr.bytesize == Rubinius::FFI.config('sockaddr_un.sizeof')
         @unix_path = Socket.unpack_sockaddr_un(sockaddr)
@@ -85,11 +90,6 @@ class Addrinfo
       end
 
       @afamily = @pfamily
-    end
-
-    # When using AF_INET6 the protocol family can only be PF_INET6
-    if @afamily == Socket::AF_INET6
-      @pfamily = Socket::PF_INET6
     end
 
     # MRI only checks this if "sockaddr" is an Array.
