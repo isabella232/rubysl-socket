@@ -239,4 +239,8 @@ class Addrinfo
   def ipv4_loopback?
     ip_address.start_with?('127.')
   end
+
+  def ipv6_loopback?
+    ip_address == '::1'
+  end
 end
