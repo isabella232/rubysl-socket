@@ -235,4 +235,8 @@ class Addrinfo
 
     [ip_address, ip_port]
   end
+
+  def ipv4_loopback?
+    ip_address.start_with?('127.')
+  end
 end
