@@ -336,4 +336,16 @@ class Addrinfo
 
     bytes[0] == 0xff && bytes[1] & 0xf == 0x5
   end
+
+  def ipv6_to_ipv4
+    return unless ipv6?
+
+    bytes = RubySL::Socket::Foreign.ip_to_bytes(afamily, ip_address)
+
+    if RubySL::Socket::IPv6.ipv4_compatible?(bytes)
+      Addrinfo.ip(bytes.last(4).join('.'))
+    else
+      nil
+    end
+  end
 end
