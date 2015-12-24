@@ -304,4 +304,12 @@ class Addrinfo
 
     bytes[0] == 0xff && bytes[1] == 0x11
   end
+
+  def ipv6_mc_orglocal?
+    return false if afamily != Socket::AF_INET6
+
+    bytes = RubySL::Socket::Foreign.ip_to_bytes(afamily, ip_address)
+
+    bytes[0] == 0xff && bytes[1] == 0x18
+  end
 end
