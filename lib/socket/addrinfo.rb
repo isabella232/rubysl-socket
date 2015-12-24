@@ -184,4 +184,26 @@ class Addrinfo
   def getnameinfo(flags = 0)
     Socket.getnameinfo(to_sockaddr, flags)
   end
+
+  def inspect_sockaddr
+    if ipv4?
+      if ip_port and ip_port != 0
+        "#{ip_address}:#{ip_port}"
+      else
+        ip_address.dup
+      end
+    elsif ipv6?
+      if ip_port and ip_port != 0
+        "[#{ip_address}]:#{ip_port}"
+      else
+        ip_address.dup
+      end
+    elsif unix?
+      if unix_path.start_with?(File::SEPARATOR)
+        unix_path.dup
+      else
+        "UNIX #{unix_path}"
+      end
+    end
+  end
 end
