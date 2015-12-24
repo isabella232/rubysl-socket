@@ -3,6 +3,8 @@ require 'socket'
 describe 'Addrinfo#ipv6_sitelocal?' do
   it 'returns true for a site-local address' do
     Addrinfo.ip('feef::').ipv6_sitelocal?.should == true
+    Addrinfo.ip('fee0::').ipv6_sitelocal?.should == true
+    Addrinfo.ip('fee2::').ipv6_sitelocal?.should == true
     Addrinfo.ip('feef::1').ipv6_sitelocal?.should == true
   end
 

@@ -3,6 +3,8 @@ require 'socket'
 describe 'Addrinfo#ipv6_linklocal?' do
   it 'returns true for a link-local address' do
     Addrinfo.ip('fe80::').ipv6_linklocal?.should == true
+    Addrinfo.ip('fe81::').ipv6_linklocal?.should == true
+    Addrinfo.ip('fe8f::').ipv6_linklocal?.should == true
     Addrinfo.ip('fe80::1').ipv6_linklocal?.should == true
   end
 

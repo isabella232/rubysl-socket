@@ -3,6 +3,8 @@ require 'socket'
 describe 'Addrinfo#ipv6_mc_sitelocal?' do
   it 'returns true for a multi-cast site-local address' do
     Addrinfo.ip('ff15::').ipv6_mc_sitelocal?.should == true
+    Addrinfo.ip('ff05::').ipv6_mc_sitelocal?.should == true
+    Addrinfo.ip('fff5::').ipv6_mc_sitelocal?.should == true
     Addrinfo.ip('ff15::1').ipv6_mc_sitelocal?.should == true
   end
 

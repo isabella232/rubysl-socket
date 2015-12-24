@@ -3,6 +3,8 @@ require 'socket'
 describe 'Addrinfo#ipv6_mc_orglocal?' do
   it 'returns true for a multi-cast org-local address' do
     Addrinfo.ip('ff18::').ipv6_mc_orglocal?.should == true
+    Addrinfo.ip('ff08::').ipv6_mc_orglocal?.should == true
+    Addrinfo.ip('fff8::').ipv6_mc_orglocal?.should == true
     Addrinfo.ip('ff18::1').ipv6_mc_orglocal?.should == true
   end
 
