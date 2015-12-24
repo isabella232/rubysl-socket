@@ -25,27 +25,23 @@ class Addrinfo
 
   def self.ip(ip)
     sockaddr = Socket.sockaddr_in(0, ip)
-    family   = sockaddr.bytesize == 28 ? Socket::AF_INET6 : Socket::AF_INET
+    family   = RubySL::Socket.family_for_sockaddr_in(sockaddr)
 
     new(sockaddr, family)
   end
 
   def self.tcp(ip, port)
-    type     = Socket::SOCK_STREAM
-    proto    = Socket::IPPROTO_TCP
     sockaddr = Socket.sockaddr_in(port, ip)
-    pfamily  = sockaddr.bytesize == 28 ? Socket::PF_INET6 : Socket::PF_INET
+    pfamily  = RubySL::Socket.family_for_sockaddr_in(sockaddr)
 
-    new(sockaddr, pfamily, type, proto)
+    new(sockaddr, pfamily, Socket::SOCK_STREAM, Socket::IPPROTO_TCP)
   end
 
   def self.udp(ip, port)
-    type     = Socket::SOCK_DGRAM
-    proto    = Socket::IPPROTO_UDP
     sockaddr = Socket.sockaddr_in(port, ip)
-    pfamily  = sockaddr.bytesize == 28 ? Socket::PF_INET6 : Socket::PF_INET
+    pfamily  = RubySL::Socket.family_for_sockaddr_in(sockaddr)
 
-    new(sockaddr, pfamily, type, proto)
+    new(sockaddr, pfamily, Socket::SOCK_DGRAM, Socket::IPPROTO_UDP)
   end
 
   def self.unix(socket, socktype = nil)

@@ -81,5 +81,9 @@ module RubySL
 
       0
     end
+
+    def self.family_for_sockaddr_in(sockaddr)
+      sockaddr.bytesize == 28 ? ::Socket::AF_INET6 : ::Socket::AF_INET
+    end
   end
 end
