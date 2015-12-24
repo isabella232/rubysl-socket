@@ -8,28 +8,30 @@ describe 'Addrinfo.getaddrinfo' do
     array[0].should be_an_instance_of(Addrinfo)
   end
 
-  it 'sets the IP address of the Addrinfo instances' do
-    array = Addrinfo.getaddrinfo('127.0.0.1', 80)
+  each_ip_protocol do |family, ip_address|
+    it 'sets the IP address of the Addrinfo instances' do
+      array = Addrinfo.getaddrinfo(ip_address, 80)
 
-    array[0].ip_address.should == '127.0.0.1'
-  end
+      array[0].ip_address.should == ip_address
+    end
 
-  it 'sets the port of the Addrinfo instances' do
-    array = Addrinfo.getaddrinfo('127.0.0.1', 80)
+    it 'sets the port of the Addrinfo instances' do
+      array = Addrinfo.getaddrinfo(ip_address, 80)
 
-    array[0].ip_port.should == 80
-  end
+      array[0].ip_port.should == 80
+    end
 
-  it 'sets the default address family of the Addrinfo instances' do
-    array = Addrinfo.getaddrinfo('127.0.0.1', 80)
+    it 'sets the address family of the Addrinfo instances' do
+      array = Addrinfo.getaddrinfo(ip_address, 80)
 
-    array[0].afamily.should == Socket::AF_INET
-  end
+      array[0].afamily.should == family
+    end
 
-  it 'sets the default protocol family of the Addrinfo instances' do
-    array = Addrinfo.getaddrinfo('127.0.0.1', 80)
+    it 'sets the protocol family of the Addrinfo instances' do
+      array = Addrinfo.getaddrinfo(ip_address, 80)
 
-    array[0].pfamily.should == Socket::PF_INET
+      array[0].pfamily.should == family
+    end
   end
 
   it 'sets a custom protocol family of the Addrinfo instances' do
@@ -68,8 +70,9 @@ describe 'Addrinfo.getaddrinfo' do
     array[0].protocol.should == Socket::IPPROTO_UDP
   end
 
-  it 'sets custom socket flags of the Addrinfo instances' do
-    array = Addrinfo.getaddrinfo('localhost', 80, nil, nil, nil, Socket::AI_CANONNAME)
+  it 'sets the canonical name when AI_CANONNAME is given as a flag' do
+    array = Addrinfo
+      .getaddrinfo('localhost', 80, nil, nil, nil, Socket::AI_CANONNAME)
 
     array[0].canonname.should be_an_instance_of(String)
   end
