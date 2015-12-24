@@ -92,13 +92,12 @@ class Addrinfo
       @pfamily = Socket::PF_INET6
     end
 
-    # MRI uses getaddrinfo() for this, but there's no need to do a system call
-    # to check if the given address is in a valid format.
-    #
     # MRI only checks this if "sockaddr" is an Array.
     if sockaddr.kind_of?(Array)
-      if @afamily == Socket::AF_INET6 and @ip_address !~ Resolv::IPv6::Regex
-        raise SocketError, "Invalid IPv6 address: #{@ip_address.inspect}"
+      if @afamily == Socket::AF_INET6
+        if Socket.sockaddr_in(0, @ip_address).bytesize != 28
+          raise SocketError, "Invalid IPv6 address: #{@ip_address.inspect}"
+        end
       end
     end
 
