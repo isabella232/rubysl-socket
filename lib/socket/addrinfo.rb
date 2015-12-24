@@ -237,7 +237,7 @@ class Addrinfo
   end
 
   def ipv4_loopback?
-    ip_address.start_with?('127.')
+    RubySL::Socket::Foreign.inet_network(ip_address) & 0xff000000 == 0x7f000000
   end
 
   def ipv6_loopback?

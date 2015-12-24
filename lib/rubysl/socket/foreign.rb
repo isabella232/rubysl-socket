@@ -55,6 +55,8 @@ module RubySL
       attach_function :htons, [:uint16_t], :uint16_t
       attach_function :ntohs, [:uint16_t], :uint16_t
 
+      attach_function :inet_network, [:string], :uint32_t
+
       attach_function :_getnameinfo,
         :getnameinfo,
         [:pointer, :socklen_t, :pointer, :socklen_t, :pointer, :socklen_t, :int],
