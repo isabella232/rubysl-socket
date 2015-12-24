@@ -245,19 +245,19 @@ class Addrinfo
   end
 
   def ipv4_loopback?
-    return false if afamily != Socket::AF_INET
+    return false unless ipv4?
 
     RubySL::Socket::Foreign.inet_network(ip_address) & 0xff000000 == 0x7f000000
   end
 
   def ipv4_multicast?
-    return false if afamily != Socket::AF_INET
+    return false unless ipv4?
 
     RubySL::Socket::Foreign.inet_network(ip_address) & 0xf0000000 == 0xe0000000
   end
 
   def ipv4_private?
-    return false if afamily != Socket::AF_INET
+    return false unless ipv4?
 
     num = RubySL::Socket::Foreign.inet_network(ip_address)
 
@@ -267,14 +267,14 @@ class Addrinfo
   end
 
   def ipv6_loopback?
-    return false if afamily != Socket::AF_INET6
+    return false unless ipv6?
 
     RubySL::Socket::Foreign.ip_to_bytes(afamily, ip_address) ==
       RubySL::Socket::IPv6::LOOPBACK
   end
 
   def ipv6_linklocal?
-    return false if afamily != Socket::AF_INET6
+    return false unless ipv6?
 
     bytes = RubySL::Socket::Foreign.ip_to_bytes(afamily, ip_address)
 
@@ -282,7 +282,7 @@ class Addrinfo
   end
 
   def ipv6_multicast?
-    return false if afamily != Socket::AF_INET6
+    return false unless ipv6?
 
     bytes = RubySL::Socket::Foreign.ip_to_bytes(afamily, ip_address)
 
@@ -290,7 +290,7 @@ class Addrinfo
   end
 
   def ipv6_sitelocal?
-    return false if afamily != Socket::AF_INET6
+    return false unless ipv6?
 
     bytes = RubySL::Socket::Foreign.ip_to_bytes(afamily, ip_address)
 
@@ -298,7 +298,7 @@ class Addrinfo
   end
 
   def ipv6_mc_global?
-    return false if afamily != Socket::AF_INET6
+    return false unless ipv6?
 
     bytes = RubySL::Socket::Foreign.ip_to_bytes(afamily, ip_address)
 
@@ -306,7 +306,7 @@ class Addrinfo
   end
 
   def ipv6_mc_linklocal?
-    return false if afamily != Socket::AF_INET6
+    return false unless ipv6?
 
     bytes = RubySL::Socket::Foreign.ip_to_bytes(afamily, ip_address)
 
@@ -314,7 +314,7 @@ class Addrinfo
   end
 
   def ipv6_mc_nodelocal?
-    return false if afamily != Socket::AF_INET6
+    return false unless ipv6?
 
     bytes = RubySL::Socket::Foreign.ip_to_bytes(afamily, ip_address)
 
@@ -322,7 +322,7 @@ class Addrinfo
   end
 
   def ipv6_mc_orglocal?
-    return false if afamily != Socket::AF_INET6
+    return false unless ipv6?
 
     bytes = RubySL::Socket::Foreign.ip_to_bytes(afamily, ip_address)
 
@@ -330,7 +330,7 @@ class Addrinfo
   end
 
   def ipv6_mc_sitelocal?
-    return false if afamily != Socket::AF_INET6
+    return false unless ipv6?
 
     bytes = RubySL::Socket::Foreign.ip_to_bytes(afamily, ip_address)
 
