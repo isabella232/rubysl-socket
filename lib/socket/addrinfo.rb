@@ -244,6 +244,14 @@ class Addrinfo
     RubySL::Socket::Foreign.inet_network(ip_address) & 0xf0000000 == 0xe0000000
   end
 
+  def ipv4_private?
+    num = RubySL::Socket::Foreign.inet_network(ip_address)
+
+    num & 0xff000000 == 0x0a000000 ||
+      num & 0xfff00000 == 0xac100000 ||
+      num & 0xffff0000 == 0xc0a80000
+  end
+
   def ipv6_loopback?
     ip_address == '::1'
   end
