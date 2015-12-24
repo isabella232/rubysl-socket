@@ -206,4 +206,25 @@ class Addrinfo
       end
     end
   end
+
+  def inspect
+    if socktype and socktype != 0
+      if ip?
+        case socktype
+        when Socket::SOCK_STREAM
+          suffix = 'TCP'
+        when Socket::SOCK_DGRAM
+          suffix = 'UDP'
+        else
+          suffix = RubySL::Socket::Helpers.socket_type_name(socktype)
+        end
+      else
+        suffix = RubySL::Socket::Helpers.socket_type_name(socktype)
+      end
+
+      "#<Addrinfo: #{inspect_sockaddr} #{suffix}>"
+    else
+      "#<Addrinfo: #{inspect_sockaddr}>"
+    end
+  end
 end

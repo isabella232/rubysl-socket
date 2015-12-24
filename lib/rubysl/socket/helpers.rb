@@ -99,6 +99,23 @@ module RubySL
         end
       end
 
+      def self.socket_type_name(socktype)
+        case socktype
+        when ::Socket::SOCK_DGRAM
+          'SOCK_DGRAM'
+        when ::Socket::SOCK_PACKET
+          'SOCK_PACKET'
+        when ::Socket::SOCK_RAW
+          'SOCK_RAW'
+        when ::Socket::SOCK_RDM
+          'SOCK_RDM'
+        when ::Socket::SOCK_SEQPACKET
+          'SOCK_SEQPACKET'
+        when ::Socket::SOCK_STREAM
+          'SOCK_STREAM'
+        end
+      end
+
       def self.protocol_family(family)
         case family
         when Symbol, String
