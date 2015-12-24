@@ -153,8 +153,12 @@ class Addrinfo
     @afamily == Socket::AF_INET6
   end
 
+  def ip?
+    ipv4? || ipv6?
+  end
+
   def ip_address
-    if !ipv4? and !ipv6?
+    unless ip?
       raise SocketError, 'An IPv4/IPv6 address is required'
     end
 
@@ -162,7 +166,7 @@ class Addrinfo
   end
 
   def ip_port
-    if !ipv4? and !ipv6?
+    unless ip?
       raise SocketError, 'An IPv4/IPv6 address is required'
     end
 
