@@ -15,4 +15,8 @@ describe 'Addrinfo#ipv4_private?' do
   it 'returns false for a regular IP address' do
     Addrinfo.ip('8.8.8.8').ipv4_private?.should == false
   end
+
+  it 'returns false for an IPv6 address' do
+    Addrinfo.ip('::1').ipv4_private?.should == false
+  end
 end

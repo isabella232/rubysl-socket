@@ -10,4 +10,8 @@ describe 'Addrinfo#ipv4_multicast?' do
   it 'returns false for a regular addrss' do
     Addrinfo.ip('8.8.8.8').ipv4_multicast?.should == false
   end
+
+  it 'returns false for an IPv6 address' do
+    Addrinfo.ip('::1').ipv4_multicast?.should == false
+  end
 end

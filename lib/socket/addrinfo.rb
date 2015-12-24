@@ -237,14 +237,20 @@ class Addrinfo
   end
 
   def ipv4_loopback?
+    return false if afamily != Socket::AF_INET
+
     RubySL::Socket::Foreign.inet_network(ip_address) & 0xff000000 == 0x7f000000
   end
 
   def ipv4_multicast?
+    return false if afamily != Socket::AF_INET
+
     RubySL::Socket::Foreign.inet_network(ip_address) & 0xf0000000 == 0xe0000000
   end
 
   def ipv4_private?
+    return false if afamily != Socket::AF_INET
+
     num = RubySL::Socket::Foreign.inet_network(ip_address)
 
     num & 0xff000000 == 0x0a000000 ||
