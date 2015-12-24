@@ -11,6 +11,7 @@ describe 'Addrinfo#ipv6_mc_global?' do
   it 'returns false for a regular IPv6 address' do
     Addrinfo.ip('::1').ipv6_mc_global?.should == false
     Addrinfo.ip('ff1a::').ipv6_mc_global?.should == false
+    Addrinfo.ip('ff1f::1').ipv6_mc_global?.should == false
   end
 
   it 'returns false for an IPv4 address' do
