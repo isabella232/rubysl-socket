@@ -1,5 +1,4 @@
 require 'socket'
-require File.expand_path('../../fixtures/classes', __FILE__)
 
 describe 'Addrinfo#ip_address' do
   describe 'with a String as the socket address' do
@@ -48,7 +47,7 @@ describe 'Addrinfo#ip_address' do
   # of any methods since Addrinfo doesn't use any Ruby methods for checking the
   # IP address. As a result we can only run this test on Rubinius.
   with_feature :pure_ruby_addrinfo do
-    describe 'with a non IPv6 or IPv6 address' do
+    describe 'with a non IPv4 or IPv6 address' do
       it 'raises SocketError' do
         sockaddr = Socket.sockaddr_in(80, '127.0.0.1')
         addr     = Addrinfo.new(sockaddr)
