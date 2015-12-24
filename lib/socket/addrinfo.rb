@@ -372,4 +372,12 @@ class Addrinfo
 
     RubySL::Socket::IPv6.ipv4_mapped?(bytes)
   end
+
+  def ipv6_unique_local?
+    return false unless ipv6?
+
+    bytes = RubySL::Socket::Foreign.ip_to_bytes(afamily, ip_address)
+
+    bytes[0] == 0xfc || bytes[0] == 0xfd
+  end
 end
