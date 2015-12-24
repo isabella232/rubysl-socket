@@ -1,5 +1,5 @@
 class Addrinfo
-  attr_reader :afamily, :pfamily, :socktype, :protocol, :unix_path
+  attr_reader :afamily, :pfamily, :socktype, :protocol
 
   attr_reader :canonname
 
@@ -171,6 +171,14 @@ class Addrinfo
     end
 
     @ip_port
+  end
+
+  def unix_path
+    unless unix?
+      raise SocketError, 'The address family must be AF_UNIX'
+    end
+
+    @unix_path
   end
 
   def to_sockaddr
