@@ -253,6 +253,7 @@ class Addrinfo
   end
 
   def ipv6_loopback?
-    ip_address == '::1'
+    RubySL::Socket::Foreign.ip_to_bytes(afamily, ip_address) ==
+      RubySL::Socket::IPv6::LOOPBACK
   end
 end

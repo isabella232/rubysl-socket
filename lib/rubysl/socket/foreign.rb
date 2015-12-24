@@ -56,6 +56,7 @@ module RubySL
       attach_function :ntohs, [:uint16_t], :uint16_t
 
       attach_function :inet_network, [:string], :uint32_t
+      attach_function :inet_pton, [:int, :string, :pointer], :int
 
       attach_function :_getnameinfo,
         :getnameinfo,
@@ -324,6 +325,18 @@ module RubySL
         end
 
         pointers
+      end
+
+      def self.ip_to_bytes(family, address)
+        size = 16
+
+        memory_pointer(:pointer, size) do |pointer|
+          status = inet_pton(family, address, pointer)
+
+          Errno.handle('inet_pton()') if status < 1
+
+          pointer.get_array_of_uchar(0, size)
+        end
       end
     end
   end

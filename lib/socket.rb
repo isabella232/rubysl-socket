@@ -25,6 +25,7 @@ require 'rubysl/socket/foreign/msghdr'
 require 'rubysl/socket/foreign/hostent'
 require 'rubysl/socket/foreign/servent'
 
+require 'rubysl/socket/ipv6'
 require 'rubysl/socket/ancillary_data'
 require 'rubysl/socket/foreign'
 require 'rubysl/socket/bsd' if RubySL::Socket.bsd_support?
