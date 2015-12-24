@@ -72,6 +72,22 @@ describe 'Socket.getaddrinfo' do
       ]
     end
 
+    it 'accepts an object responding to #to_str as the host' do
+      dummy = mock(:dummy)
+
+      dummy.stub!(:to_str).and_return('127.0.0.1')
+
+      Socket.getaddrinfo(dummy, 'http')[0].should == [
+        'AF_INET',
+        80,
+        '127.0.0.1',
+        '127.0.0.1',
+        Socket::AF_INET,
+        Socket::SOCK_STREAM,
+        Socket::IPPROTO_TCP
+      ]
+    end
+
     it 'accepts an object responding to #to_str as the address family' do
       dummy = mock(:dummy)
 
