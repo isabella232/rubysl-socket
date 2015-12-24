@@ -24,11 +24,10 @@ class Addrinfo
   end
 
   def self.ip(ip)
-    if ip =~ Resolv::IPv6::Regex
-      new(['AF_INET6', 0, nil, ip], :INET6)
-    else
-      new(['AF_INET', 0, nil, ip], :INET)
-    end
+    sockaddr = Socket.sockaddr_in(0, ip)
+    family   = sockaddr.bytesize == 28 ? Socket::AF_INET6 : Socket::AF_INET
+
+    new(sockaddr, family)
   end
 
   def self.tcp(ip, port)
