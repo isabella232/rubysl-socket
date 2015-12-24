@@ -348,4 +348,12 @@ class Addrinfo
       nil
     end
   end
+
+  def ipv6_unspecified?
+    return false unless ipv6?
+
+    bytes = RubySL::Socket::Foreign.ip_to_bytes(afamily, ip_address)
+
+    bytes == RubySL::Socket::IPv6::UNSPECIFIED
+  end
 end

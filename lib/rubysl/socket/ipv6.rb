@@ -4,6 +4,9 @@ module RubySL
       # The IPv6 loopback address as produced by inet_pton(INET6, "::1")
       LOOPBACK = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
 
+      # The bytes used for an unspecified IPv6 address.
+      UNSPECIFIED = [0] * 16
+
       # The first 10 bytes of an IPv4 compatible IPv6 address.
       COMPAT_PREFIX = [0] * 10
 
