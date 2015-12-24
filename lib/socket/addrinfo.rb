@@ -294,7 +294,7 @@ class Addrinfo
 
     bytes = RubySL::Socket::Foreign.ip_to_bytes(afamily, ip_address)
 
-    bytes[0] == 0xff && bytes[1] == 0x1e
+    bytes[0] == 0xff && bytes[1] & 0xf == 0xe
   end
 
   def ipv6_mc_linklocal?
