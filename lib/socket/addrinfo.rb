@@ -32,23 +32,27 @@ class Addrinfo
   end
 
   def self.tcp(ip, port)
-    type  = Socket::SOCK_STREAM
-    proto = Socket::IPPROTO_TCP
+    type     = Socket::SOCK_STREAM
+    proto    = Socket::IPPROTO_TCP
+    sockaddr = Socket.sockaddr_in(port, ip)
+    pfamily  = sockaddr.bytesize == 28 ? Socket::PF_INET6 : Socket::PF_INET
 
-    new(Socket.pack_sockaddr_in(port, ip), nil, type, proto)
+    new(sockaddr, pfamily, type, proto)
   end
 
   def self.udp(ip, port)
-    type  = Socket::SOCK_DGRAM
-    proto = Socket::IPPROTO_UDP
+    type     = Socket::SOCK_DGRAM
+    proto    = Socket::IPPROTO_UDP
+    sockaddr = Socket.sockaddr_in(port, ip)
+    pfamily  = sockaddr.bytesize == 28 ? Socket::PF_INET6 : Socket::PF_INET
 
-    new(Socket.pack_sockaddr_in(port, ip), nil, type, proto)
+    new(sockaddr, pfamily, type, proto)
   end
 
   def self.unix(socket, socktype = nil)
     socktype ||= Socket::SOCK_STREAM
 
-    new(Socket.pack_sockaddr_un(socket), nil, socktype)
+    new(Socket.pack_sockaddr_un(socket), Socket::PF_UNIX, socktype)
   end
 
   def initialize(sockaddr, pfamily = nil, socktype = 0, protocol = 0)
