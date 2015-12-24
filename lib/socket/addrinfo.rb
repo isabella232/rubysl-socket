@@ -286,7 +286,7 @@ class Addrinfo
 
     bytes = RubySL::Socket::Foreign.ip_to_bytes(afamily, ip_address)
 
-    bytes[0] == 0xfe && bytes[1] == 0xef
+    bytes[0] == 0xfe && bytes[1] >= 0xe0
   end
 
   def ipv6_mc_global?
