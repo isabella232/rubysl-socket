@@ -6,6 +6,10 @@ describe 'Addrinfo#ipv6_v4compat?' do
     Addrinfo.ip('::192.168.1.1').ipv6_v4compat?.should == true
   end
 
+  it 'returns false for an IPv4 mapped address' do
+    Addrinfo.ip('::ffff:192.168.1.1').ipv6_v4compat?.should == false
+  end
+
   it 'returns false for a regular IPv6 address' do
     Addrinfo.ip('::1').ipv6_v4compat?.should == false
   end

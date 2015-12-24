@@ -342,7 +342,7 @@ class Addrinfo
 
     bytes = RubySL::Socket::Foreign.ip_to_bytes(afamily, ip_address)
 
-    if RubySL::Socket::IPv6.ipv4_compatible?(bytes)
+    if RubySL::Socket::IPv6.ipv4_embedded?(bytes)
       Addrinfo.ip(bytes.last(4).join('.'))
     else
       nil
