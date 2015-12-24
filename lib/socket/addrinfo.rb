@@ -227,4 +227,12 @@ class Addrinfo
       "#<Addrinfo: #{inspect_sockaddr}>"
     end
   end
+
+  def ip_unpack
+    unless ip?
+      raise SocketError, 'An IPv4/IPv6 address is required'
+    end
+
+    [ip_address, ip_port]
+  end
 end
