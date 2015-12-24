@@ -103,9 +103,9 @@ class Addrinfo
 
     # Based on MRI's (re-)implementation of getaddrinfo()
     if @afamily != Socket::AF_UNIX and
-    @afamily != Socket::PF_UNSPEC and
-    @afamily != Socket::PF_INET and
-    @afamily != Socket::PF_INET6
+    @afamily != Socket::AF_UNSPEC and
+    @afamily != Socket::AF_INET and
+    @afamily != Socket::AF_INET6
       raise(
         SocketError,
         'Address family must be AF_UNIX, AF_INET, AF_INET6, PF_INET or PF_INET6'
