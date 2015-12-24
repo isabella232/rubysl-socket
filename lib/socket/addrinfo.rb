@@ -256,4 +256,10 @@ class Addrinfo
     RubySL::Socket::Foreign.ip_to_bytes(afamily, ip_address) ==
       RubySL::Socket::IPv6::LOOPBACK
   end
+
+  def ipv6_linklocal?
+    bytes = RubySL::Socket::Foreign.ip_to_bytes(afamily, ip_address)
+
+    bytes[0] == 0xfe && bytes[1] == 0x80
+  end
 end
