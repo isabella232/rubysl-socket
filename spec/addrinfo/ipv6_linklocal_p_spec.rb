@@ -9,4 +9,8 @@ describe 'Addrinfo#ipv6_linklocal?' do
   it 'returns false for a regular address' do
     Addrinfo.ip('::1').ipv6_linklocal?.should == false
   end
+
+  it 'returns false for an IPv4 address' do
+    Addrinfo.ip('127.0.0.1').ipv6_linklocal?.should == false
+  end
 end

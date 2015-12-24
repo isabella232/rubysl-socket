@@ -259,11 +259,15 @@ class Addrinfo
   end
 
   def ipv6_loopback?
+    return false if afamily != Socket::AF_INET6
+
     RubySL::Socket::Foreign.ip_to_bytes(afamily, ip_address) ==
       RubySL::Socket::IPv6::LOOPBACK
   end
 
   def ipv6_linklocal?
+    return false if afamily != Socket::AF_INET6
+
     bytes = RubySL::Socket::Foreign.ip_to_bytes(afamily, ip_address)
 
     bytes[0] == 0xfe && bytes[1] == 0x80
