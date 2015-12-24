@@ -240,6 +240,10 @@ class Addrinfo
     RubySL::Socket::Foreign.inet_network(ip_address) & 0xff000000 == 0x7f000000
   end
 
+  def ipv4_multicast?
+    RubySL::Socket::Foreign.inet_network(ip_address) & 0xf0000000 == 0xe0000000
+  end
+
   def ipv6_loopback?
     ip_address == '::1'
   end
