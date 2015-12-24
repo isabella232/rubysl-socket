@@ -18,7 +18,6 @@ Gem::Specification.new do |spec|
 
   spec.required_ruby_version = "~> 2.0"
 
-  spec.add_dependency 'rubysl-resolv', '~> 2.0'
   spec.add_dependency 'rubysl-fcntl', '~> 2.0'
 
   spec.add_development_dependency "bundler", "~> 1.3"
