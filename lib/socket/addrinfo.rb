@@ -1,16 +1,25 @@
 class Addrinfo
   attr_reader :afamily, :pfamily, :socktype, :protocol, :unix_path
 
+  attr_reader :canonname
+
   def self.getaddrinfo(nodename, service, family = nil, socktype = nil,
                        protocol = nil, flags = nil)
 
-    raw = Socket.getaddrinfo(nodename, service, family, socktype, protocol,
-                             flags)
+    raw = Socket
+      .getaddrinfo(nodename, service, family, socktype, protocol, flags)
 
     raw.map do |pair|
-      sockaddr = Socket.pack_sockaddr_in(pair[1], pair[3])
+      lfamily, lport, lhost, laddress, _, lsocktype, lprotocol = pair
 
-      Addrinfo.new(sockaddr, pair[0], pair[5], pair[6])
+      sockaddr = Socket.pack_sockaddr_in(lport, laddress)
+      addr     = Addrinfo.new(sockaddr, lfamily, lsocktype, lprotocol)
+
+      if flags and flags | Socket::AI_CANONNAME
+        addr.instance_variable_set(:@canonname, lhost)
+      end
+
+      addr
     end
   end
 
