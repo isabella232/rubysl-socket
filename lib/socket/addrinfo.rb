@@ -272,4 +272,12 @@ class Addrinfo
 
     bytes[0] == 0xfe && bytes[1] == 0x80
   end
+
+  def ipv6_multicast?
+    return false if afamily != Socket::AF_INET6
+
+    bytes = RubySL::Socket::Foreign.ip_to_bytes(afamily, ip_address)
+
+    bytes[0] == 0xff && (bytes[1] >= 0 && bytes[1] <= 0x0f)
+  end
 end
