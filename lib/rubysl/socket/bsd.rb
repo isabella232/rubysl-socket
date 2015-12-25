@@ -16,7 +16,7 @@ module RubySL
           if res == 0
             [euid.read_int, egid.read_int]
           else
-            Errno.handle('getpeereid(3)')
+            Error.error('getpeereid(3)')
           end
         ensure
           euid.free

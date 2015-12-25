@@ -127,7 +127,7 @@ class BasicSocket < IO
       end
     end
 
-    Errno.handle('send(2)') if bytes_sent < 0
+    RubySL::Socket::Error.write_error('send(2)', self) if bytes_sent < 0
 
     bytes_sent
   end
@@ -161,7 +161,7 @@ class BasicSocket < IO
         status = RubySL::Socket::Foreign
           .recvmsg(descriptor, header.pointer, flags)
 
-        Errno.handle('recvmsg(2)') if status < 0
+        RubySL::Socket::Error.read_error('recvmsg(2)', self) if status < 0
 
         if grow_msg and header.message_truncated?
           need_more = true
@@ -190,6 +190,8 @@ class BasicSocket < IO
   end
 
   def recvmsg_nonblock(max_msg_len = nil, flags = 0, *_)
+    fcntl(Fcntl::F_SETFL, Fcntl::O_NONBLOCK)
+
     recvmsg(max_msg_len, flags | Socket::MSG_DONTWAIT)
   end
 
@@ -218,7 +220,7 @@ class BasicSocket < IO
       num_bytes = RubySL::Socket::Foreign
         .sendmsg(descriptor, header.pointer, flags)
 
-      Errno.handle('sendmsg(2)') if num_bytes < 0
+      RubySL::Socket::Error.read_error('sendmsg(2)', self) if num_bytes < 0
 
       num_bytes
     ensure
@@ -230,6 +232,8 @@ class BasicSocket < IO
   end
 
   def sendmsg_nonblock(message, flags = 0, dest_sockaddr = nil, *_)
+    fcntl(Fcntl::F_SETFL, Fcntl::O_NONBLOCK)
+
     sendmsg(message, flags | Socket::MSG_DONTWAIT, dest_sockaddr)
   end
 
@@ -263,9 +267,10 @@ class BasicSocket < IO
 
   def recv_nonblock(bytes_to_read, flags = 0)
     fcntl(Fcntl::F_SETFL, Fcntl::O_NONBLOCK)
-    socket_recv(bytes_to_read, flags, 0)
-  rescue Errno::EWOULDBLOCK
-    raise Errno::EAGAIN
+
+    RubySL::Socket::Error.wrap_read_nonblock do
+      socket_recv(bytes_to_read, flags, 0)
+    end
   end
 
   def shutdown(how = Socket::SHUT_RDWR)

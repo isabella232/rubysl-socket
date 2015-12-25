@@ -51,7 +51,7 @@ module RubySL
             .accept(source.descriptor, sockaddr.pointer, size_p)
         end
 
-        Errno.handle('accept(2)') if fd < 0
+        Error.read_error('accept(2)', source) if fd < 0
 
         socket = new_class.allocate
 
@@ -77,7 +77,7 @@ module RubySL
       backlog = Rubinius::Type.coerce_to(backlog, Fixnum, :to_int)
       err     = Foreign.listen(source.descriptor, backlog)
 
-      Errno.handle('listen(2)') if err < 0
+      Error.read_error('listen(2)', source) if err < 0
 
       0
     end

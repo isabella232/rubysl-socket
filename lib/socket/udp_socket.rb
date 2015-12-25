@@ -26,7 +26,7 @@ class UDPSocket < IPSocket
 
     status = RubySL::Socket::Foreign.connect(descriptor, sockaddr)
 
-    Errno.handle('connect(2)') if status < 0
+    RubySL::Socket::Error.write_error('connect(2)', self) if status < 0
 
     0
   end
