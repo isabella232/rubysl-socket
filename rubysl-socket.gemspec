@@ -4,17 +4,19 @@ require './lib/rubysl/socket/version'
 Gem::Specification.new do |spec|
   spec.name          = "rubysl-socket"
   spec.version       = RubySL::Socket::VERSION
-  spec.authors       = ["Brian Shirai"]
-  spec.email         = ["brixen@gmail.com"]
-  spec.description   = %q{Ruby standard library socket.}
-  spec.summary       = %q{Ruby standard library socket.}
+  spec.authors       = ["Brian Shirai", "Yorick Peterse"]
+  spec.email         = ["brixen@gmail.com", "yorickpeterse@gmail.com"]
+  spec.description   = %q{Socket standard library for Rubinius.}
+  spec.summary       = %q{Socket standard library for Rubinius.}
   spec.homepage      = "https://github.com/rubysl/rubysl-socket"
   spec.license       = "BSD"
 
-  spec.files         = `git ls-files`.split($/)
-  spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
-  spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
-  spec.require_paths = ["lib"]
+  spec.files = Dir.glob([
+    'lib/**/*.*',
+    'LICENSE',
+    'README.md',
+    'rubysl-socket.gemspec'
+  ])
 
   spec.required_ruby_version = "~> 2.0"
 
