@@ -1,7 +1,7 @@
 class UDPSocket < IPSocket
   def initialize(family = Socket::AF_INET)
     @no_reverse_lookup = self.class.do_not_reverse_lookup
-    @family            = RubySL::Socket::Helpers.address_family(family)
+    @family            = RubySL::Socket.address_family(family)
 
     descriptor = RubySL::Socket::Foreign
       .socket(@family, Socket::SOCK_DGRAM, Socket::IPPROTO_UDP)

@@ -2,7 +2,6 @@ require 'fcntl'
 
 require 'rubysl/socket'
 require 'rubysl/socket/version'
-require 'rubysl/socket/helpers'
 require 'rubysl/socket/socket_options'
 
 require 'socket/socket_error'

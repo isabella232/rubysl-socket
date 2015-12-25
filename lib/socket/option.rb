@@ -24,7 +24,7 @@ class Socket < BasicSocket
     end
 
     def initialize(family, level, optname, data)
-      @family  = RubySL::Socket::Helpers.address_family(family)
+      @family  = RubySL::Socket.address_family(family)
       @level   = RubySL::Socket::SocketOptions.socket_level(level, @family)
       @optname = RubySL::Socket::SocketOptions.socket_option(@level, optname)
       @data    = data

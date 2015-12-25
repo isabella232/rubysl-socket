@@ -32,21 +32,21 @@ class Socket < BasicSocket
   def self.getaddrinfo(host, service, family = 0, socktype = 0,
                        protocol = 0, flags = 0, reverse_lookup = nil)
     if host
-      host = RubySL::Socket::Helpers.coerce_to_string(host)
+      host = RubySL::Socket.coerce_to_string(host)
     end
 
     if service.kind_of?(Fixnum)
       service = service.to_s
     elsif service
-      service = RubySL::Socket::Helpers.coerce_to_string(service)
+      service = RubySL::Socket.coerce_to_string(service)
     end
 
-    family    = RubySL::Socket::Helpers.address_family(family)
-    socktype  = RubySL::Socket::Helpers.socket_type(socktype)
+    family    = RubySL::Socket.address_family(family)
+    socktype  = RubySL::Socket.socket_type(socktype)
     addrinfos = RubySL::Socket::Foreign
       .getaddrinfo(host, service, family, socktype, protocol, flags)
 
-    reverse_lookup = RubySL::Socket::Helpers
+    reverse_lookup = RubySL::Socket
       .convert_reverse_lookup(nil, reverse_lookup)
 
     addrinfos.map do |ai|
@@ -146,7 +146,7 @@ class Socket < BasicSocket
       family = Socket::AF_INET
     end
 
-    family = RubySL::Socket::Helpers.address_family(family)
+    family = RubySL::Socket.address_family(family)
 
     RubySL::Socket::Foreign.char_pointer(addr.bytesize) do |in_pointer|
       in_pointer.write_string(addr)
@@ -192,8 +192,8 @@ class Socket < BasicSocket
   end
 
   def self.socketpair(family, type, protocol = 0)
-    family = RubySL::Socket::Helpers.address_family(family)
-    type   = RubySL::Socket::Helpers.socket_type(type)
+    family = RubySL::Socket.address_family(family)
+    type   = RubySL::Socket.socket_type(type)
 
     fd0, fd1 = RubySL::Socket::Foreign.socketpair(family, type, protocol)
 
@@ -235,8 +235,8 @@ class Socket < BasicSocket
   def initialize(family, socket_type, protocol = 0)
     @no_reverse_lookup = self.class.do_not_reverse_lookup
 
-    @family      = RubySL::Socket::Helpers.protocol_family(family)
-    @socket_type = RubySL::Socket::Helpers.socket_type(socket_type)
+    @family      = RubySL::Socket.protocol_family(family)
+    @socket_type = RubySL::Socket.socket_type(socket_type)
 
     descriptor = RubySL::Socket::Foreign.socket(@family, @socket_type, protocol)
 

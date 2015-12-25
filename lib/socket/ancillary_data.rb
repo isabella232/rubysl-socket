@@ -50,8 +50,8 @@ class Socket < BasicSocket
     end
 
     def initialize(family, level, type, data)
-      @family = RubySL::Socket::Helpers.address_family(family)
-      @data   = RubySL::Socket::Helpers.coerce_to_string(data)
+      @family = RubySL::Socket.address_family(family)
+      @data   = RubySL::Socket.coerce_to_string(data)
       @level  = RubySL::Socket::AncillaryData.level(level)
       @type   = RubySL::Socket::AncillaryData.type(@family, @level, type)
     end

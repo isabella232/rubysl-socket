@@ -274,7 +274,7 @@ class BasicSocket < IO
   end
 
   def shutdown(how = Socket::SHUT_RDWR)
-    how = RubySL::Socket::Helpers.shutdown_option(how)
+    how = RubySL::Socket.shutdown_option(how)
     err = RubySL::Socket::Foreign.shutdown(descriptor, how)
 
     Errno.handle('shutdown(2)') unless err == 0

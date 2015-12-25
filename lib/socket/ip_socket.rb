@@ -6,11 +6,11 @@ class IPSocket < BasicSocket
   end
 
   def addr(reverse_lookup = nil)
-    RubySL::Socket::Helpers.address_info(:getsockname, self, reverse_lookup)
+    RubySL::Socket.address_info(:getsockname, self, reverse_lookup)
   end
 
   def peeraddr(reverse_lookup=nil)
-    RubySL::Socket::Helpers.address_info(:getpeername, self, reverse_lookup)
+    RubySL::Socket.address_info(:getpeername, self, reverse_lookup)
   end
 
   def recvfrom(maxlen, flags = 0)
@@ -18,7 +18,7 @@ class IPSocket < BasicSocket
 
     message, addr = recvmsg(maxlen, flags)
 
-    aname    = RubySL::Socket::Helpers.address_family_name(addr.afamily)
+    aname    = RubySL::Socket.address_family_name(addr.afamily)
     hostname = addr.ip_address
 
     # We're re-using recvmsg which doesn't return the reverse hostname, thus

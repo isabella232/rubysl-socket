@@ -19,13 +19,13 @@ class TCPSocket < IPSocket
     @no_reverse_lookup = self.class.do_not_reverse_lookup
 
     if host
-      host = RubySL::Socket::Helpers.coerce_to_string(host)
+      host = RubySL::Socket.coerce_to_string(host)
     end
 
     if service.is_a?(Fixnum)
       service = service.to_s
     else
-      service = RubySL::Socket::Helpers.coerce_to_string(service)
+      service = RubySL::Socket.coerce_to_string(service)
     end
 
     local_addrinfo = nil
@@ -34,13 +34,13 @@ class TCPSocket < IPSocket
     # socket to said address (besides also connecting to the remote address).
     if local_host or local_service
       if local_host
-        local_host = RubySL::Socket::Helpers.coerce_to_string(local_host)
+        local_host = RubySL::Socket.coerce_to_string(local_host)
       end
 
       if local_service.is_a?(Fixnum)
         local_service = local_service.to_s
       elsif local_service
-        local_service = RubySL::Socket::Helpers.coerce_to_string(local_service)
+        local_service = RubySL::Socket.coerce_to_string(local_service)
       end
 
       local_addrinfo = Socket

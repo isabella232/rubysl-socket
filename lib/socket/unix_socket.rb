@@ -3,7 +3,7 @@ class UNIXSocket < BasicSocket
 
   def self.socketpair(type = Socket::SOCK_STREAM, protocol = 0)
     family = Socket::AF_UNIX
-    type   = RubySL::Socket::Helpers.socket_type(type)
+    type   = RubySL::Socket.socket_type(type)
 
     fd0, fd1 = RubySL::Socket::Foreign.socketpair(family, type, protocol)
 

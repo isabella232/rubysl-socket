@@ -13,7 +13,7 @@ module RubySL
             end
           end
         elsif level.respond_to?(:to_str)
-          socket_level(Helpers.coerce_to_string(level), family)
+          socket_level(Socket.coerce_to_string(level), family)
         else
           level
         end
@@ -46,7 +46,7 @@ module RubySL
           end
         else
           if optname.respond_to?(:to_str)
-            socket_option(level, Helpers.coerce_to_string(optname))
+            socket_option(level, Socket.coerce_to_string(optname))
           else
             optname
           end

@@ -13,14 +13,14 @@ module RubySL
         if raw_level.is_a?(Fixnum)
           raw_level
         else
-          level = Helpers.coerce_to_string(raw_level)
+          level = Socket.coerce_to_string(raw_level)
 
           if level == 'SOL_SOCKET' or level == 'SOCKET'
             ::Socket::SOL_SOCKET
 
           # Translates "TCP" into "IPPROTO_TCP", "UDP" into "IPPROTO_UDP", etc.
           else
-            Helpers.prefixed_socket_constant(level, 'IPPROTO_') do
+            Socket.prefixed_socket_constant(level, 'IPPROTO_') do
               "unknown protocol level: #{level}"
             end
           end
@@ -31,7 +31,7 @@ module RubySL
         if raw_type.is_a?(Fixnum)
           raw_type
         else
-          type = Helpers.coerce_to_string(raw_type)
+          type = Socket.coerce_to_string(raw_type)
 
           if family == ::Socket::AF_INET or family == ::Socket::AF_INET6
             prefix, label = LEVEL_PREFIXES[level]
@@ -42,7 +42,7 @@ module RubySL
           # Translates "RIGHTS" into "SCM_RIGHTS", "CORK" into "TCP_CORK" (when
           # the level is IPPROTO_TCP), etc.
           if prefix and label
-            Helpers.prefixed_socket_constant(type, prefix) do
+            Socket.prefixed_socket_constant(type, prefix) do
               "Unknown #{label} control message: #{type}"
             end
           else

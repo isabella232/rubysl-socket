@@ -52,7 +52,7 @@ class Addrinfo
 
   def initialize(sockaddr, pfamily = nil, socktype = 0, protocol = 0)
     if sockaddr.kind_of?(Array)
-      @afamily    = RubySL::Socket::Helpers.address_family(sockaddr[0])
+      @afamily    = RubySL::Socket.address_family(sockaddr[0])
       @ip_port    = sockaddr[1]
       @ip_address = sockaddr[3]
 
@@ -75,9 +75,9 @@ class Addrinfo
       end
     end
 
-    @pfamily ||= RubySL::Socket::Helpers.protocol_family(pfamily)
+    @pfamily ||= RubySL::Socket.protocol_family(pfamily)
 
-    @socktype = RubySL::Socket::Helpers.socket_type(socktype || 0)
+    @socktype = RubySL::Socket.socket_type(socktype || 0)
     @protocol = protocol || 0
 
     # Per MRI behaviour setting the protocol family should also set the address
@@ -226,10 +226,10 @@ class Addrinfo
         when Socket::SOCK_DGRAM
           suffix = 'UDP'
         else
-          suffix = RubySL::Socket::Helpers.socket_type_name(socktype)
+          suffix = RubySL::Socket.socket_type_name(socktype)
         end
       else
-        suffix = RubySL::Socket::Helpers.socket_type_name(socktype)
+        suffix = RubySL::Socket.socket_type_name(socktype)
       end
 
       "#<Addrinfo: #{inspect_sockaddr} #{suffix}>"
@@ -393,14 +393,14 @@ class Addrinfo
     if unix?
       protocol = 0
     else
-      protocol = RubySL::Socket::Helpers.protocol_name(self.protocol)
+      protocol = RubySL::Socket.protocol_name(self.protocol)
     end
 
     [
-      RubySL::Socket::Helpers.address_family_name(afamily),
+      RubySL::Socket.address_family_name(afamily),
       address,
-      RubySL::Socket::Helpers.protocol_family_name(pfamily),
-      RubySL::Socket::Helpers.socket_type_name(socktype),
+      RubySL::Socket.protocol_family_name(pfamily),
+      RubySL::Socket.socket_type_name(socktype),
       protocol,
       canonname
     ]
@@ -409,9 +409,9 @@ class Addrinfo
   def marshal_load(array)
     afamily, address, pfamily, socktype, protocol, canonname = array
 
-    @afamily  = RubySL::Socket::Helpers.address_family(afamily)
-    @pfamily  = RubySL::Socket::Helpers.protocol_family(pfamily)
-    @socktype = RubySL::Socket::Helpers.socket_type(socktype)
+    @afamily  = RubySL::Socket.address_family(afamily)
+    @pfamily  = RubySL::Socket.protocol_family(pfamily)
+    @socktype = RubySL::Socket.socket_type(socktype)
 
     if protocol and protocol != 0
       @protocol = ::Socket.const_get(protocol)

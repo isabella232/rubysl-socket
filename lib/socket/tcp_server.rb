@@ -18,11 +18,11 @@ class TCPServer < TCPSocket
     end
 
     unless service.is_a?(Fixnum)
-      service = RubySL::Socket::Helpers.coerce_to_string(service)
+      service = RubySL::Socket.coerce_to_string(service)
     end
 
     if host
-      host = RubySL::Socket::Helpers.coerce_to_string(host)
+      host = RubySL::Socket.coerce_to_string(host)
     else
       host = ''
     end

@@ -80,7 +80,7 @@ module RubySL
         if sockaddr.is_a?(::Addrinfo)
           sockaddr = sockaddr.to_sockaddr
         else
-          sockaddr = Helpers.coerce_to_string(sockaddr)
+          sockaddr = Socket.coerce_to_string(sockaddr)
         end
 
         unless sockaddr.is_a?(String)
