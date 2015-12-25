@@ -67,39 +67,26 @@ module RubySL
       end
 
       def self.address_family_name(family_int)
-        # Since this list doesn't change very often (if ever) we're using a
-        # plain old "case" instead of something like Socket.constants.grep(...)
-        case family_int
-        when ::Socket::AF_APPLETALK
-          'AF_APPLETALK'
-        when ::Socket::AF_AX25
-          'AF_AX25'
-        when ::Socket::AF_INET
-          'AF_INET'
-        when ::Socket::AF_INET6
-          'AF_INET6'
-        when ::Socket::AF_IPX
-          'AF_IPX'
-        when ::Socket::AF_ISDN
-          'AF_ISDN'
-        when ::Socket::AF_LOCAL
-          'AF_LOCAL'
-        when ::Socket::AF_MAX
-          'AF_MAX'
-        when ::Socket::AF_PACKET
-          'AF_PACKET'
-        when ::Socket::AF_ROUTE
-          'AF_ROUTE'
-        when ::Socket::AF_SNA
-          'AF_SNA'
-        when ::Socket::AF_UNIX
-          'AF_UNIX'
-        else
-          'AF_UNSPEC'
+        # Both AF_LOCAL and AF_UNIX use value 1. CRuby seems to prefer AF_UNIX
+        # over AF_LOCAL.
+        if family_int == ::Socket::AF_UNIX && family_int == ::Socket::AF_LOCAL
+          return 'AF_UNIX'
         end
+
+        ::Socket.constants.grep(/^AF_/).each do |name|
+          return name.to_s if ::Socket.const_get(name) == family_int
+        end
+
+        'AF_UNSPEC'
       end
 
       def self.protocol_family_name(family_int)
+        # Both PF_LOCAL and AF_UNIX use value 1. CRuby seems to prefer AF_UNIX
+        # over PF_LOCAL.
+        if family_int == ::Socket::PF_UNIX && family_int == ::Socket::PF_LOCAL
+          return 'PF_UNIX'
+        end
+
         ::Socket.constants.grep(/^PF_/).each do |name|
           return name.to_s if ::Socket.const_get(name) == family_int
         end
@@ -116,20 +103,11 @@ module RubySL
       end
 
       def self.socket_type_name(socktype)
-        case socktype
-        when ::Socket::SOCK_DGRAM
-          'SOCK_DGRAM'
-        when ::Socket::SOCK_PACKET
-          'SOCK_PACKET'
-        when ::Socket::SOCK_RAW
-          'SOCK_RAW'
-        when ::Socket::SOCK_RDM
-          'SOCK_RDM'
-        when ::Socket::SOCK_SEQPACKET
-          'SOCK_SEQPACKET'
-        when ::Socket::SOCK_STREAM
-          'SOCK_STREAM'
+        ::Socket.constants.grep(/^SOCK_/).each do |name|
+          return name.to_s if ::Socket.const_get(name) == socktype
         end
+
+        nil
       end
 
       def self.protocol_family(family)
