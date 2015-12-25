@@ -330,8 +330,4 @@ class Socket < BasicSocket
 
     return socket.fileno, addrinfo
   end
-
-  def ipv6only!
-    setsockopt(:IPV6, :V6ONLY, 1)
-  end
 end
