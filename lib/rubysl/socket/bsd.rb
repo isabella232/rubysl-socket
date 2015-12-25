@@ -7,8 +7,8 @@ module RubySL
         :getpeereid, [:int, :pointer, :pointer], :int
 
       def self.getpeereid(descriptor)
-        euid = Rubinius::FFI::MemoryPointer.new(:int)
-        egid = Rubinius::FFI::MemoryPointer.new(:int)
+        euid = Foreign.memory_pointer(:int)
+        egid = Foreign.memory_pointer(:int)
 
         begin
           res = _getpeereid(descriptor, euid, egid)

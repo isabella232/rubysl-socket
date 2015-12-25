@@ -10,7 +10,7 @@ module RubySL
               "UNIX socket path is too long (max: #{size} bytes)"
           end
 
-          pointer = Rubinius::FFI::MemoryPointer.new(size)
+          pointer = Foreign.memory_pointer(size)
           pointer.write_string(addr, addr.bytesize)
 
           new(pointer)

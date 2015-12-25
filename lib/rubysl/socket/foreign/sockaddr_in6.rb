@@ -6,7 +6,7 @@ module RubySL
                :sin6_flowinfo, :sin6_addr, :sin6_scope_id)
 
         def self.with_sockaddr(addr)
-          pointer = Rubinius::FFI::MemoryPointer.new(addr.bytesize)
+          pointer = Foreign.memory_pointer(addr.bytesize)
           pointer.write_string(addr, addr.bytesize)
 
           new(pointer)

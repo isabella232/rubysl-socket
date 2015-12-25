@@ -67,7 +67,7 @@ module RubySL
       attach_function :freeifaddrs, [:pointer], :void
 
       def self.bind(descriptor, sockaddr)
-        Rubinius::FFI::MemoryPointer.new(:char, sockaddr.bytesize) do |sockaddr_p|
+        memory_pointer(:char, sockaddr.bytesize) do |sockaddr_p|
           sockaddr_p.write_string(sockaddr, sockaddr.bytesize)
 
           _bind(descriptor, sockaddr_p, sockaddr.bytesize)
@@ -88,7 +88,7 @@ module RubySL
             "no implicit conversion of #{sockaddr.class} into String"
         end
 
-        Rubinius::FFI::MemoryPointer.new(:char, sockaddr.bytesize) do |sockaddr_p|
+        memory_pointer(:char, sockaddr.bytesize) do |sockaddr_p|
           sockaddr_p.write_string(sockaddr, sockaddr.bytesize)
 
           err = _connect(descriptor, sockaddr_p, sockaddr.bytesize)
@@ -98,8 +98,8 @@ module RubySL
       end
 
       def self.getsockopt(descriptor, level, optname)
-        Rubinius::FFI::MemoryPointer.new(256) do |val|
-          Rubinius::FFI::MemoryPointer.new(:socklen_t) do |length|
+        memory_pointer(256) do |val|
+          memory_pointer(:socklen_t) do |length|
             length.write_int(256)
 
             err = _getsockopt(descriptor, level, optname, val, length)
@@ -126,7 +126,7 @@ module RubySL
           host = '255.255.255.255'
         end
 
-        res_p = Rubinius::FFI::MemoryPointer.new(:pointer)
+        res_p = memory_pointer(:pointer)
 
         err = _getaddrinfo(host, service, hints.pointer, res_p)
 
@@ -213,8 +213,8 @@ module RubySL
       end
 
       def self.getpeername(descriptor)
-        Rubinius::FFI::MemoryPointer.new(:char, 128) do |sockaddr_storage_p|
-          Rubinius::FFI::MemoryPointer.new(:socklen_t) do |len_p|
+        memory_pointer(:char, 128) do |sockaddr_storage_p|
+          memory_pointer(:socklen_t) do |len_p|
             len_p.write_int(128)
 
             err = _getpeername(descriptor, sockaddr_storage_p, len_p)
@@ -227,8 +227,8 @@ module RubySL
       end
 
       def self.getsockname(descriptor)
-        Rubinius::FFI::MemoryPointer.new(:char, 128) do |sockaddr_storage_p|
-          Rubinius::FFI::MemoryPointer.new(:socklen_t) do |len_p|
+        memory_pointer(:char, 128) do |sockaddr_storage_p|
+          memory_pointer(:socklen_t) do |len_p|
             len_p.write_int(128)
 
             err = _getsockname(descriptor, sockaddr_storage_p, len_p)
@@ -252,7 +252,7 @@ module RubySL
           host = "0.0.0.0"
         end
 
-        res_p = Rubinius::FFI::MemoryPointer.new(:pointer)
+        res_p = memory_pointer(:pointer)
 
         err = _getaddrinfo(host, port.to_s, hints.pointer, res_p)
 
@@ -305,7 +305,7 @@ module RubySL
       end
 
       def self.char_pointer(length, &block)
-        Rubinius::FFI::MemoryPointer.new(:char, length, &block)
+        memory_pointer(:char, length, &block)
       end
 
       def self.memory_pointer(*args, &block)

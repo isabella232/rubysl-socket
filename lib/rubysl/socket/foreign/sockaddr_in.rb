@@ -6,7 +6,7 @@ module RubySL
                :sin_family, :sin_port, :sin_addr, :sin_zero)
 
         def self.with_sockaddr(addr)
-          pointer = Rubinius::FFI::MemoryPointer.new(addr.bytesize)
+          pointer = Foreign.memory_pointer(addr.bytesize)
           pointer.write_string(addr, addr.bytesize)
 
           new(pointer)
