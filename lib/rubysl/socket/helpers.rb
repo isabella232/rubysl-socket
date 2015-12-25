@@ -81,7 +81,7 @@ module RubySL
       end
 
       def self.protocol_family_name(family_int)
-        # Both PF_LOCAL and AF_UNIX use value 1. CRuby seems to prefer AF_UNIX
+        # Both PF_LOCAL and PF_UNIX use value 1. CRuby seems to prefer PF_UNIX
         # over PF_LOCAL.
         if family_int == ::Socket::PF_UNIX && family_int == ::Socket::PF_LOCAL
           return 'PF_UNIX'

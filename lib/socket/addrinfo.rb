@@ -382,13 +382,47 @@ class Addrinfo
   end
 
   def marshal_dump
+    if unix?
+      address = unix_path
+    else
+      address = [ip_address, ip_port.to_s]
+    end
+
+    if unix?
+      protocol = 0
+    else
+      protocol = RubySL::Socket::Helpers.protocol_name(self.protocol)
+    end
+
     [
       RubySL::Socket::Helpers.address_family_name(afamily),
-      [ip_address, ip_port.to_s],
+      address,
       RubySL::Socket::Helpers.protocol_family_name(pfamily),
       RubySL::Socket::Helpers.socket_type_name(socktype),
-      RubySL::Socket::Helpers.protocol_name(protocol),
+      protocol,
       canonname
     ]
+  end
+
+  def marshal_load(array)
+    afamily, address, pfamily, socktype, protocol, canonname = array
+
+    @afamily  = RubySL::Socket::Helpers.address_family(afamily)
+    @pfamily  = RubySL::Socket::Helpers.protocol_family(pfamily)
+    @socktype = RubySL::Socket::Helpers.socket_type(socktype)
+
+    if protocol and protocol != 0
+      @protocol = ::Socket.const_get(protocol)
+    else
+      @protocol = protocol
+    end
+
+    if unix?
+      @unix_path = address
+    else
+      @ip_address = address[0]
+      @ip_port    = address[1].to_i
+      @canonname  = canonname
+    end
   end
 end
