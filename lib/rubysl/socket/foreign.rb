@@ -75,26 +75,13 @@ module RubySL
       end
 
       def self.connect(descriptor, sockaddr)
-        err = 0
-
-        if sockaddr.is_a?(::Addrinfo)
-          sockaddr = sockaddr.to_sockaddr
-        else
-          sockaddr = Socket.coerce_to_string(sockaddr)
-        end
-
-        unless sockaddr.is_a?(String)
-          raise TypeError,
-            "no implicit conversion of #{sockaddr.class} into String"
-        end
+        sockaddr = Socket.coerce_to_string(sockaddr)
 
         memory_pointer(:char, sockaddr.bytesize) do |sockaddr_p|
           sockaddr_p.write_string(sockaddr, sockaddr.bytesize)
 
-          err = _connect(descriptor, sockaddr_p, sockaddr.bytesize)
+          _connect(descriptor, sockaddr_p, sockaddr.bytesize)
         end
-
-        err
       end
 
       def self.getsockopt(descriptor, level, optname)
@@ -120,15 +107,8 @@ module RubySL
         hints[:ai_protocol] = protocol || 0
         hints[:ai_flags]    = flags || 0
 
-        if host && (host.empty? || host == '<any>')
-          host = "0.0.0.0"
-        elsif host == '<broadcast>'
-          host = '255.255.255.255'
-        end
-
         res_p = memory_pointer(:pointer)
-
-        err = _getaddrinfo(host, service, hints.pointer, res_p)
+        err   = _getaddrinfo(host, service, hints.pointer, res_p)
 
         raise SocketError, gai_strerror(err) unless err == 0
 

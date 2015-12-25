@@ -35,6 +35,12 @@ class Socket < BasicSocket
       host = RubySL::Socket.coerce_to_string(host)
     end
 
+    if host && (host.empty? || host == '<any>')
+      host = "0.0.0.0"
+    elsif host == '<broadcast>'
+      host = '255.255.255.255'
+    end
+
     if service.kind_of?(Fixnum)
       service = service.to_s
     elsif service
@@ -258,6 +264,10 @@ class Socket < BasicSocket
   end
 
   def connect(sockaddr)
+    if sockaddr.is_a?(Addrinfo)
+      sockaddr = sockaddr.to_sockaddr
+    end
+
     status = RubySL::Socket::Foreign.connect(descriptor, sockaddr)
 
     RubySL::Socket::Error.write_error('connect(2)', self) if status < 0
@@ -267,6 +277,10 @@ class Socket < BasicSocket
 
   def connect_nonblock(sockaddr)
     fcntl(Fcntl::F_SETFL, Fcntl::O_NONBLOCK)
+
+    if sockaddr.is_a?(Addrinfo)
+      sockaddr = sockaddr.to_sockaddr
+    end
 
     status = RubySL::Socket::Foreign.connect(descriptor, sockaddr)
 
