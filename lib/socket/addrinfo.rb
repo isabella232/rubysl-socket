@@ -189,6 +189,8 @@ class Addrinfo
     end
   end
 
+  alias_method :to_s, :to_sockaddr
+
   def getnameinfo(flags = 0)
     Socket.getnameinfo(to_sockaddr, flags)
   end
