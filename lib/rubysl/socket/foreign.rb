@@ -49,6 +49,7 @@ module RubySL
 
       attach_function :gethostname, [:pointer, :size_t], :int
       attach_function :getservbyname, [:string, :string], :pointer
+      attach_function :getservbyport, [:int, :string], :pointer
       attach_function :gethostbyname, [:string], :pointer
       attach_function :gethostbyaddr, [:pointer, :socklen_t, :int], :pointer
 

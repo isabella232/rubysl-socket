@@ -180,6 +180,17 @@ class Socket < BasicSocket
     RubySL::Socket::Foreign.ntohs(struct.port)
   end
 
+  def self.getservbyport(port, proto = nil)
+    proto ||= 'tcp'
+    pointer = RubySL::Socket::Foreign.getservbyport(port, proto)
+
+    raise SocketError, "no such service for port #{port}/#{proto}" unless pointer
+
+    struct = RubySL::Socket::Foreign::Servent.new(pointer)
+
+    struct.name
+  end
+
   def self.pack_sockaddr_in(port, host)
     RubySL::Socket::Foreign.pack_sockaddr_in(host, port)
   end
