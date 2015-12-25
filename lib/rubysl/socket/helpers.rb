@@ -99,6 +99,22 @@ module RubySL
         end
       end
 
+      def self.protocol_family_name(family_int)
+        ::Socket.constants.grep(/^PF_/).each do |name|
+          return name.to_s if ::Socket.const_get(name) == family_int
+        end
+
+        'PF_UNSPEC'
+      end
+
+      def self.protocol_name(family_int)
+        ::Socket.constants.grep(/^IPPROTO_/).each do |name|
+          return name.to_s if ::Socket.const_get(name) == family_int
+        end
+
+        'IPPROTO_IP'
+      end
+
       def self.socket_type_name(socktype)
         case socktype
         when ::Socket::SOCK_DGRAM

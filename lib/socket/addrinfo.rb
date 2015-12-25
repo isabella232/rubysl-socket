@@ -380,4 +380,15 @@ class Addrinfo
 
     bytes[0] == 0xfc || bytes[0] == 0xfd
   end
+
+  def marshal_dump
+    [
+      RubySL::Socket::Helpers.address_family_name(afamily),
+      [ip_address, ip_port.to_s],
+      RubySL::Socket::Helpers.protocol_family_name(pfamily),
+      RubySL::Socket::Helpers.socket_type_name(socktype),
+      RubySL::Socket::Helpers.protocol_name(protocol),
+      canonname
+    ]
+  end
 end
