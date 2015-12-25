@@ -85,5 +85,9 @@ module RubySL
     def self.family_for_sockaddr_in(sockaddr)
       sockaddr.bytesize == 28 ? ::Socket::AF_INET6 : ::Socket::AF_INET
     end
+
+    def self.constant_pairs
+      Rubinius::FFI.config_hash('socket').reject { |name, value| value.empty? }
+    end
   end
 end

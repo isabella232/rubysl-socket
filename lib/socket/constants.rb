@@ -1,6 +1,6 @@
 class Socket < BasicSocket
   module Constants
-    all_valid = Rubinius::FFI.config_hash("socket").reject {|name, value| value.empty? }
+    all_valid = RubySL::Socket.constant_pairs
 
     all_valid.each {|name, value| const_set name, Integer(value) }
 

@@ -61,7 +61,7 @@ class Addrinfo
         pfamily = Socket::PF_INET6
       end
     else
-      if sockaddr.bytesize == Rubinius::FFI.config('sockaddr_un.sizeof')
+      if sockaddr.bytesize == RubySL::Socket::Foreign::SockaddrUn.size
         @unix_path = Socket.unpack_sockaddr_un(sockaddr)
         @afamily   = Socket::AF_UNIX
       else
