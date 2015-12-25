@@ -4,6 +4,10 @@ module RubySL
       Rubinius.bsd? || Rubinius.darwin?
     end
 
+    def self.linux_support?
+      Rubinius.linux?
+    end
+
     def self.unix_socket_support?
       ::Socket::Constants.const_defined?(:AF_UNIX)
     end

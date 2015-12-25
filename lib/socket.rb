@@ -29,7 +29,7 @@ require 'rubysl/socket/ancillary_data'
 require 'rubysl/socket/foreign'
 require 'rubysl/socket/error'
 require 'rubysl/socket/bsd' if RubySL::Socket.bsd_support?
-require 'rubysl/socket/linux' if Rubinius.linux?
+require 'rubysl/socket/linux' if RubySL::Socket.linux_support?
 
 require 'socket/socket'
 require 'socket/option'
