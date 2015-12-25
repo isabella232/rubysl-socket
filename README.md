@@ -19,6 +19,15 @@ correctly).
 The 2.0 branch of rubysl-socket targets Ruby 2.x, other Ruby versions are
 currently not supported.
 
+## Unsupported Features
+
+Currently the use of ancillary data is not supported. While
+`Socket::AncillaryData` exists and is implemented for the most part it's not
+used by `BasicSocket#sendmsg` and `BasicSocket#recvmsg`. Extracting/building
+ancillary data requires the use of platform specific macros and these can't be
+easily bound to Ruby via FFI. Using a C extension only adds more complexity for
+a feature that will most likely be rarely used, if ever.
+
 ## Requirements
 
 * Rubinius 2.9 or newer
