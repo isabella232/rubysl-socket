@@ -33,6 +33,18 @@ module RubySL
           self[:ifa_netmask]
         end
 
+        def each_address
+          next_pointer = self.next
+
+          while next_pointer
+            struct = self.class.new(next_pointer)
+
+            yield struct
+
+            next_pointer = struct.next
+          end
+        end
+
         def broadcast?
           flags & ::Socket::IFF_BROADCAST > 0
         end

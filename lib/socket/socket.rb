@@ -180,11 +180,7 @@ class Socket < BasicSocket
     Errno.handle('getifaddrs()') if status < 0
 
     begin
-      next_pointer = initial.next
-
-      while next_pointer
-        ifaddrs_struct  = RubySL::Socket::Foreign::Ifaddrs.new(next_pointer)
-
+      initial.each_address do |ifaddrs_struct|
         ifaddrs << Ifaddr.new(
           addr:      ifaddrs_struct.address_to_addrinfo,
           broadaddr: ifaddrs_struct.broadcast_to_addrinfo,
@@ -195,8 +191,7 @@ class Socket < BasicSocket
           ifindex:   index
         )
 
-        next_pointer = ifaddrs_struct.next
-        index       += 1
+        index += 1
       end
 
       ifaddrs
