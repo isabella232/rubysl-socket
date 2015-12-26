@@ -1,9 +1,36 @@
 module RubySL
   module Socket
     module Foreign
+      # Class representing an "ifaddrs" C structure.
+      #
+      # The memory used by this structure should be free'd using
+      # `RubySL::Socket::Foreign.freeifaddrs` _only_ as following:
+      #
+      #     RubySL::Socket::Foreign.freeifaddrs(initial_ifaddrs_struct)
+      #
+      # To ensure Rubinius doesn't accidentally free invalid pointers all
+      # pointers (including the pointer of "self") stored in this class have the
+      # "autorelease" option set to false.
       class Ifaddrs < Rubinius::FFI::Struct
         config("rbx.platform.ifaddrs", :ifa_next, :ifa_name, :ifa_flags,
                :ifa_addr, :ifa_netmask, :ifa_broadaddr, :ifa_dstaddr)
+
+        POINTERS = [
+          :address, :next, :broadcast_address, :destination_address,
+          :netmask_address
+        ]
+
+        def initialize(*args)
+          super
+
+          POINTERS.each do |name|
+            pointer = __send__(name)
+
+            pointer.autorelease = false if pointer
+          end
+
+          pointer.autorelease = false
+        end
 
         def name
           self[:ifa_name]
@@ -13,24 +40,28 @@ module RubySL
           self[:ifa_flags]
         end
 
+        def data
+          @data ||= self[:ifa_data]
+        end
+
         def next
-          self[:ifa_next]
+          @next ||= self[:ifa_next]
         end
 
         def address
-          self[:ifa_addr]
+          @address ||= self[:ifa_addr]
         end
 
         def broadcast_address
-          self[:ifa_broadaddr]
+          @broadcast_address ||= self[:ifa_broadaddr]
         end
 
         def destination_address
-          self[:ifa_dstaddr]
+          @destination_address ||= self[:ifa_dstaddr]
         end
 
         def netmask_address
-          self[:ifa_netmask]
+          @netmask_address ||= self[:ifa_netmask]
         end
 
         def each_address
