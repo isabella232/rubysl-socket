@@ -44,6 +44,18 @@ describe 'Socket#recvfrom_nonblock' do
           ret.length.should == 2
         end
 
+        describe 'the returned data' do
+          it 'is the same as the sent data' do
+            5.times do
+              @client.write('hello')
+
+              msg, _ = @server.recvfrom_nonblock(5)
+
+              msg.should == 'hello'
+            end
+          end
+        end
+
         describe 'the returned Array' do
           before do
             @array = @server.recvfrom_nonblock(1)

@@ -177,7 +177,7 @@ class BasicSocket < IO
           addr = Addrinfo.new([Socket::AF_UNSPEC], nil, socket_type)
         end
 
-        return msg_buffer.read_string, addr, header.flags
+        return msg_buffer.read_string(msg_buffer.total), addr, header.flags
       ensure
         msg_buffer.free
         address.free
