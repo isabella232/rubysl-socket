@@ -158,10 +158,10 @@ class BasicSocket < IO
       begin
         need_more = false
 
-        status = RubySL::Socket::Foreign
+        msg_size = RubySL::Socket::Foreign
           .recvmsg(descriptor, header.pointer, flags)
 
-        RubySL::Socket::Error.read_error('recvmsg(2)', self) if status < 0
+        RubySL::Socket::Error.read_error('recvmsg(2)', self) if msg_size < 0
 
         if grow_msg and header.message_truncated?
           need_more = true
@@ -177,7 +177,7 @@ class BasicSocket < IO
           addr = Addrinfo.new([Socket::AF_UNSPEC], nil, socket_type)
         end
 
-        return msg_buffer.read_string(msg_buffer.total), addr, header.flags
+        return msg_buffer.read_string(msg_size), addr, header.flags
       ensure
         msg_buffer.free
         address.free
