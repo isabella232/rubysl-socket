@@ -50,6 +50,25 @@ class Addrinfo
     new(Socket.pack_sockaddr_un(socket), Socket::PF_UNIX, socktype)
   end
 
+  # Addrinfo#initialize has a bunch of checks that prevent us from setting
+  # certain address families (e.g. AF_PACKET). Meanwhile methods such as
+  # Socket.getifaddrs need to create Addrinfo instances with exactly those
+  # address families.
+  #
+  # Because modifying #initialize would break compatibility we have to define a
+  # separate new-like method that completely ignores #initialize. You can thank
+  # Ruby for being such a well designed language.
+  #
+  # For the sake of simplicity `family` **must** be a Fixnum, a String based
+  # address family is not supported.
+  def self.raw_with_family(family)
+    instance = allocate
+
+    instance.instance_variable_set(:@afamily, family)
+
+    instance
+  end
+
   def initialize(sockaddr, pfamily = nil, socktype = 0, protocol = 0)
     if sockaddr.kind_of?(Array)
       @afamily    = RubySL::Socket.address_family(sockaddr[0])
@@ -199,8 +218,10 @@ class Addrinfo
     if ipv4?
       if ip_port and ip_port != 0
         "#{ip_address}:#{ip_port}"
-      else
+      elsif ip_address
         ip_address.dup
+      else
+        'UNKNOWN'
       end
     elsif ipv6?
       if ip_port and ip_port != 0
@@ -214,6 +235,8 @@ class Addrinfo
       else
         "UNIX #{unix_path}"
       end
+    else
+      RubySL::Socket.address_family_name(afamily)
     end
   end
 

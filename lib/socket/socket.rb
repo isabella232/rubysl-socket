@@ -1,32 +1,12 @@
 class Socket < BasicSocket
   def self.ip_address_list
-    initial = RubySL::Socket::Foreign::Ifaddrs.new
-    status  = RubySL::Socket::Foreign.getifaddrs(initial)
-    addrs   = []
+    ips = []
 
-    Errno.handle('getifaddrs()') if status < 0
-
-    begin
-      next_pointer = initial.next
-
-      while next_pointer
-        ifaddrs_struct  = RubySL::Socket::Foreign::Ifaddrs.new(next_pointer)
-        sockaddr_struct = ifaddrs_struct.to_sockaddr
-
-        if sockaddr_struct.family == AF_INET
-          addrs << Addrinfo.new(ifaddrs_struct.to_sockaddr_in.to_s)
-
-        elsif sockaddr_struct.family == AF_INET6
-          addrs << Addrinfo.new(ifaddrs_struct.to_sockaddr_in6.to_s)
-        end
-
-        next_pointer = ifaddrs_struct.next
-      end
-
-      addrs
-    ensure
-      RubySL::Socket::Foreign.freeifaddrs(initial)
+    getifaddrs.each do |ifaddr|
+      ips << ifaddr.addr if ifaddr.addr
     end
+
+    ips
   end
 
   def self.getaddrinfo(host, service, family = 0, socktype = 0,
@@ -189,6 +169,40 @@ class Socket < BasicSocket
     struct = RubySL::Socket::Foreign::Servent.new(pointer)
 
     struct.name
+  end
+
+  def self.getifaddrs
+    initial = RubySL::Socket::Foreign::Ifaddrs.new
+    status  = RubySL::Socket::Foreign.getifaddrs(initial)
+    ifaddrs = []
+    index   = 1
+
+    Errno.handle('getifaddrs()') if status < 0
+
+    begin
+      next_pointer = initial.next
+
+      while next_pointer
+        ifaddrs_struct  = RubySL::Socket::Foreign::Ifaddrs.new(next_pointer)
+
+        ifaddrs << Ifaddr.new(
+          addr:      ifaddrs_struct.address_to_addrinfo,
+          broadaddr: ifaddrs_struct.broadcast_to_addrinfo,
+          dstaddr:   ifaddrs_struct.destination_to_addrinfo,
+          netmask:   ifaddrs_struct.netmask_to_addrinfo,
+          name:      ifaddrs_struct.name,
+          flags:     ifaddrs_struct.flags,
+          ifindex:   index
+        )
+
+        next_pointer = ifaddrs_struct.next
+        index       += 1
+      end
+
+      ifaddrs
+    ensure
+      RubySL::Socket::Foreign.freeifaddrs(initial)
+    end
   end
 
   def self.pack_sockaddr_in(port, host)
