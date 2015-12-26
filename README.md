@@ -30,7 +30,7 @@ a feature that will most likely be rarely used, if ever.
 
 ## Requirements
 
-* Rubinius 2.9 or newer
+* Rubinius 2.10 or newer
 * A POSIX compliant operating system
 
 Windows is currently not supported and there are no plans to support it for the
