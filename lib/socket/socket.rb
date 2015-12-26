@@ -92,7 +92,7 @@ class Socket < BasicSocket
   end
 
   def self.gethostname
-    RubySL::Socket::Foreign.char_pointer(1024) do |pointer|
+    RubySL::Socket::Foreign.char_pointer(::Socket::NI_MAXHOST) do |pointer|
       RubySL::Socket::Foreign.gethostname(pointer, pointer.total)
 
       pointer.read_string
