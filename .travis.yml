@@ -1,3 +1,4 @@
+---
 language: ruby
 env:
   - RUBYLIB=lib:.
@@ -7,5 +8,9 @@ branches:
     - 1.0
     - 2.0
 rvm:
-  - 2.1
+  - 2.2
   - rbx-2
+os:
+  - linux
+  - osx
+sudo: false
