@@ -3,10 +3,6 @@ language: ruby
 env:
   - RUBYLIB=lib:.
 script: mspec spec
-branches:
-  only:
-    - 1.0
-    - 2.0
 rvm:
   - 2.2
   - rbx-2
