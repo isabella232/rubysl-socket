@@ -87,49 +87,49 @@ describe 'BasicSocket#getsockopt' do
   end
 
   describe 'using Strings as arguments' do
-    it 'returns a Socket:"O"ption for arguments "SOCKET" and "TYPE"' do
+    it 'returns a Socket::Option for arguments "SOCKET" and "TYPE"' do
       opt = @sock.getsockopt("SOCKET", "TYPE")
 
       opt.level.should   == Socket::SOL_SOCKET
       opt.optname.should == Socket::SO_TYPE
     end
 
-    it 'returns a Socket:"O"ption for arguments "IP" and "TTL"' do
+    it 'returns a Socket::Option for arguments "IP" and "TTL"' do
       opt = @sock.getsockopt("IP", "TTL")
 
       opt.level.should   == Socket::SOL_IP
       opt.optname.should == Socket::IP_TTL
     end
 
-    it 'returns a Socket:"O"ption for arguments "IP" and "MULTICAST"_TTL' do
+    it 'returns a Socket::Option for arguments "IP" and "MULTICAST"_TTL' do
       opt = @sock.getsockopt("IP", "MULTICAST_TTL")
 
       opt.level.should   == Socket::SOL_IP
       opt.optname.should == Socket::IP_MULTICAST_TTL
     end
 
-    it 'returns a Socket:"O"ption for arguments "SOCKET" and "REUSEADDR"' do
+    it 'returns a Socket::Option for arguments "SOCKET" and "REUSEADDR"' do
       opt = @sock.getsockopt("SOCKET", "REUSEADDR")
 
       opt.level.should   == Socket::SOL_SOCKET
       opt.optname.should == Socket::SO_REUSEADDR
     end
 
-    it 'returns a Socket:"O"ption for arguments "SOCKET" and "LINGER"' do
+    it 'returns a Socket::Option for arguments "SOCKET" and "LINGER"' do
       opt = @sock.getsockopt("SOCKET", "LINGER")
 
       opt.level.should   == Socket::SOL_SOCKET
       opt.optname.should == Socket::SO_LINGER
     end
 
-    it 'returns a Socket:"O"ption for arguments "TCP" and "REPAIR"' do
+    it 'returns a Socket::Option for arguments "TCP" and "REPAIR"' do
       opt = @sock.getsockopt("TCP", "REPAIR")
 
       opt.level.should   == Socket::SOL_TCP
       opt.optname.should == Socket::TCP_REPAIR
     end
 
-    it 'returns a Socket:"O"ption for arguments "UDP" and "CORK"' do
+    it 'returns a Socket::Option for arguments "UDP" and "CORK"' do
       sock = Socket.new("INET", "DGRAM")
       opt  = sock.getsockopt("UDP", "CORK")
 
