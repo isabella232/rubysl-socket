@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
     'rubysl-socket.gemspec'
   ])
 
-  spec.required_ruby_version = "~> 2.0"
+  spec.required_ruby_version = '~> 2.0'
 
   spec.add_dependency 'rubysl-fcntl', '~> 2.0'
 
