@@ -70,13 +70,6 @@ describe 'BasicSocket#getsockopt' do
       opt.optname.should == Socket::SO_LINGER
     end
 
-    it 'returns a Socket::Option for arguments :TCP and :REPAIR' do
-      opt = @sock.getsockopt(:TCP, :REPAIR)
-
-      opt.level.should   == Socket::SOL_TCP
-      opt.optname.should == Socket::TCP_REPAIR
-    end
-
     it 'returns a Socket::Option for arguments :UDP and :CORK' do
       sock = Socket.new(:INET, :DGRAM)
       opt  = sock.getsockopt(:UDP, :CORK)
