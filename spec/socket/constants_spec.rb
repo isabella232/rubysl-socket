@@ -34,11 +34,7 @@ describe 'Socket::Constants' do
   end
 
   it 'defines socket level options' do
-    consts = %w{SOL_SOCKET SOL_IP SOL_TCP SOL_UDP}
-
-    consts.each do |c|
-      Socket::Constants.should have_constant(c)
-    end
+    Socket::Constants.should have_constant('SOL_SOCKET')
   end
 
   it 'defines socket options' do

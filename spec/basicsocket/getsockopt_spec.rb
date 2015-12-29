@@ -45,14 +45,14 @@ describe 'BasicSocket#getsockopt' do
     it 'returns a Socket::Option for arguments :IP and :TTL' do
       opt = @sock.getsockopt(:IP, :TTL)
 
-      opt.level.should   == Socket::SOL_IP
+      opt.level.should   == Socket::IPPROTO_IP
       opt.optname.should == Socket::IP_TTL
     end
 
     it 'returns a Socket::Option for arguments :IP and :MULTICAST_TTL' do
       opt = @sock.getsockopt(:IP, :MULTICAST_TTL)
 
-      opt.level.should   == Socket::SOL_IP
+      opt.level.should   == Socket::IPPROTO_IP
       opt.optname.should == Socket::IP_MULTICAST_TTL
     end
 
@@ -74,7 +74,7 @@ describe 'BasicSocket#getsockopt' do
       sock = Socket.new(:INET, :DGRAM)
       opt  = sock.getsockopt(:UDP, :CORK)
 
-      opt.level.should   == Socket::SOL_UDP
+      opt.level.should   == Socket::IPPROTO_UDP
       opt.optname.should == Socket::UDP_CORK
     end
   end
@@ -90,14 +90,14 @@ describe 'BasicSocket#getsockopt' do
     it 'returns a Socket::Option for arguments "IP" and "TTL"' do
       opt = @sock.getsockopt("IP", "TTL")
 
-      opt.level.should   == Socket::SOL_IP
+      opt.level.should   == Socket::IPPROTO_IP
       opt.optname.should == Socket::IP_TTL
     end
 
     it 'returns a Socket::Option for arguments "IP" and "MULTICAST"_TTL' do
       opt = @sock.getsockopt("IP", "MULTICAST_TTL")
 
-      opt.level.should   == Socket::SOL_IP
+      opt.level.should   == Socket::IPPROTO_IP
       opt.optname.should == Socket::IP_MULTICAST_TTL
     end
 
@@ -119,7 +119,7 @@ describe 'BasicSocket#getsockopt' do
       sock = Socket.new("INET", "DGRAM")
       opt  = sock.getsockopt("UDP", "CORK")
 
-      opt.level.should   == Socket::SOL_UDP
+      opt.level.should   == Socket::IPPROTO_UDP
       opt.optname.should == Socket::UDP_CORK
     end
   end

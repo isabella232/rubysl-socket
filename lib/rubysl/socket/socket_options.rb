@@ -28,20 +28,17 @@ module RubySL
             case level
             when ::Socket::SOL_SOCKET
               constant("SO", optname)
-            when ::Socket::SOL_IP
+            when ::Socket::IPPROTO_IP
               constant("IP", optname)
-            when ::Socket::SOL_TCP
+            when ::Socket::IPPROTO_TCP
               constant("TCP", optname)
-            when ::Socket::SOL_UDP
+            when ::Socket::IPPROTO_UDP
               constant("UDP", optname)
+            when ::Socket.const_defined?(:IPPROTO_IPV6) && ::Socket::IPPROTO_IPV6
+              constant("IPV6", optname)
             else
-              if ::Socket.const_defined?(:IPPROTO_IPV6) &&
-                level == ::Socket::IPPROTO_IPV6
-                constant("IPV6", optname)
-              else
-                raise SocketError,
-                  "Unsupported socket level option name: #{optname}"
-              end
+              raise SocketError,
+                "Unsupported socket level option name: #{optname}"
             end
           end
         else

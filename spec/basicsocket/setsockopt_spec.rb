@@ -64,7 +64,7 @@ describe 'BasicSocket#setsockopt' do
     end
 
     it 'sets an integer option' do
-      @socket.setsockopt(Socket::SOL_IP, Socket::IP_TTL, 255).should == 0
+      @socket.setsockopt(Socket::IPPROTO_IP, Socket::IP_TTL, 255).should == 0
 
       @socket.getsockopt(:IP, :TTL).int.should == 255
     end
