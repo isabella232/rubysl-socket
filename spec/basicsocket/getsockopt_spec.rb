@@ -96,13 +96,6 @@ describe 'BasicSocket#getsockopt' do
       opt.optname.should == Socket::IP_TTL
     end
 
-    it 'returns a Socket::Option for arguments "IP" and "MULTICAST"_TTL' do
-      opt = @sock.getsockopt("IP", "MULTICAST_TTL")
-
-      opt.level.should   == Socket::IPPROTO_IP
-      opt.optname.should == Socket::IP_MULTICAST_TTL
-    end
-
     it 'returns a Socket::Option for arguments "SOCKET" and "REUSEADDR"' do
       opt = @sock.getsockopt("SOCKET", "REUSEADDR")
 
