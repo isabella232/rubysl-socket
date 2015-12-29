@@ -184,9 +184,11 @@ describe 'Socket::AncillaryData#initialize' do
   end
 
   describe 'using :AF_INET as the family and :TCP as the level' do
-    it 'sets the type to TCP_CORK when using :CORK as the type argument' do
-      Socket::AncillaryData.new(:INET, :TCP, :CORK, '').type
-        .should == Socket::TCP_CORK
+    with_feature :tcp_cork do
+      it 'sets the type to TCP_CORK when using :CORK as the type argument' do
+        Socket::AncillaryData.new(:INET, :TCP, :CORK, '').type
+          .should == Socket::TCP_CORK
+      end
     end
 
     it 'sets the type to TCP_INFO when using :INFO as the type argument' do

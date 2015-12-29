@@ -110,12 +110,14 @@ describe 'BasicSocket#getsockopt' do
       opt.optname.should == Socket::SO_LINGER
     end
 
-    it 'returns a Socket::Option for arguments "UDP" and "CORK"' do
-      sock = Socket.new("INET", "DGRAM")
-      opt  = sock.getsockopt("UDP", "CORK")
+    with_feature :udp_cork do
+      it 'returns a Socket::Option for arguments "UDP" and "CORK"' do
+        sock = Socket.new("INET", "DGRAM")
+        opt  = sock.getsockopt("UDP", "CORK")
 
-      opt.level.should   == Socket::IPPROTO_UDP
-      opt.optname.should == Socket::UDP_CORK
+        opt.level.should   == Socket::IPPROTO_UDP
+        opt.optname.should == Socket::UDP_CORK
+      end
     end
   end
 

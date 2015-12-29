@@ -25,6 +25,10 @@ class MSpecScript
     MSpec.enable_feature :udp_cork
   end
 
+  if ::Socket.const_defined?(:TCP_CORK)
+    MSpec.enable_feature :tcp_cork
+  end
+
   set :backtrace_filter, %r{(bin/mspec|lib/mspec|kernel)}
 end
 
