@@ -206,9 +206,11 @@ describe 'Socket::AncillaryData#initialize' do
   end
 
   describe 'using :AF_INET as the family and :UDP as the level' do
-    it 'sets the type to UDP_CORK when using :CORK as the type argument' do
-      Socket::AncillaryData.new(:INET, :UDP, :CORK, '').type
-        .should == Socket::UDP_CORK
+    with_feature :udp_cork do
+      it 'sets the type to UDP_CORK when using :CORK as the type argument' do
+        Socket::AncillaryData.new(:INET, :UDP, :CORK, '').type
+          .should == Socket::UDP_CORK
+      end
     end
 
     it 'raises SocketError when using :RIGHTS as the type argument' do
