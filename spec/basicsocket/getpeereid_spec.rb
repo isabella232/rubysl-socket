@@ -19,20 +19,22 @@ describe 'BasicSocket#getpeereid' do
     end
   end
 
-  describe 'using a UNIXSocket' do
-    before do
-      @path   = tmp('basic_socket_getpeereid_spec.sock', false)
-      @server = UNIXServer.new(@path)
-    end
+  with_feature :unix_socket do
+    describe 'using a UNIXSocket' do
+      before do
+        @path   = tmp('basic_socket_getpeereid_spec.sock', false)
+        @server = UNIXServer.new(@path)
+      end
 
-    after do
-      @server.close
+      after do
+        @server.close
 
-      rm_r(@path)
-    end
+        rm_r(@path)
+      end
 
-    it 'returns an Array with the user and group ID' do
-      @server.getpeereid.should == [Process.euid, Process.egid]
+      it 'returns an Array with the user and group ID' do
+        @server.getpeereid.should == [Process.euid, Process.egid]
+      end
     end
   end
 
