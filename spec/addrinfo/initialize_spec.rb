@@ -209,7 +209,7 @@ describe 'Addrinfo#initialize' do
         end
       end
 
-      [:SOCK_RDM, :SOCK_PACKET].each do |type|
+      [:SOCK_RDM].each do |type|
         it "raises SocketError when using #{type}" do
           value = Socket.const_get(type)
           block = proc { Addrinfo.new(@sockaddr, nil, value) }
@@ -272,17 +272,19 @@ describe 'Addrinfo#initialize' do
         end
       end
 
-      describe 'and the socket type is set to SOCK_PACKET' do
-        before do
-          @socktype = Socket::SOCK_PACKET
-        end
+      with_feature :sock_packet do
+        describe 'and the socket type is set to SOCK_PACKET' do
+          before do
+            @socktype = Socket::SOCK_PACKET
+          end
 
-        Socket.constants.grep(/^IPPROTO/).each do |type|
-          it "raises SocketError when using #{type} " do
-            value = Socket.const_get(type)
-            block = proc { Addrinfo.new(@sockaddr, nil, @socktype, value) }
+          Socket.constants.grep(/^IPPROTO/).each do |type|
+            it "raises SocketError when using #{type} " do
+              value = Socket.const_get(type)
+              block = proc { Addrinfo.new(@sockaddr, nil, @socktype, value) }
 
-            block.should raise_error(SocketError)
+              block.should raise_error(SocketError)
+            end
           end
         end
       end
