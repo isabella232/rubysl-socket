@@ -3,6 +3,11 @@ $:.unshift(File.expand_path('..', __FILE__))
 require 'socket'
 require 'custom/helpers/each_ip_protocol'
 
+# This ensures we can actually read backtraces Travis CI might spit out.
+if ENV['TRAVIS'] and RUBY_ENGINE == 'rbx'
+  Rubinius::TERMINAL_WIDTH = 120
+end
+
 class MSpecScript
   if RUBY_ENGINE == 'rbx'
     MSpec.enable_feature :pure_ruby_addrinfo
