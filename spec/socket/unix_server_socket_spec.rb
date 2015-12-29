@@ -1,45 +1,47 @@
 require 'socket'
 
-describe 'Socket.unix_server_socket' do
-  before do
-    @path = tmp('unix_socket')
-  end
-
-  after do
-    rm_r(@path)
-  end
-
-  describe 'when no block is given' do
+with_feature :unix_socket do
+  describe 'Socket.unix_server_socket' do
     before do
-      @socket = nil
+      @path = tmp('unix_socket')
     end
 
     after do
-      @socket.close
+      rm_r(@path)
     end
 
-    it 'returns a Socket' do
-      @socket = Socket.unix_server_socket(@path)
+    describe 'when no block is given' do
+      before do
+        @socket = nil
+      end
 
-      @socket.should be_an_instance_of(Socket)
-    end
-  end
+      after do
+        @socket.close
+      end
 
-  describe 'when a block is given' do
-    it 'yields a Socket' do
-      Socket.unix_server_socket(@path) do |sock|
-        sock.should be_an_instance_of(Socket)
+      it 'returns a Socket' do
+        @socket = Socket.unix_server_socket(@path)
+
+        @socket.should be_an_instance_of(Socket)
       end
     end
 
-    it 'closes the Socket when the block returns' do
-      socket = nil
-
-      Socket.unix_server_socket(@path) do |sock|
-        socket = sock
+    describe 'when a block is given' do
+      it 'yields a Socket' do
+        Socket.unix_server_socket(@path) do |sock|
+          sock.should be_an_instance_of(Socket)
+        end
       end
 
-      socket.should be_an_instance_of(Socket)
+      it 'closes the Socket when the block returns' do
+        socket = nil
+
+        Socket.unix_server_socket(@path) do |sock|
+          socket = sock
+        end
+
+        socket.should be_an_instance_of(Socket)
+      end
     end
   end
 end

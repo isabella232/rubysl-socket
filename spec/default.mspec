@@ -12,6 +12,10 @@ class MSpecScript
     MSpec.enable_feature :sock_packet
   end
 
+  if ::Socket.const_defined?(:AF_UNIX)
+    MSpec.enable_feature :unix_socket
+  end
+
   set :backtrace_filter, %r{(bin/mspec|lib/mspec|kernel)}
 end
 

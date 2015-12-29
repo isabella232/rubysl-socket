@@ -1,21 +1,23 @@
 require 'socket'
 
-describe 'UNIXServer#initialize' do
-  before do
-    @path = tmp('unix_socket')
-  end
+with_feature :unix_socket do
+  describe 'UNIXServer#initialize' do
+    before do
+      @path = tmp('unix_socket')
+    end
 
-  after do
-    rm_r(@path)
-  end
+    after do
+      rm_r(@path)
+    end
 
-  it 'returns a new UNIXServer' do
-    UNIXServer.new(@path).should be_an_instance_of(UNIXServer)
-  end
+    it 'returns a new UNIXServer' do
+      UNIXServer.new(@path).should be_an_instance_of(UNIXServer)
+    end
 
-  it 'raises Errno::EADDRINUSE when the socket is already in use' do
-    UNIXServer.new(@path)
+    it 'raises Errno::EADDRINUSE when the socket is already in use' do
+      UNIXServer.new(@path)
 
-    proc { UNIXServer.new(@path) }.should raise_error(Errno::EADDRINUSE)
+      proc { UNIXServer.new(@path) }.should raise_error(Errno::EADDRINUSE)
+    end
   end
 end
