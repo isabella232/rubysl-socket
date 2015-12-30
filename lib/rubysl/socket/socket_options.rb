@@ -8,8 +8,10 @@ module RubySL
           else
             if family and is_ip_family?(family)
               ip_level_to_int(level)
+            elsif level.to_s == 'SOCKET'
+              ::Socket::SOL_SOCKET
             else
-              constant("SOL", level)
+              constant("IPPROTO", level)
             end
           end
         elsif level.respond_to?(:to_str)
