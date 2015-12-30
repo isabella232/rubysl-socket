@@ -19,9 +19,9 @@ describe 'BasicSocket#shutdown' do
 
     describe 'using a Fixnum' do
       it 'shuts down a socket for reading' do
-        @server.shutdown(Socket::SHUT_RD)
+        @client.shutdown(Socket::SHUT_RD)
 
-        proc { @client.write('hello') }.should raise_error(Errno::ECONNRESET)
+        @client.recv(1).should be_empty
       end
 
       it 'shuts down a socket for writing' do
@@ -31,9 +31,11 @@ describe 'BasicSocket#shutdown' do
       end
 
       it 'shuts down a socket for reading and writing' do
-        @server.shutdown(Socket::SHUT_RDWR)
+        @client.shutdown(Socket::SHUT_RDWR)
 
-        proc { @client.write('hello') }.should raise_error(Errno::ECONNRESET)
+        @client.recv(1).should be_empty
+
+        proc { @client.write('hello') }.should raise_error(Errno::EPIPE)
       end
 
       it 'raises ArgumentError when using an invalid option' do
@@ -43,27 +45,35 @@ describe 'BasicSocket#shutdown' do
 
     describe 'using a Symbol' do
       it 'shuts down a socket for reading using :RD' do
-        @server.shutdown(:RD)
+        @client.shutdown(:RD)
 
-        proc { @client.write('hello') }.should raise_error(Errno::ECONNRESET)
+        @client.recv(1).should be_empty
       end
 
       it 'shuts down a socket for reading using :SHUT_RD' do
-        @server.shutdown(:SHUT_RD)
+        @client.shutdown(:SHUT_RD)
 
-        proc { @client.write('hello') }.should raise_error(Errno::ECONNRESET)
+        @client.recv(1).should be_empty
       end
 
-      it 'shuts down a socket for writing' do
+      it 'shuts down a socket for writing using :WR' do
         @client.shutdown(:WR)
 
         proc { @client.write('hello') }.should raise_error(Errno::EPIPE)
       end
 
-      it 'shuts down a socket for reading and writing' do
-        @server.shutdown(:RDWR)
+      it 'shuts down a socket for writing using :SHUT_WR' do
+        @client.shutdown(:SHUT_WR)
 
-        proc { @client.write('hello') }.should raise_error(Errno::ECONNRESET)
+        proc { @client.write('hello') }.should raise_error(Errno::EPIPE)
+      end
+
+      it 'shuts down a socket for reading and writing' do
+        @client.shutdown(:RDWR)
+
+        @client.recv(1).should be_empty
+
+        proc { @client.write('hello') }.should raise_error(Errno::EPIPE)
       end
 
       it 'raises ArgumentError when using an invalid option' do
@@ -73,21 +83,27 @@ describe 'BasicSocket#shutdown' do
 
     describe 'using a String' do
       it 'shuts down a socket for reading using "RD"' do
-        @server.shutdown('RD')
+        @client.shutdown('RD')
 
-        proc { @client.write('hello') }.should raise_error(Errno::ECONNRESET)
+        @client.recv(1).should be_empty
       end
 
       it 'shuts down a socket for reading using "SHUT_RD"' do
-        @server.shutdown('SHUT_RD')
+        @client.shutdown('SHUT_RD')
 
-        proc { @client.write('hello') }.should raise_error(Errno::ECONNRESET)
+        @client.recv(1).should be_empty
       end
 
-      it 'shuts down a socket for reading and writing' do
-        @server.shutdown('RDWR')
+      it 'shuts down a socket for writing using "WR"' do
+        @client.shutdown('WR')
 
-        proc { @client.write('hello') }.should raise_error(Errno::ECONNRESET)
+        proc { @client.write('hello') }.should raise_error(Errno::EPIPE)
+      end
+
+      it 'shuts down a socket for writing using "SHUT_WR"' do
+        @client.shutdown('SHUT_WR')
+
+        proc { @client.write('hello') }.should raise_error(Errno::EPIPE)
       end
 
       it 'raises ArgumentError when using an invalid option' do
@@ -103,25 +119,27 @@ describe 'BasicSocket#shutdown' do
       it 'shuts down a socket for reading using "RD"' do
         @dummy.stub!(:to_str).and_return('RD')
 
-        @server.shutdown(@dummy)
+        @client.shutdown(@dummy)
 
-        proc { @client.write('hello') }.should raise_error(Errno::ECONNRESET)
+        @client.recv(1).should be_empty
       end
 
       it 'shuts down a socket for reading using "SHUT_RD"' do
         @dummy.stub!(:to_str).and_return('SHUT_RD')
 
-        @server.shutdown(@dummy)
+        @client.shutdown(@dummy)
 
-        proc { @client.write('hello') }.should raise_error(Errno::ECONNRESET)
+        @client.recv(1).should be_empty
       end
 
       it 'shuts down a socket for reading and writing' do
         @dummy.stub!(:to_str).and_return('RDWR')
 
-        @server.shutdown(@dummy)
+        @client.shutdown(@dummy)
 
-        proc { @client.write('hello') }.should raise_error(Errno::ECONNRESET)
+        @client.recv(1).should be_empty
+
+        proc { @client.write('hello') }.should raise_error(Errno::EPIPE)
       end
     end
 
