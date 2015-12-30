@@ -41,7 +41,6 @@ describe 'BasicSocket#sendmsg' do
         @server = Socket.new(family, :DGRAM)
 
         @server.bind(Socket.sockaddr_in(0, ip_address))
-        @client.connect(@server.getsockname)
       end
 
       after do
@@ -50,6 +49,10 @@ describe 'BasicSocket#sendmsg' do
       end
 
       describe 'without a destination address argument' do
+        before do
+          @client.connect(@server.getsockname)
+        end
+
         it 'returns the amount of bytes written' do
           @client.sendmsg('hello').should == 5
         end
