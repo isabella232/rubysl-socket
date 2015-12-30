@@ -29,6 +29,10 @@ class MSpecScript
     MSpec.enable_feature :tcp_cork
   end
 
+  if ::Socket.const_defined?(:IPV6_PKTINFO)
+    MSpec.enable_feature :ipv6_pktinfo
+  end
+
   set :backtrace_filter, %r{(bin/mspec|lib/mspec|kernel)}
 end
 
