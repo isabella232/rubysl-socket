@@ -132,9 +132,9 @@ describe 'Socket::AncillaryData#initialize' do
     end
   end
 
-  describe 'using :AF_INET as the family and :ICMP as the level' do
+  describe 'using :AF_INET as the family and :SOCKET as the level' do
     it 'sets the type to SCM_RIGHTS when using :RIGHTS as the type argument' do
-      Socket::AncillaryData.new(:INET, :ICMP, :RIGHTS, '').type
+      Socket::AncillaryData.new(:INET, :SOCKET, :RIGHTS, '').type
         .should == Socket::SCM_RIGHTS
     end
   end
