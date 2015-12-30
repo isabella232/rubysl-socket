@@ -1,25 +1,21 @@
 require 'socket'
 
 describe 'Socket::AncillaryData#cmsg_is?' do
-  describe 'using :INET, :IPV6, :PKTINFO as the family, level, and type' do
+  describe 'using :INET, :IP, :TTL as the family, level, and type' do
     before do
-      @data = Socket::AncillaryData.new(:INET, :IPV6, :PKTINFO, '')
+      @data = Socket::AncillaryData.new(:INET, :IP, :TTL, '')
     end
 
-    it 'returns true when comparing with IPPROTO_IPV6 and IPV6_PKTINFO' do
-      @data.cmsg_is?(Socket::IPPROTO_IPV6, Socket::IPV6_PKTINFO).should == true
+    it 'returns true when comparing with IPPROTO_IP and IP_TTL' do
+      @data.cmsg_is?(Socket::IPPROTO_IP, Socket::IP_TTL).should == true
     end
 
-    it 'returns true when comparing with :IPV6 and :PKTINFO' do
-      @data.cmsg_is?(:IPV6, :PKTINFO).should == true
+    it 'returns true when comparing with :IP and :TTL' do
+      @data.cmsg_is?(:IP, :TTL).should == true
     end
 
     it 'returns false when comparing with :IP and :PKTINFO' do
       @data.cmsg_is?(:IP, :PKTINFO).should == false
-    end
-
-    it 'returns false when comparing with :IPV6 and :NEXTHOP' do
-      @data.cmsg_is?(:IPV6, :NEXTHOP).should == false
     end
 
     it 'returns false when comparing with :SOCKET and :RIGHTS' do
