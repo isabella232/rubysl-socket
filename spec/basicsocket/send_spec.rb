@@ -46,7 +46,6 @@ describe 'BasicSocket#send' do
         @server = Socket.new(family, :DGRAM)
 
         @server.bind(Socket.sockaddr_in(0, ip_address))
-        @client.connect(@server.getsockname)
       end
 
       after do
@@ -55,6 +54,10 @@ describe 'BasicSocket#send' do
       end
 
       describe 'without a destination address argument' do
+        before do
+          @client.connect(@server.getsockname)
+        end
+
         it 'returns the amount of bytes written' do
           @client.send('hello', 0).should == 5
         end
@@ -81,6 +84,8 @@ describe 'BasicSocket#send' do
 
         it 'does not persist the alternative connection after writing to the socket' do
           @client.send('hello', 0, @alt_server.getsockname)
+
+          @client.connect(@server.getsockname)
           @client.send('world', 0)
 
           @server.recv(5).should == 'world'
