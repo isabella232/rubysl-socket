@@ -4,7 +4,7 @@ describe 'TCPSocket#initialize' do
   each_ip_protocol do |family, ip_address|
     describe 'when no server is listening on the given address' do
       it 'raises Errno::ECONNREFUSED' do
-        proc { TCPSocket.new(ip_address, 0) }
+        proc { TCPSocket.new(ip_address, 666) }
           .should raise_error(Errno::ECONNREFUSED)
       end
     end
