@@ -7,7 +7,7 @@ describe 'Socket::Option.bool' do
     opt.should be_an_instance_of(Socket::Option)
 
     opt.family.should  == Socket::AF_INET
-    opt.level.should   == Socket::SOL_IP
+    opt.level.should   == Socket::IPPROTO_IP
     opt.optname.should == Socket::IP_TTL
     opt.data.should    == [4].pack('i')
   end
