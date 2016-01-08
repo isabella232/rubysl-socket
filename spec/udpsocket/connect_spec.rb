@@ -11,7 +11,7 @@ describe 'UDPSocket#connect' do
     end
 
     it 'connects to an address even when it is not used' do
-      @socket.connect(ip_address, 0).should == 0
+      @socket.connect(ip_address, 9999).should == 0
     end
 
     it 'can send data after connecting' do
