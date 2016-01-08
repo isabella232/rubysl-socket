@@ -8,13 +8,10 @@ env:
 script: mspec spec
 rvm:
   - 2.2
-  - ruby-head
   - rbx-2
 matrix:
   exclude:
     - rvm: 2.2
-      env: RUBYLIB=lib
-    - rvm: ruby-head
       env: RUBYLIB=lib
     - rvm: rbx-2
       env: RUBYLIB=
