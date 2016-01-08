@@ -145,9 +145,11 @@ describe 'Socket::AncillaryData#initialize' do
         .should == Socket::IP_RECVTTL
     end
 
-    it 'sets the type to IP_MTU when using :MTU as the type argument' do
-      Socket::AncillaryData.new(:INET, :IP, :MTU, '').type
-        .should == Socket::IP_MTU
+    with_feature :ip_mtu do
+      it 'sets the type to IP_MTU when using :MTU as the type argument' do
+        Socket::AncillaryData.new(:INET, :IP, :MTU, '').type
+          .should == Socket::IP_MTU
+      end
     end
 
     it 'raises SocketError when using :RIGHTS as the type argument' do
@@ -167,9 +169,11 @@ describe 'Socket::AncillaryData#initialize' do
         .should == Socket::IPV6_CHECKSUM
     end
 
-    it 'sets the type to IPV6_NEXTHOP when using :NEXTHOP as the type argument' do
-      Socket::AncillaryData.new(:INET, :IPV6, :NEXTHOP, '').type
-        .should == Socket::IPV6_NEXTHOP
+    with_feature :ipv6_nexthop do
+      it 'sets the type to IPV6_NEXTHOP when using :NEXTHOP as the type argument' do
+        Socket::AncillaryData.new(:INET, :IPV6, :NEXTHOP, '').type
+          .should == Socket::IPV6_NEXTHOP
+      end
     end
 
     it 'raises SocketError when using :RIGHTS as the type argument' do
@@ -191,9 +195,11 @@ describe 'Socket::AncillaryData#initialize' do
       end
     end
 
-    it 'sets the type to TCP_INFO when using :INFO as the type argument' do
-      Socket::AncillaryData.new(:INET, :TCP, :INFO, '').type
-        .should == Socket::TCP_INFO
+    with_feature :tcp_info do
+      it 'sets the type to TCP_INFO when using :INFO as the type argument' do
+        Socket::AncillaryData.new(:INET, :TCP, :INFO, '').type
+          .should == Socket::TCP_INFO
+      end
     end
 
     it 'raises SocketError when using :RIGHTS as the type argument' do
