@@ -37,7 +37,9 @@ describe 'BasicSocket#recv_nonblock' do
         it 'returns the given amount of bytes' do
           @client.write('hello')
 
-          wait_until_success { @server.recv_nonblock(2).should == 'he' }
+          IO.select([@server], nil, nil, 5)
+
+          @server.recv_nonblock(2).should == 'he'
         end
       end
     end

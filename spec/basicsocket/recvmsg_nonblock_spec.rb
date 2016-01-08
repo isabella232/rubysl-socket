@@ -37,6 +37,8 @@ describe 'BasicSocket#recvmsg_nonblock' do
             @client.connect(@server.getsockname)
 
             @client.write('hello')
+
+            IO.select([@server], nil, nil, 5)
           end
 
           it 'returns an Array containing the data, an Addrinfo and the flags' do
