@@ -7,69 +7,75 @@ describe 'Socket.getaddrinfo' do
     end
 
     it 'accepts a Fixnum as the address family' do
-      Socket.getaddrinfo(nil, 'http', Socket::AF_INET)[0].should == [
-        'AF_INET',
-        80,
-        '127.0.0.1',
-        '127.0.0.1',
-        Socket::AF_INET,
-        Socket::SOCK_STREAM,
-        Socket::IPPROTO_TCP
-      ]
+      array = Socket.getaddrinfo(nil, 'http', Socket::AF_INET)[0]
 
-      Socket.getaddrinfo(nil, 'http', Socket::AF_INET6)[0].should == [
-        'AF_INET6',
-        80,
-        '::1',
-        '::1',
-        Socket::AF_INET6,
-        Socket::SOCK_STREAM,
-        Socket::IPPROTO_TCP
-      ]
+      array[0].should == 'AF_INET'
+      array[1].should == 80
+      array[2].should == '127.0.0.1'
+      array[3].should == '127.0.0.1'
+      array[4].should == Socket::AF_INET
+      array[5].should be_an_instance_of(Fixnum)
+      array[6].should be_an_instance_of(Fixnum)
+    end
+
+    it 'accepts a Fixnum as the address family using IPv6' do
+      array = Socket.getaddrinfo(nil, 'http', Socket::AF_INET6)[0]
+
+      array[0].should == 'AF_INET6'
+      array[1].should == 80
+      array[2].should == '::1'
+      array[3].should == '::1'
+      array[4].should == Socket::AF_INET6
+      array[5].should be_an_instance_of(Fixnum)
+      array[6].should be_an_instance_of(Fixnum)
     end
 
     it 'accepts a Symbol as the address family' do
-      Socket.getaddrinfo(nil, 'http', :INET)[0].should == [
-        'AF_INET',
-        80,
-        '127.0.0.1',
-        '127.0.0.1',
-        Socket::AF_INET,
-        Socket::SOCK_STREAM,
-        Socket::IPPROTO_TCP
-      ]
+      array = Socket.getaddrinfo(nil, 'http', :INET)[0]
 
-      Socket.getaddrinfo(nil, 'http', :INET6)[0].should == [
-        'AF_INET6',
-        80,
-        '::1',
-        '::1',
-        Socket::AF_INET6,
-        Socket::SOCK_STREAM,
-        Socket::IPPROTO_TCP
-      ]
+      array[0].should == 'AF_INET'
+      array[1].should == 80
+      array[2].should == '127.0.0.1'
+      array[3].should == '127.0.0.1'
+      array[4].should == Socket::AF_INET
+      array[5].should be_an_instance_of(Fixnum)
+      array[6].should be_an_instance_of(Fixnum)
+    end
+
+    it 'accepts a Symbol as the address family using IPv6' do
+      array = Socket.getaddrinfo(nil, 'http', :INET6)[0]
+
+      array[0].should == 'AF_INET6'
+      array[1].should == 80
+      array[2].should == '::1'
+      array[3].should == '::1'
+      array[4].should == Socket::AF_INET6
+      array[5].should be_an_instance_of(Fixnum)
+      array[6].should be_an_instance_of(Fixnum)
     end
 
     it 'accepts a String as the address family' do
-      Socket.getaddrinfo(nil, 'http', 'INET')[0].should == [
-        'AF_INET',
-        80,
-        '127.0.0.1',
-        '127.0.0.1',
-        Socket::AF_INET,
-        Socket::SOCK_STREAM,
-        Socket::IPPROTO_TCP
-      ]
+      array = Socket.getaddrinfo(nil, 'http', 'INET')[0]
 
-      Socket.getaddrinfo(nil, 'http', 'INET6')[0].should == [
-        'AF_INET6',
-        80,
-        '::1',
-        '::1',
-        Socket::AF_INET6,
-        Socket::SOCK_STREAM,
-        Socket::IPPROTO_TCP
-      ]
+      array[0].should == 'AF_INET'
+      array[1].should == 80
+      array[2].should == '127.0.0.1'
+      array[3].should == '127.0.0.1'
+      array[4].should == Socket::AF_INET
+      array[5].should be_an_instance_of(Fixnum)
+      array[6].should be_an_instance_of(Fixnum)
+    end
+
+    it 'accepts a String as the address family using IPv6' do
+      array = Socket.getaddrinfo(nil, 'http', 'INET6')[0]
+
+      array[0].should == 'AF_INET6'
+      array[1].should == 80
+      array[2].should == '::1'
+      array[3].should == '::1'
+      array[4].should == Socket::AF_INET6
+      array[5].should be_an_instance_of(Fixnum)
+      array[6].should be_an_instance_of(Fixnum)
     end
 
     it 'accepts an object responding to #to_str as the host' do
@@ -77,15 +83,15 @@ describe 'Socket.getaddrinfo' do
 
       dummy.stub!(:to_str).and_return('127.0.0.1')
 
-      Socket.getaddrinfo(dummy, 'http')[0].should == [
-        'AF_INET',
-        80,
-        '127.0.0.1',
-        '127.0.0.1',
-        Socket::AF_INET,
-        Socket::SOCK_STREAM,
-        Socket::IPPROTO_TCP
-      ]
+      array = Socket.getaddrinfo(dummy, 'http')[0]
+
+      array[0].should == 'AF_INET'
+      array[1].should == 80
+      array[2].should == '127.0.0.1'
+      array[3].should == '127.0.0.1'
+      array[4].should == Socket::AF_INET
+      array[5].should be_an_instance_of(Fixnum)
+      array[6].should be_an_instance_of(Fixnum)
     end
 
     it 'accepts an object responding to #to_str as the address family' do
@@ -93,15 +99,15 @@ describe 'Socket.getaddrinfo' do
 
       dummy.stub!(:to_str).and_return('INET')
 
-      Socket.getaddrinfo(nil, 'http', dummy)[0].should == [
-        'AF_INET',
-        80,
-        '127.0.0.1',
-        '127.0.0.1',
-        Socket::AF_INET,
-        Socket::SOCK_STREAM,
-        Socket::IPPROTO_TCP
-      ]
+      array = Socket.getaddrinfo(nil, 'http', dummy)[0]
+
+      array[0].should == 'AF_INET'
+      array[1].should == 80
+      array[2].should == '127.0.0.1'
+      array[3].should == '127.0.0.1'
+      array[4].should == Socket::AF_INET
+      array[5].should be_an_instance_of(Fixnum)
+      array[6].should be_an_instance_of(Fixnum)
     end
 
     it 'accepts a Fixnum as the socket type' do
