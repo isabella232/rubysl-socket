@@ -87,7 +87,17 @@ module RubySL
     end
 
     def self.family_for_sockaddr_in(sockaddr)
-      sockaddr.bytesize == 28 ? ::Socket::AF_INET6 : ::Socket::AF_INET
+      case sockaddr.bytesize
+      when 28
+        ::Socket::AF_INET6
+      when 16
+        ::Socket::AF_INET
+      # UNIX socket addresses can have a variable size depending as sometimes
+      # any trailing null bytes are stripped (e.g. when calling
+      # UNIXServer#getsockname).
+      else
+        ::Socket::AF_UNIX
+      end
     end
 
     def self.constant_pairs

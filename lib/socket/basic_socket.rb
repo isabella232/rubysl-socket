@@ -26,17 +26,10 @@ class BasicSocket < IO
 
   def getsockopt(level, optname)
     sockname = RubySL::Socket::Foreign.getsockname(descriptor)
-    family   = RubySL::Socket::Foreign.getnameinfo(sockname).first
+    family   = RubySL::Socket.family_for_sockaddr_in(sockname)
     level    = RubySL::Socket::SocketOptions.socket_level(level, family)
     optname  = RubySL::Socket::SocketOptions.socket_option(level, optname)
-
     data     = RubySL::Socket::Foreign.getsockopt(descriptor, level, optname)
-    sockaddr = RubySL::Socket::Foreign.getsockname(descriptor)
-
-    family, _ = RubySL::Socket::Foreign.getnameinfo(
-      sockaddr,
-      Socket::Constants::NI_NUMERICHOST | Socket::Constants::NI_NUMERICSERV
-    )
 
     Socket::Option.new(family, level, optname, data)
   end
@@ -64,7 +57,7 @@ class BasicSocket < IO
     optval = 0 if optval == false
 
     sockname = RubySL::Socket::Foreign.getsockname(descriptor)
-    family   = RubySL::Socket::Foreign.getnameinfo(sockname).first
+    family   = RubySL::Socket.family_for_sockaddr_in(sockname)
     level    = RubySL::Socket::SocketOptions.socket_level(level, family)
     optname  = RubySL::Socket::SocketOptions.socket_option(level, optname)
     error    = 0
