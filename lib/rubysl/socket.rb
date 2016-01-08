@@ -35,7 +35,9 @@ module RubySL
         RubySL::Socket::Foreign::SockaddrIn
       when 28
         RubySL::Socket::Foreign::SockaddrIn6
-      when 110
+
+      # On Linux the size is 110, on OS X/BSD this is 106 instead.
+      when 110, 106
         RubySL::Socket::Foreign::SockaddrUn
       else
         raise ArgumentError, 'invalid destination address'
