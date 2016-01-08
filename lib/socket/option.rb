@@ -46,7 +46,7 @@ class Socket < BasicSocket
           "invalid size, expected #{expected_size} but got #{@data.bytesize}"
       end
 
-      if @data.unpack('i')[0] == 1
+      if @data.unpack('i')[0] > 0
         true
       else
         false
