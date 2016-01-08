@@ -5,7 +5,7 @@ before_install:
 env:
   - RUBYLIB=lib
   - RUBYLIB=
-script: mspec spec
+script: rake ci
 rvm:
   - 2.2
   - rbx
