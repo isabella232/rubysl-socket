@@ -45,11 +45,11 @@ describe 'UDPSocket#send' do
     end
 
     describe 'using a connected socket' do
-      before do
-        @client.connect(@addr.ip_address, @addr.ip_port)
-      end
-
       describe 'without an explicit destination address' do
+        before do
+          @client.connect(@addr.ip_address, @addr.ip_port)
+        end
+
         it 'returns the amount of bytes written' do
           @client.send('hello', 0).should == 5
         end
