@@ -10,7 +10,7 @@ describe 'Socket.udp_server_loop' do
   describe 'when a connection is available' do
     before do
       @client = Socket.new(:INET, :DGRAM)
-      @port   = 9999
+      @port   = 9997
     end
 
     after do

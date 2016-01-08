@@ -10,7 +10,7 @@ describe 'Socket.tcp_server_loop' do
   describe 'when a connection is available' do
     before do
       @client = Socket.new(:INET, :STREAM)
-      @port   = 9999
+      @port   = 9998
     end
 
     after do
@@ -29,7 +29,7 @@ describe 'Socket.tcp_server_loop' do
         end
       end
 
-      wait_until_success(30) do
+      wait_until_success do
         @client.connect(Socket.sockaddr_in(@port, '127.0.0.1'))
       end
 
