@@ -96,7 +96,7 @@ describe 'Socket.gethostbyaddr' do
         end
 
         it 'includes all address strings as the remaining values' do
-          @array[3].should == @addr
+          @array[3].should be_an_instance_of(String)
 
           @array[4..-1].each do |val|
             val.should be_an_instance_of(String)
