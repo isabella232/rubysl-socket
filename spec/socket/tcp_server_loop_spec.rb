@@ -29,7 +29,7 @@ describe 'Socket.tcp_server_loop' do
         end
       end
 
-      wait_until_success do
+      wait_until_success(30) do
         @client.connect(Socket.sockaddr_in(@port, '127.0.0.1'))
       end
 
