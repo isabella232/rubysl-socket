@@ -10,6 +10,8 @@ if ENV['TRAVIS'] and RUBY_ENGINE == 'rbx'
   Rubinius::TERMINAL_WIDTH = 120
 end
 
+Thread.abort_on_exception = true
+
 class MSpecScript
   if RUBY_ENGINE == 'rbx'
     MSpec.enable_feature :pure_ruby_addrinfo
