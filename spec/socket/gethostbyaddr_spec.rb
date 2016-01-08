@@ -1,4 +1,5 @@
 require 'socket'
+require 'ipaddr'
 
 describe 'Socket.gethostbyaddr' do
   before do
@@ -7,7 +8,7 @@ describe 'Socket.gethostbyaddr' do
 
   describe 'using an IPv4 address' do
     before do
-      @addr = "\x7F\x00\x00\x01" # IPAddr.new('127.0.0.1').hton
+      @addr = IPAddr.new('127.0.0.1').hton
     end
 
     describe 'without an explicit address family' do
@@ -65,8 +66,7 @@ describe 'Socket.gethostbyaddr' do
 
   describe 'using an IPv6 address' do
     before do
-      # IPAddr.new('::1').hton
-      @addr = "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01"
+      @addr = IPAddr.new('::1').hton
     end
 
     describe 'without an explicit address family' do

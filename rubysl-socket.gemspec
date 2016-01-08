@@ -26,4 +26,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "mspec", "~> 1.9"
   spec.add_development_dependency "rubysl-prettyprint", "~> 2.0"
+  spec.add_development_dependency "rubysl-ipaddr", "~> 2.0"
 end
