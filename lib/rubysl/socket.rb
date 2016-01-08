@@ -92,9 +92,8 @@ module RubySL
         ::Socket::AF_INET6
       when 16
         ::Socket::AF_INET
-      # UNIX socket addresses can have a variable size depending as sometimes
-      # any trailing null bytes are stripped (e.g. when calling
-      # UNIXServer#getsockname).
+      # UNIX socket addresses can have a variable size as sometimes any trailing
+      # null bytes are stripped (e.g. when calling UNIXServer#getsockname).
       else
         ::Socket::AF_UNIX
       end
