@@ -7,7 +7,7 @@ with_feature :unix_socket do
     end
 
     after do
-      rm_r(@path)
+      rm_r(@path) if File.file?(@path)
     end
 
     describe 'when no connections are available' do
@@ -26,10 +26,7 @@ with_feature :unix_socket do
       end
 
       it 'yields a Socket and an Addrinfo' do
-        sock = nil
-        addr = nil
-        cvar = ConditionVariable.new
-        lock = Mutex.new
+        sock, addr = nil
 
         thread = Thread.new do
           Socket.unix_server_loop(@path) do |socket, addrinfo|
@@ -38,15 +35,11 @@ with_feature :unix_socket do
 
             break
           end
-
-          lock.synchronize { cvar.signal }
         end
 
+        @client = wait_until_success { Socket.unix(@path) }
+
         thread.join(2)
-
-        @client = Socket.unix(@path)
-
-        lock.synchronize { cvar.wait(lock) }
 
         sock.should be_an_instance_of(Socket)
         addr.should be_an_instance_of(Addrinfo)

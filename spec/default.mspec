@@ -2,6 +2,8 @@ $:.unshift(File.expand_path('..', __FILE__))
 
 require 'socket'
 require 'custom/helpers/each_ip_protocol'
+require 'custom/helpers/loop_with_timeout'
+require 'custom/helpers/wait_until_success'
 
 # This ensures we can actually read backtraces Travis CI might spit out.
 if ENV['TRAVIS'] and RUBY_ENGINE == 'rbx'
