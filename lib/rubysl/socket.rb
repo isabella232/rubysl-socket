@@ -19,28 +19,23 @@ module RubySL
     end
 
     def self.sockaddr_class_for_socket(socket)
-      case Socket.address_info(:getsockname, socket)[0]
-      when 'AF_INET6'
-        RubySL::Socket::Foreign::SockaddrIn6
-      when 'AF_UNIX'
-        RubySL::Socket::Foreign::SockaddrUn
-      else
-        RubySL::Socket::Foreign::SockaddrIn
+      if socket.is_a?(::UNIXSocket)
+        return Foreign::SockaddrUn
       end
-    end
 
-    def self.sockaddr_class_for_string(sockaddr)
-      case sockaddr.bytesize
-      when 16
-        RubySL::Socket::Foreign::SockaddrIn
-      when 28
-        RubySL::Socket::Foreign::SockaddrIn6
+      # Socket created using for example Socket.unix('foo')
+      if socket.is_a?(::Socket) and
+        socket.instance_variable_get(:@family) == ::Socket::AF_UNIX
+        return Foreign::SockaddrUn
+      end
 
-      # On Linux the size is 110, on OS X/BSD this is 106 instead.
-      when 110, 106
-        RubySL::Socket::Foreign::SockaddrUn
+      case address_info(:getsockname, socket)[0]
+      when 'AF_INET6'
+        Foreign::SockaddrIn6
+      when 'AF_UNIX'
+        Foreign::SockaddrUn
       else
-        raise ArgumentError, 'invalid destination address'
+        Foreign::SockaddrIn
       end
     end
 

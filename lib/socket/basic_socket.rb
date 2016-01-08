@@ -105,7 +105,7 @@ class BasicSocket < IO
       buffer.write_string(message)
 
       if dest_sockaddr.is_a?(String)
-        addr = RubySL::Socket.sockaddr_class_for_string(dest_sockaddr)
+        addr = RubySL::Socket.sockaddr_class_for_socket(self)
           .with_sockaddr(dest_sockaddr)
 
         begin
