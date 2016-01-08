@@ -8,12 +8,12 @@ env:
 script: mspec spec
 rvm:
   - 2.2
-  - rbx-2
+  - rbx
 matrix:
   exclude:
     - rvm: 2.2
       env: RUBYLIB=lib
-    - rvm: rbx-2
+    - rvm: rbx
       env: RUBYLIB=
     - rvm: 2.2
       os: osx
