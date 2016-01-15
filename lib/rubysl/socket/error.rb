@@ -30,27 +30,27 @@ module RubySL
       def self.wrap_read_nonblock
         yield
       rescue Errno::EAGAIN => err
-        raise_wrapped_error(err, IO::EAGAINWaitReadable)
+        raise_wrapped_error(err, ::IO::EAGAINWaitReadable)
       rescue Errno::EWOULDBLOCK => err
-        raise_wrapped_error(err, IO::EWOULDBLOCKWaitReadable)
+        raise_wrapped_error(err, ::IO::EWOULDBLOCKWaitReadable)
       rescue Errno::EINPROGRESS => err
-        raise_wrapped_error(err, IO::EINPROGRESSWaitReadable)
+        raise_wrapped_error(err, ::IO::EINPROGRESSWaitReadable)
       end
 
       def self.wrap_write_nonblock
         yield
       rescue Errno::EAGAIN => err
-        raise_wrapped_error(err, IO::EAGAINWaitWritable)
+        raise_wrapped_error(err, ::IO::EAGAINWaitWritable)
       rescue Errno::EWOULDBLOCK => err
-        raise_wrapped_error(err, IO::EWOULDBLOCKWaitWritable)
+        raise_wrapped_error(err, ::IO::EWOULDBLOCKWaitWritable)
       rescue Errno::EINPROGRESS => err
-        raise_wrapped_error(err, IO::EINPROGRESSWaitWritable)
+        raise_wrapped_error(err, ::IO::EINPROGRESSWaitWritable)
       end
 
       # Wraps the error given in `original` in an instance of `error_class`.
       #
       # This can be used to wrap e.g. an Errno::EAGAIN error in an
-      # IO::EAGAINWaitReadable instance.
+      # ::IO::EAGAINWaitReadable instance.
       def self.raise_wrapped_error(original, error_class)
         error = error_class.new(original.message)
 

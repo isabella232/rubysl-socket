@@ -56,7 +56,7 @@ module RubySL
 
         socket = new_class.allocate
 
-        IO.setup(socket, fd, nil, true)
+        ::IO.setup(socket, fd, nil, true)
         socket.binmode
 
         socktype = source.getsockopt(:SOCKET, :TYPE).int
