@@ -93,7 +93,7 @@ describe 'BasicSocket#send' do
       end
     end
 
-    describe 'using a connected TPC socket' do
+    describe 'using a connected TCP socket' do
       before do
         @client = Socket.new(family, :STREAM)
         @server = Socket.new(family, :STREAM)
