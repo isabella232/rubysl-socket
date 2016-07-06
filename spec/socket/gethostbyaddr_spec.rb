@@ -58,8 +58,8 @@ describe 'Socket.gethostbyaddr' do
       end
 
       it 'raises SocketError when the address is not supported by the family' do
-#        proc { Socket.gethostbyaddr(@addr, :INET6) }
-#          .should raise_error(SocketError)
+        proc { Socket.gethostbyaddr(@addr, :INET6) }
+          .should raise_error(SocketError)
       end
     end
   end
