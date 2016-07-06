@@ -44,7 +44,10 @@ describe 'Socket.getnameinfo' do
 
       describe 'without custom flags' do
         it 'returns an Array containing the hostname and service name' do
-          Socket.getnameinfo(@addr).should == [@hostname, 'http']
+          array = Socket.getnameinfo(@addr)
+          array.should be_an_instance_of(Array)
+          array[0].should =~ /#{@hostname}/
+          array[1].should == 'http'
         end
       end
 
@@ -63,13 +66,19 @@ describe 'Socket.getnameinfo' do
 
       describe 'without custom flags' do
         it 'returns an Array containing the hostname and service name' do
-          Socket.getnameinfo(@addr).should == [@hostname, 'http']
+          array = Socket.getnameinfo(@addr)
+          array.should be_an_instance_of(Array)
+          array[0].should =~ /#{@hostname}/
+          array[1].should == 'http'
         end
 
         it 'uses the 3rd value as the hostname if the 4th is not present' do
           addr = [family_name, 80, ip_address, nil]
 
-          Socket.getnameinfo(addr).should == [@hostname, 'http']
+          array = Socket.getnameinfo(addr)
+          array.should be_an_instance_of(Array)
+          array[0].should =~ /#{@hostname}/
+          array[1].should == 'http'
         end
       end
 
