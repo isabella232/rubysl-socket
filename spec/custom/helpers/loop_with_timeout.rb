@@ -9,6 +9,7 @@ class Object
         raise TimeoutError, "Did not succeed within #{timeout} seconds"
       end
 
+      sleep 0.01 # necessary on OSX; don't know why
       yield
     end
   end
