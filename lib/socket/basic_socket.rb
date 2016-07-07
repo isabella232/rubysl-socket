@@ -233,13 +233,13 @@ class BasicSocket < IO
   def close_read
     ensure_open
 
-    if @mode & ACCMODE == RDONLY
+    if mode_read_only?
       return close
     end
 
     RubySL::Socket::Foreign.shutdown(descriptor, 0)
 
-    @mode = WRONLY
+    force_write_only
 
     nil
   end
@@ -247,13 +247,13 @@ class BasicSocket < IO
   def close_write
     ensure_open
 
-    if @mode & ACCMODE == WRONLY
+    if mode_write_only?
       return close
     end
 
     RubySL::Socket::Foreign.shutdown(descriptor, 1)
 
-    @mode = RDONLY
+    force_read_only
 
     nil
   end

@@ -80,7 +80,7 @@ describe 'Socket.gethostbyaddr' do
         end
 
         it 'includes the hostname as the first value' do
-          @array[0].should == @hostname
+          @array[0].should =~ /#{@hostname}/
         end
 
         it 'includes the aliases as the 2nd value' do
