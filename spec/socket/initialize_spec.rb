@@ -78,7 +78,5 @@ describe 'Socket#initialize' do
   it "sets basic IO accessors" do
     @socket = Socket.new(:INET, :STREAM)
     @socket.lineno.should == 0
-    @socket.mode.should_not be_nil
-    @socket.sync.should == true
   end
 end
