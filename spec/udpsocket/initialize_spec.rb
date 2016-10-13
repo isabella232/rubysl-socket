@@ -17,6 +17,10 @@ describe 'UDPSocket#initialize' do
     UDPSocket.new('INET').should be_an_instance_of(UDPSocket)
   end
 
+  it 'sets the socket to binmode' do
+    UDPSocket.new(:INET).binmode?.should be_true
+  end
+
   it 'raises Errno::EAFNOSUPPORT when given an invalid address family' do
     proc { UDPSocket.new(666) }.should raise_error(Errno::EAFNOSUPPORT)
   end

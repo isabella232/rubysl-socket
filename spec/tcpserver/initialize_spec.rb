@@ -1,6 +1,11 @@
 require 'socket'
 
 describe 'TCPServer#initialize' do
+  it "sets the socket to binmode" do
+    server = TCPServer.new(0)
+    server.binmode?.should be_true
+  end
+
   describe 'with a single Fixnum argument' do
     before do
       @server = TCPServer.new(0)

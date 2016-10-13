@@ -79,4 +79,9 @@ describe 'Socket#initialize' do
     @socket = Socket.new(:INET, :STREAM)
     @socket.lineno.should == 0
   end
+
+  it "sets the socket to binary mode" do
+    @socket = Socket.new(:INET, :STREAM)
+    @socket.binmode?.should be_true
+  end
 end

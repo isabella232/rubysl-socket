@@ -31,6 +31,10 @@ describe 'TCPSocket#initialize' do
         proc { TCPSocket.new(ip_address, 'cats') }.should raise_error(SocketError)
       end
 
+      it 'set the socket to binmode' do
+        TCPSocket.new(ip_address, @port).binmode?.should be_true
+      end
+
       it 'connects to the right address' do
         socket = TCPSocket.new(ip_address, @port)
 

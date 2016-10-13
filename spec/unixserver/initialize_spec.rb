@@ -14,6 +14,10 @@ with_feature :unix_socket do
       UNIXServer.new(@path).should be_an_instance_of(UNIXServer)
     end
 
+    it 'sets the socket to binmode' do
+      UNIXServer.new(@path).binmode?.should be_true
+    end
+
     it 'raises Errno::EADDRINUSE when the socket is already in use' do
       UNIXServer.new(@path)
 

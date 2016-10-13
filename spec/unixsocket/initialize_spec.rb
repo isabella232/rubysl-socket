@@ -28,6 +28,10 @@ with_feature :unix_socket do
       it 'sets the socket path to an empty String' do
         UNIXSocket.new(@path).path.should == ''
       end
+
+      it 'sets the socket to binmode' do
+        UNIXSocket.new(@path).binmode?.should be_true
+      end
     end
   end
 end
