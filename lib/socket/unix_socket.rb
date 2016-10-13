@@ -23,6 +23,7 @@ class UNIXSocket < BasicSocket
     Errno.handle('socket(2)') if fd < 0
 
     IO.setup(self, fd, 'r+', true)
+    binmode
 
     sockaddr = Socket.sockaddr_un(path)
     status   = RubySL::Socket::Foreign.connect(descriptor, sockaddr)

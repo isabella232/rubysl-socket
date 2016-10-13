@@ -90,6 +90,7 @@ class TCPSocket < IPSocket
       Errno.handle('connect(2)')
     else
       IO.setup(self, descriptor, nil, true)
+      binmode
     end
   end
 

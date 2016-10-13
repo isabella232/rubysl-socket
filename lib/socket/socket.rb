@@ -269,6 +269,7 @@ class Socket < BasicSocket
     Errno.handle('socket(2)') if descriptor < 0
 
     IO.setup(self, descriptor, nil, true)
+    binmode
   end
 
   def bind(addr)

@@ -46,7 +46,7 @@ class TCPServer < TCPSocket
         Errno.handle('bind(2)')
       else
         IO.setup(self, descriptor, nil, true)
-
+        binmode
         setsockopt(:SOCKET, :REUSEADDR, true)
 
         break

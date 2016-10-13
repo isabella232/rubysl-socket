@@ -3,6 +3,7 @@ class BasicSocket < IO
     sock = allocate
 
     IO.setup(sock, fixnum, nil, true)
+    sock.binmode
 
     sock
   end
