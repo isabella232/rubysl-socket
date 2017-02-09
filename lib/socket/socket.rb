@@ -233,8 +233,9 @@ class Socket < BasicSocket
 
   if RubySL::Socket.unix_socket_support?
     def self.pack_sockaddr_un(file)
-      sockaddr = [Socket::AF_UNIX].pack('s') + file
-      struct   = RubySL::Socket::Foreign::SockaddrUn.with_sockaddr(sockaddr)
+      struct = RubySL::Socket::Foreign::SockaddrUn.new
+      struct[:sun_family] = Socket::AF_UNIX
+      struct[:sun_path] = file
 
       begin
         struct.to_s
@@ -247,7 +248,7 @@ class Socket < BasicSocket
       struct = RubySL::Socket::Foreign::SockaddrUn.with_sockaddr(addr)
 
       begin
-        struct[:sun_path]
+        struct[:sun_path].to_s
       ensure
         struct.free
       end
